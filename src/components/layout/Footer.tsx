@@ -24,7 +24,7 @@ export function Footer() {
     <footer className="relative bg-[#042a1a] text-[#e2f7ed] overflow-hidden select-none">
       
       {/* Main Footer Container */}
-      <div className="mx-auto max-w-7xl px-4 md:px-6 py-12 md:py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-10">
+      <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-12 md:py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-10">
         
         {/* Brand Column */}
         <div className="lg:col-span-1 space-y-4">
@@ -157,7 +157,7 @@ export function Footer() {
 
       {/* Bottom Bar */}
       <div className="border-t border-emerald-900/80 bg-[#031f13] py-4">
-        <div className="mx-auto max-w-7xl px-4 md:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#a3e6c5]">
+        <div className="mx-auto max-w-[1400px] px-4 md:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#a3e6c5]">
           <div>
             © {new Date().getFullYear()} FlashKart. All Rights Reserved.
           </div>

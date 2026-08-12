@@ -39,7 +39,7 @@ const supplyCards = [
 export function WhereWeSupplySection() {
   return (
     <section id="where-we-supply" className="py-14 md:py-20 bg-white">
-      <div className="mx-auto max-w-7xl px-4 md:px-6">
+      <div className="mx-auto max-w-[1400px] px-4 md:px-8">
         
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-12">

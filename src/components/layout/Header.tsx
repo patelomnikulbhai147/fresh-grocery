@@ -76,7 +76,7 @@ export function Header() {
           scrolled ? "shadow-md border-b border-slate-200" : "border-b border-slate-100"
         )}
       >
-        <div className="mx-auto max-w-7xl px-4 md:px-6 py-3 flex items-center justify-between gap-4">
+        <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-3 flex items-center justify-between gap-4">
           {/* Mobile menu button */}
           <button
             onClick={() => setMenuOpen(true)}

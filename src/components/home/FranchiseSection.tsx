@@ -6,7 +6,7 @@ import Image from "next/image";
 export function FranchiseSection() {
   return (
     <section id="franchise" className="py-10 md:py-14 bg-white border-t border-slate-100">
-      <div className="mx-auto max-w-7xl px-4 md:px-6">
+      <div className="mx-auto max-w-[1400px] px-4 md:px-8">
         
         {/* Franchise Card Banner */}
         <div className="relative rounded-3xl bg-gradient-to-r from-emerald-50/80 via-white to-orange-50/80 border border-slate-200/80 p-8 md:p-12 overflow-hidden shadow-sm flex flex-col md:flex-row items-center justify-between gap-8">
