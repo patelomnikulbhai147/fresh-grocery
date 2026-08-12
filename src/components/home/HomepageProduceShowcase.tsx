@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, ShoppingBag } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { products } from "@/data/catalog";
 import { formatINR } from "@/lib/utils";
 
@@ -15,16 +15,16 @@ export function HomepageProduceShowcase() {
     .slice(0, 6);
 
   return (
-    <section className="py-12 md:py-16 bg-white border-t border-slate-100">
+    <section className="py-12 md:py-16">
       <div className="mx-auto max-w-[1400px] px-4 md:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           
-          {/* Left: Fresh Vegetables Showcase */}
-          <div className="bg-slate-50/70 rounded-3xl p-6 md:p-8 border border-slate-200/90 shadow-sm flex flex-col justify-between">
+          {/* Left: Fresh Vegetables Glass Panel */}
+          <div className="bg-white/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-white/80 shadow-md flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200/80">
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200/60">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-[#067a46] border border-emerald-200 grid place-items-center text-xl font-bold">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-100/80 text-[#067a46] border border-emerald-200/80 grid place-items-center text-xl font-bold">
                     🥦
                   </div>
                   <div>
@@ -37,7 +37,7 @@ export function HomepageProduceShowcase() {
 
                 <Link
                   href="/shop?cat=vegetables"
-                  className="inline-flex items-center gap-1.5 text-xs md:text-sm font-extrabold text-[#067a46] hover:text-[#046338] transition bg-white border border-emerald-200 px-4 py-2 rounded-full shadow-sm"
+                  className="inline-flex items-center gap-1.5 text-xs md:text-sm font-extrabold text-[#067a46] hover:text-[#046338] transition bg-white/90 border border-emerald-200 px-4 py-2 rounded-full shadow-sm"
                 >
                   <span>View All</span>
                   <ArrowRight className="w-4 h-4" />
@@ -53,7 +53,7 @@ export function HomepageProduceShowcase() {
                     <Link
                       key={item.id}
                       href={`/product/${item.slug}`}
-                      className="group bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm hover:shadow-md transition text-center flex flex-col items-center justify-between h-full"
+                      className="group bg-white/90 border border-white/90 rounded-2xl p-4 shadow-sm hover:shadow-md hover:bg-white transition text-center flex flex-col items-center justify-between h-full"
                     >
                       <div className="relative w-full aspect-square mb-3 overflow-hidden rounded-xl bg-slate-50 border border-slate-100">
                         <Image
@@ -79,12 +79,12 @@ export function HomepageProduceShowcase() {
             </div>
           </div>
 
-          {/* Right: Seasonal Fruits Showcase */}
-          <div className="bg-slate-50/70 rounded-3xl p-6 md:p-8 border border-slate-200/90 shadow-sm flex flex-col justify-between">
+          {/* Right: Seasonal Fruits Glass Panel */}
+          <div className="bg-white/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-white/80 shadow-md flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200/80">
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200/60">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 border border-amber-200 grid place-items-center text-xl font-bold">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-100/80 text-amber-700 border border-amber-200/80 grid place-items-center text-xl font-bold">
                     🍊
                   </div>
                   <div>
@@ -97,7 +97,7 @@ export function HomepageProduceShowcase() {
 
                 <Link
                   href="/shop?cat=fruits"
-                  className="inline-flex items-center gap-1.5 text-xs md:text-sm font-extrabold text-[#067a46] hover:text-[#046338] transition bg-white border border-emerald-200 px-4 py-2 rounded-full shadow-sm"
+                  className="inline-flex items-center gap-1.5 text-xs md:text-sm font-extrabold text-[#067a46] hover:text-[#046338] transition bg-white/90 border border-emerald-200 px-4 py-2 rounded-full shadow-sm"
                 >
                   <span>View All</span>
                   <ArrowRight className="w-4 h-4" />
@@ -113,7 +113,7 @@ export function HomepageProduceShowcase() {
                     <Link
                       key={item.id}
                       href={`/product/${item.slug}`}
-                      className="group bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm hover:shadow-md transition text-center flex flex-col items-center justify-between h-full"
+                      className="group bg-white/90 border border-white/90 rounded-2xl p-4 shadow-sm hover:shadow-md hover:bg-white transition text-center flex flex-col items-center justify-between h-full"
                     >
                       <div className="relative w-full aspect-square mb-3 overflow-hidden rounded-xl bg-slate-50 border border-slate-100">
                         <Image

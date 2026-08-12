@@ -34,19 +34,8 @@ const benefits = [
 
 export function Hero() {
   return (
-    <div className="relative bg-[#faf9f6]">
-      <section className="relative overflow-hidden pt-10 pb-16 md:pt-16 md:pb-24">
-        {/* Background Decorative Layer */}
-        <div className="absolute inset-0 z-0 opacity-40 pointer-events-none">
-          <Image
-            src="/images/hero_bg_india.png"
-            alt="Independence Day Background"
-            fill
-            priority
-            className="object-cover object-center"
-          />
-        </div>
-
+    <div className="relative">
+      <section className="relative overflow-hidden pt-8 pb-16 md:pt-12 md:pb-24">
         {/* Hero Content */}
         <div className="relative z-10 mx-auto max-w-[1400px] px-4 md:px-8 w-full flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
           
@@ -110,9 +99,9 @@ export function Hero() {
             transition={{ delay: 0.25, duration: 0.6 }}
             className="w-full lg:w-[48%] relative flex justify-center lg:justify-end"
           >
-            <div className="relative w-full max-w-xl aspect-[4/3] sm:aspect-square lg:aspect-auto lg:h-[500px]">
+            <div className="relative w-full max-w-xl aspect-[4/3] sm:aspect-square lg:aspect-auto lg:h-[480px]">
               {/* Proud to be Indian Circular Badge */}
-              <div className="absolute top-2 right-2 md:top-4 md:right-4 z-20 bg-white/95 backdrop-blur-md rounded-2xl p-3.5 border border-slate-200 shadow-md flex items-center gap-3">
+              <div className="absolute top-2 right-2 md:top-4 md:right-4 z-20 bg-white/90 backdrop-blur-md rounded-2xl p-3.5 border border-white/80 shadow-lg flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-[#1e3a8a]/10 border border-[#1e3a8a]/30 grid place-items-center text-[#1e3a8a] text-sm font-black">
                   ⚙️
                 </div>
@@ -136,17 +125,17 @@ export function Hero() {
         </div>
       </section>
 
-      {/* Feature Benefit Strip - Reference Mockup Card */}
+      {/* Floating Glass Feature Benefit Strip - Glassmorphism Panel */}
       <div className="relative z-20 max-w-[1400px] mx-auto px-4 md:px-8 -mt-6 md:-mt-10 pb-12">
-        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xl p-5 md:p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 divide-y sm:divide-y-0 lg:divide-x divide-slate-100">
+        <div className="bg-white/80 backdrop-blur-md rounded-3xl border border-white/80 shadow-xl p-5 md:p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 divide-y sm:divide-y-0 lg:divide-x divide-slate-100">
           {benefits.map((b, idx) => (
             <div key={b.title} className={`flex items-center gap-4 ${idx > 0 ? "lg:pl-6 pt-4 sm:pt-0" : ""}`}>
-              <div className="w-13 h-13 rounded-2xl bg-emerald-50 text-[#067a46] border border-emerald-100 flex items-center justify-center shrink-0 shadow-sm p-3">
+              <div className="w-13 h-13 rounded-2xl bg-emerald-50/90 text-[#067a46] border border-emerald-100/90 flex items-center justify-center shrink-0 shadow-sm p-3">
                 <b.icon className="w-6 h-6" />
               </div>
               <div>
                 <div className="font-display font-extrabold text-base text-[#0f172a]">{b.title}</div>
-                <div className="text-xs text-slate-500 leading-relaxed font-medium">{b.desc}</div>
+                <div className="text-xs text-slate-600 leading-relaxed font-medium">{b.desc}</div>
               </div>
             </div>
           ))}

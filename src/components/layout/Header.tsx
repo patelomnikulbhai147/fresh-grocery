@@ -5,22 +5,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   ShoppingBag,
-  Heart,
   User,
-  MapPin,
   Menu,
   X,
-  ChevronDown,
   PhoneCall,
   ShieldCheck,
 } from "lucide-react";
-import { useCart, useCity } from "@/store/shop";
+import { useCart } from "@/store/shop";
 import { useCustomerAuth } from "@/store/customerAuth";
-import { products, categories, cities } from "@/data/catalog";
+import { products } from "@/data/catalog";
 import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { FlashKartLogo } from "./FlashKartLogo";
-import { CityModal } from "@/components/city/CityModal";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -39,17 +35,13 @@ export function Header() {
   const isAdmin = user?.mobile === "9773271029" || user?.mobile?.includes("9773271029") || user?.email === "admin@flashkart.co";
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [cityOpen, setCityOpen] = useState(false);
   const [query, setQuery] = useState("");
 
   const itemCount = useCart((s) => s.itemCount());
   const openCart = useCart((s) => s.open);
-  const citySlug = useCity((s) => s.slug);
-  const currentCity = cities.find((c) => c.slug === citySlug) ?? cities[0];
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => setScrolled(window.scrollY > 15);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -65,23 +57,26 @@ export function Header() {
 
   return (
     <>
-      {/* Top Announcement Bar - Reference Mockup Style */}
+      {/* Top Announcement Bar - Reference Style */}
       <div className="w-full bg-[#063b25] text-white py-1.5 px-4 text-center text-xs font-semibold select-none flex items-center justify-center gap-2 z-50">
-        <span>🇮🇳 Celebrate 15 August with Freshness – Supporting a Healthy & Strong India!</span>
+        <span>🇮🇳 Happy Independence Day! Celebrate 15 August with Freshness & Quality.</span>
       </div>
 
+      {/* Glassmorphism Navigation Bar */}
       <header
         className={cn(
-          "sticky top-0 z-40 transition-all duration-300 bg-white",
-          scrolled ? "shadow-md border-b border-slate-200" : "border-b border-slate-100"
+          "sticky top-0 z-40 transition-all duration-300",
+          scrolled
+            ? "bg-white/90 backdrop-blur-lg border-b border-white/80 shadow-sm"
+            : "bg-white/80 backdrop-blur-md border-b border-white/60"
         )}
       >
         <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-3 flex items-center justify-between gap-4">
-          {/* Mobile menu button */}
+          {/* Mobile Menu Button */}
           <button
             onClick={() => setMenuOpen(true)}
             aria-label="Open menu"
-            className="lg:hidden p-2 -ml-2 text-slate-800 rounded-xl hover:bg-slate-100 transition"
+            className="lg:hidden p-2 -ml-2 text-slate-800 rounded-xl hover:bg-white/80 transition"
           >
             <Menu className="w-6 h-6" />
           </button>
@@ -118,9 +113,9 @@ export function Header() {
             })}
           </nav>
 
-          {/* Right Action Icons & Get in Touch CTA */}
+          {/* Right Actions & Get in Touch Button */}
           <div className="flex items-center gap-3">
-            {/* Search Trigger */}
+            {/* Search Input Box */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -131,7 +126,7 @@ export function Header() {
               }}
               className="relative hidden xl:block w-48"
             >
-              <div className="flex items-center bg-slate-100 border border-slate-200 rounded-full px-3 py-1.5 focus-within:border-[#067a46] focus-within:bg-white transition">
+              <div className="flex items-center bg-white/70 border border-slate-200/80 rounded-full px-3 py-1.5 focus-within:border-[#067a46] focus-within:bg-white transition shadow-sm">
                 <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                 <input
                   value={query}
@@ -142,7 +137,7 @@ export function Header() {
               </div>
 
               {query && (
-                <div className="absolute top-full right-0 mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden z-50">
+                <div className="absolute top-full right-0 mt-2 w-72 bg-white/95 backdrop-blur-md border border-slate-200 rounded-2xl shadow-xl overflow-hidden z-50">
                   {suggestions.length === 0 ? (
                     <div className="p-3 text-center text-xs text-slate-500">No items found</div>
                   ) : (
@@ -171,7 +166,7 @@ export function Header() {
               <Link
                 href="/admin"
                 title="Go to FlashKart Admin Portal"
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#063b25] text-white rounded-full text-xs font-bold hover:bg-[#042a1a] transition"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#063b25] text-white rounded-full text-xs font-bold hover:bg-[#042a1a] transition shadow-sm"
               >
                 <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
                 <span>Admin</span>
@@ -185,7 +180,7 @@ export function Header() {
                 else openLoginModal("/account");
               }}
               aria-label="Account"
-              className="p-2 text-slate-700 hover:text-[#067a46] rounded-full hover:bg-slate-100 transition"
+              className="p-2 text-slate-700 hover:text-[#067a46] rounded-full hover:bg-white/80 transition"
             >
               <User className="w-5 h-5" />
             </button>
@@ -194,7 +189,7 @@ export function Header() {
             <button
               onClick={openCart}
               aria-label="Cart"
-              className="relative p-2 text-slate-700 hover:text-[#067a46] rounded-full hover:bg-slate-100 transition"
+              className="relative p-2 text-slate-700 hover:text-[#067a46] rounded-full hover:bg-white/80 transition"
             >
               <ShoppingBag className="w-5 h-5" />
               {itemCount > 0 && (
@@ -204,10 +199,10 @@ export function Header() {
               )}
             </button>
 
-            {/* Primary Get in Touch CTA - Reference Mockup Style */}
+            {/* Primary Get in Touch CTA - Reference Style */}
             <Link
               href="/contact"
-              className="hidden sm:inline-flex items-center gap-2 bg-[#067a46] hover:bg-[#046338] text-white font-bold px-5 py-2 rounded-full text-xs sm:text-sm transition shadow-sm"
+              className="hidden sm:inline-flex items-center gap-2 bg-[#067a46] hover:bg-[#046338] text-white font-extrabold px-5 py-2 rounded-full text-xs sm:text-sm transition shadow-sm"
             >
               <PhoneCall className="w-4 h-4" />
               <span>Get in Touch</span>
@@ -232,7 +227,7 @@ export function Header() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 260 }}
-              className="fixed inset-y-0 left-0 w-[85%] max-w-sm bg-white z-50 flex flex-col shadow-2xl"
+              className="fixed inset-y-0 left-0 w-[85%] max-w-sm bg-white/95 backdrop-blur-lg z-50 flex flex-col shadow-2xl"
             >
               <div className="p-5 flex items-center justify-between border-b border-slate-100">
                 <FlashKartLogo size="sm" />
@@ -267,9 +262,6 @@ export function Header() {
           </>
         )}
       </AnimatePresence>
-
-      {/* City Modal */}
-      <CityModal open={cityOpen} onClose={() => setCityOpen(false)} />
     </>
   );
 }

@@ -15,22 +15,33 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white text-slate-900 flex flex-col font-sans">
-      <Header />
-      <main className="flex-1">
-        {/* 1. Independence Day Hero Section + Benefit Strip */}
-        <Hero />
+    <div className="relative min-h-screen bg-[#faf8f5] text-slate-900 flex flex-col font-sans selection:bg-[#067a46] selection:text-white">
+      
+      {/* Global Watercolor Background Layer */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0 bg-[url('/images/hero_bg_india.png')] bg-cover bg-top bg-no-repeat opacity-75" 
+        aria-hidden="true"
+      />
 
-        {/* 2. Side-by-Side Vegetables & Seasonal Fruits Showcase */}
-        <HomepageProduceShowcase />
+      {/* Foreground Content */}
+      <div className="relative z-10 flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-1">
+          {/* 1. Independence Day Hero Section + Floating Glass Feature Strip */}
+          <Hero />
 
-        {/* 3. Where We Supply Section (Hostels, Hotels, Shops) */}
-        <WhereWeSupplySection />
+          {/* 2. Side-by-Side Glassmorphism Produce Showcase */}
+          <HomepageProduceShowcase />
 
-        {/* 4. FlashKart Shop Franchise Banner */}
-        <FranchiseSection />
-      </main>
-      <Footer />
+          {/* 3. Where We Supply Section (Hostels, Hotels, Shops) */}
+          <WhereWeSupplySection />
+
+          {/* 4. FlashKart Shop Franchise Banner */}
+          <FranchiseSection />
+        </main>
+        <Footer />
+      </div>
+
     </div>
   );
 }
