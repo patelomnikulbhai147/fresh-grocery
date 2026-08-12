@@ -35,7 +35,7 @@ export function Hero() {
   return (
     <div className="relative">
       {/* Hero Fixed Image Banner */}
-      <section className="pt-4 pb-4 md:pt-6 md:pb-6">
+      <section className="pt-3 pb-3 md:pt-4 md:pb-4">
         <div className="mx-auto max-w-[1400px] px-4 md:px-8">
           <Link href="/where-we-supply" className="block relative w-full rounded-2xl md:rounded-3xl overflow-hidden shadow-md border border-slate-200/80 group">
             <Image

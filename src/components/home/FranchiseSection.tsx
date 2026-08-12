@@ -22,7 +22,7 @@ export function FranchiseSection() {
           </div>
           <div className="absolute right-0 top-0 bottom-0 w-36 pointer-events-none opacity-25 hidden md:block">
             <Image
-              src="/images/products/apple.jpg"
+              src="/images/products/alphonso-mango.png"
               alt=""
               fill
               className="object-cover rounded-r-3xl"

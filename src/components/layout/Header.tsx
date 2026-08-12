@@ -83,9 +83,7 @@ export function Header() {
 
           {/* Logo - Existing FlashKart Logo intact */}
           <div className="shrink-0">
-            <Link href="/" className="block">
-              <FlashKartLogo size="md" showTagline={true} />
-            </Link>
+            <FlashKartLogo size="md" showTagline={true} />
           </div>
 
           {/* Desktop Navigation Links */}

@@ -159,16 +159,4 @@
   box-shadow: 0 0 0 4px var(--color-brand-100);
 }
 
-:root {
-  --header-height: 112px;
-}
 
-@media (max-width: 768px) {
-  :root {
-    --header-height: 68px;
-  }
-}
-
-main {
-  margin-top: var(--header-height);
-}
