@@ -1,161 +1,157 @@
 "use client";
 import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle2, ShieldCheck, Store, Tractor, Clock, Users, Sprout, Star, Leaf } from "lucide-react";
+import { ArrowRight, Leaf, ShieldCheck, Clock, Tag, Package, Sprout, Award, Truck, Banknote, Store } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
+const benefits = [
+  {
+    icon: Leaf,
+    title: "Farm Fresh",
+    desc: "Directly sourced from trusted farmers",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Premium Quality",
+    desc: "Carefully selected for the best quality",
+  },
+  {
+    icon: Truck,
+    title: "Timely Supply",
+    desc: "Reliable and on-time delivery",
+  },
+  {
+    icon: Tag,
+    title: "Best Prices",
+    desc: "Competitive pricing for your business",
+  },
+  {
+    icon: Package,
+    title: "Bulk Orders",
+    desc: "Custom orders for all business needs",
+  },
+];
+
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-[#fdfbf7] flex flex-col">
-      {/* Background Layer */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/images/hero_bg_india.png"
-          alt="Independence Day Background"
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-bottom"
-        />
-        {/* Subtle white fade at the top to blend with header */}
-        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white to-transparent" />
-      </div>
-
-      {/* Hero Content (Two Columns) */}
-      <div className="relative z-10 mx-auto max-w-7xl px-5 md:px-8 py-12 md:py-20 w-full flex-1 flex flex-col lg:flex-row items-center gap-12 lg:gap-8">
-        
-        {/* Left Side: Copy */}
-        <div className="w-full lg:w-[50%] xl:w-[50%] pt-8">
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 bg-white text-navy-900 border border-india-green/20 shadow-sm px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider mb-6"
-          >
-            <Star className="w-3.5 h-3.5 text-india-saffron fill-india-saffron" />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-india-saffron via-navy-900 to-india-green">
-              🇮🇳 Franchise Opportunity In Gujarat
-            </span>
-          </motion.div>
-
-          {/* Main Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
-            className="font-display text-4xl sm:text-5xl md:text-[3.5rem] font-extrabold leading-[1.12] tracking-tight whitespace-pre-line text-balance drop-shadow-sm"
-          >
-            <span className="text-navy-950 block mb-1">Start Your Own</span>
-            <span className="text-india-saffron block mb-1 drop-shadow-md">FlashKart</span>
-            <span className="text-india-green block">Fresh Produce Shop</span>
-          </motion.h1>
-
-          {/* Subtitle */}
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="mt-6 text-base md:text-lg text-slate-700 leading-relaxed max-w-xl font-medium"
-          >
-            Partner with an established brand, get reliable daily produce supply, and build your own fresh vegetable and fruit retail business.
-          </motion.p>
-
-          {/* Feature Badges */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.25 }}
-            className="mt-8 flex flex-wrap items-center gap-3 text-xs text-navy-900 font-bold"
-          >
-            <span className="flex items-center gap-2 bg-white px-3.5 py-2 rounded-xl border border-india-green/20 shadow-sm">
-              <CheckCircle2 className="w-4 h-4 text-india-green" /> Best Quality & Rate
-            </span>
-            <span className="flex items-center gap-2 bg-white px-3.5 py-2 rounded-xl border border-india-saffron/20 shadow-sm">
-              <ShieldCheck className="w-4 h-4 text-india-saffron" /> Direct Farm Sourcing
-            </span>
-            <span className="flex items-center gap-2 bg-white px-3.5 py-2 rounded-xl border border-navy-900/10 shadow-sm">
-              <Store className="w-4 h-4 text-navy-600" /> Hostels, Hotels & Shops
-            </span>
-          </motion.div>
-
-          {/* CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="mt-10 flex flex-wrap gap-4"
-          >
-            <Link
-              href="/franchise"
-              className="bg-india-saffron hover:bg-india-green text-white font-black px-8 py-4 rounded-full text-sm md:text-base transition-colors shadow-lg shadow-orange-500/20 flex items-center gap-2 group"
-            >
-              Franchise Details
-              <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-            </Link>
-            <Link
-              href="/shop"
-              className="bg-white hover:bg-slate-50 text-navy-900 font-bold px-8 py-4 rounded-full text-sm md:text-base border border-slate-200 transition shadow-sm"
-            >
-              Explore Products
-            </Link>
-          </motion.div>
+    <div className="relative bg-[#faf9f6]">
+      <section className="relative overflow-hidden pt-8 pb-16 md:pt-14 md:pb-24">
+        {/* Background Decorative Layer */}
+        <div className="absolute inset-0 z-0 opacity-40 pointer-events-none">
+          <Image
+            src="/images/hero_bg_india.png"
+            alt="Independence Day Background"
+            fill
+            priority
+            className="object-cover object-center"
+          />
         </div>
 
-        {/* Right Side: Graphic */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3, duration: 0.7, ease: "easeOut" }}
-          className="w-full lg:w-[50%] xl:w-[50%] flex justify-center lg:justify-end relative"
-        >
-          <div className="relative w-full max-w-lg aspect-square lg:aspect-auto lg:h-[650px] lg:scale-110 lg:-mb-12 origin-bottom">
-            <Image
-              src="/images/hero_basket_transparent.png"
-              alt="Fresh Produce Basket Independence Day"
-              fill
-              className="object-contain drop-shadow-2xl"
-              priority
-            />
+        {/* Hero Content */}
+        <div className="relative z-10 mx-auto max-w-7xl px-5 md:px-8 w-full flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
+          
+          {/* Left Side: Headline & Copy */}
+          <div className="w-full lg:w-[52%] pt-2">
+            {/* Festival Label Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-2 mb-4 text-xs font-black uppercase tracking-widest text-slate-800"
+            >
+              <span className="h-[2px] w-6 bg-[#ea580c]" />
+              <span className="text-[#ea580c]">HAPPY</span>
+              <span className="text-[#1d4ed8]">INDEPENDENCE</span>
+              <span className="text-[#16a34a]">DAY</span>
+              <span className="h-[2px] w-6 bg-[#16a34a]" />
+            </motion.div>
+
+            {/* Main Headline */}
+            <motion.h1
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.5 }}
+              className="font-display text-4xl sm:text-5xl lg:text-[3.6rem] font-extrabold text-[#0f172a] leading-[1.12] tracking-tight text-balance"
+            >
+              Celebrate <span className="text-[#ea580c]">15 August</span> <br />
+              with Freshness
+            </motion.h1>
+
+            {/* Subtitle */}
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="mt-5 text-base md:text-lg text-slate-600 leading-relaxed max-w-xl font-medium"
+            >
+              Fresh vegetables and seasonal fruits, supplied directly to Hostels, PGs, Hotels and Shops.
+            </motion.p>
+
+            {/* Primary CTA Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="mt-8 flex items-center gap-4"
+            >
+              <Link
+                href="/where-we-supply"
+                className="bg-[#067a46] hover:bg-[#046338] text-white font-extrabold px-8 py-3.5 rounded-full text-sm md:text-base transition shadow-md flex items-center gap-2 group"
+              >
+                <span>Enquire Now</span>
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </motion.div>
           </div>
-        </motion.div>
-      </div>
 
-      {/* Bottom Benefits Bar */}
-      <div className="relative z-20 w-full bg-navy-950 text-white border-t-4 border-india-saffron mt-4 md:mt-0">
-        {/* Very slim tricolor line on top of the bar */}
-        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-india-saffron via-white to-india-green opacity-50" />
-        
-        <div className="mx-auto max-w-7xl px-4 md:px-6 py-4 md:py-5">
-          <div className="grid grid-cols-2 md:flex md:flex-nowrap items-center justify-center md:justify-between gap-4 md:gap-2">
-            
-            <div className="flex items-center gap-3 px-2 md:border-r border-slate-700/50 flex-1 justify-start md:justify-start last:border-0 min-w-0 md:min-w-[140px]">
-              <Leaf className="w-6 h-6 text-india-green" />
-              <div className="text-xs font-bold leading-tight">Fresh & Healthy<br/>Everyday</div>
+          {/* Right Side: Fresh Produce Graphic & Indian Badge */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.25, duration: 0.6 }}
+            className="w-full lg:w-[48%] relative flex justify-center lg:justify-end"
+          >
+            <div className="relative w-full max-w-lg aspect-[4/3] sm:aspect-square lg:aspect-auto lg:h-[480px]">
+              {/* Proud to be Indian Circular Badge */}
+              <div className="absolute top-2 right-2 md:top-4 md:right-4 z-20 bg-white/95 backdrop-blur-md rounded-2xl p-3 border border-slate-200 shadow-md flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-[#1e3a8a]/10 border border-[#1e3a8a]/30 grid place-items-center text-[#1e3a8a] text-xs font-black">
+                  ⚙️
+                </div>
+                <div className="text-[10px] uppercase font-black tracking-wider leading-tight text-slate-800">
+                  <span className="text-[#ea580c] block">PROUD TO BE</span>
+                  <span className="text-[#0f172a] block font-extrabold text-xs">INDIAN</span>
+                  <span className="text-[#16a34a] block text-[9px]">PROUD TO SERVE FRESHNESS</span>
+                </div>
+              </div>
+
+              {/* Basket Produce Image */}
+              <Image
+                src="/images/hero_basket_transparent.png"
+                alt="Fresh Produce Crate 15 August"
+                fill
+                priority
+                className="object-contain drop-shadow-xl"
+              />
             </div>
+          </motion.div>
+        </div>
+      </section>
 
-            <div className="flex items-center gap-3 px-2 md:border-r border-slate-700/50 flex-1 justify-start md:justify-center last:border-0 min-w-0 md:min-w-[140px]">
-              <Tractor className="w-6 h-6 text-india-saffron shrink-0" />
-              <div className="text-xs font-bold leading-tight">Farm Fresh<br/>Guarantee</div>
+      {/* Feature Benefit Strip - Reference Mockup Card */}
+      <div className="relative z-20 max-w-7xl mx-auto px-4 md:px-6 -mt-6 md:-mt-10 pb-12">
+        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-md p-4 md:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 divide-y sm:divide-y-0 lg:divide-x divide-slate-100">
+          {benefits.map((b, idx) => (
+            <div key={b.title} className={`flex items-center gap-3.5 ${idx > 0 ? "lg:pl-5 pt-3 sm:pt-0" : ""}`}>
+              <div className="w-11 h-11 rounded-xl bg-emerald-50 text-[#067a46] border border-emerald-100 flex items-center justify-center shrink-0">
+                <b.icon className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="font-display font-bold text-sm text-[#0f172a]">{b.title}</div>
+                <div className="text-xs text-slate-500 leading-snug">{b.desc}</div>
+              </div>
             </div>
-
-            <div className="flex items-center gap-3 px-2 md:border-r border-slate-700/50 flex-1 justify-start md:justify-center last:border-0 min-w-0 md:min-w-[140px]">
-              <Clock className="w-6 h-6 text-india-green shrink-0" />
-              <div className="text-xs font-bold leading-tight">On-Time<br/>Delivery</div>
-            </div>
-
-            <div className="flex items-center gap-3 px-2 md:border-r border-slate-700/50 flex-1 justify-start md:justify-center last:border-0 min-w-0 md:min-w-[140px]">
-              <Users className="w-6 h-6 text-india-saffron shrink-0" />
-              <div className="text-xs font-bold leading-tight">Trusted by<br/>Hundreds</div>
-            </div>
-
-            <div className="flex items-center gap-3 px-2 flex-1 justify-start md:justify-end min-w-0 md:min-w-[140px] col-span-2 md:col-span-1 border-t md:border-t-0 border-slate-700/50 pt-3 md:pt-0 mt-1 md:mt-0">
-              <Sprout className="w-6 h-6 text-india-green shrink-0" />
-              <div className="text-xs font-bold leading-tight">Grow with<br/>FlashKart</div>
-            </div>
-
-          </div>
+          ))}
         </div>
       </div>
-    </section>
+    </div>
   );
 }

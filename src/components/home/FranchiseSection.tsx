@@ -1,117 +1,65 @@
 "use client";
 import Link from "next/link";
-import { Sparkles, Store, TrendingUp, ShieldCheck, Truck, Users, HelpCircle, PhoneCall, ArrowRight, CheckCircle2 } from "lucide-react";
-import { motion } from "framer-motion";
-
-const benefits = [
-  {
-    icon: Store,
-    title: "Attractive Shop Concept",
-    desc: "Modern, clean, and recognizable fresh produce storefront designed to attract daily shoppers.",
-  },
-  {
-    icon: Truck,
-    title: "Daily Fresh Product Supply",
-    desc: "Dependable morning delivery of fresh vegetables and seasonal fruits directly to your store.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Quality-Focused Sourcing",
-    desc: "Rigorous grading and direct farm connections ensure your customers always get the best produce.",
-  },
-  {
-    icon: TrendingUp,
-    title: "Established Brand Identity",
-    desc: "Leverage FlashKart's trusted brand, marketing materials, and customer reputation.",
-  },
-  {
-    icon: Users,
-    title: "Comprehensive Guidance",
-    desc: "Operational training, inventory turnover best practices, and pricing guidance from day one.",
-  },
-  {
-    icon: HelpCircle,
-    title: "Ongoing Brand Support",
-    desc: "Continuous logistics, supply assistance, and promotional campaign support to grow your business.",
-  },
-];
+import { Store, ArrowRight } from "lucide-react";
+import Image from "next/image";
 
 export function FranchiseSection() {
   return (
-    <section id="franchise" className="py-16 md:py-24 bg-gradient-to-b from-purple-950 via-purple-900 to-indigo-950 text-white relative overflow-hidden">
-      {/* Decorative Glow Elements */}
-      <div className="absolute top-1/4 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-10 w-96 h-96 bg-purple-500/15 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="mx-auto max-w-7xl px-5 md:px-8 relative z-10">
-        {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14">
-          <div className="inline-flex items-center gap-2 bg-amber-400/20 text-amber-300 border border-amber-400/30 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            Partnership Opportunity
+    <section id="franchise" className="py-10 md:py-14 bg-white border-t border-slate-100">
+      <div className="mx-auto max-w-7xl px-4 md:px-6">
+        
+        {/* Franchise Card Banner */}
+        <div className="relative rounded-3xl bg-gradient-to-r from-emerald-50/80 via-white to-orange-50/80 border border-slate-200/80 p-8 md:p-12 overflow-hidden shadow-sm flex flex-col md:flex-row items-center justify-between gap-8">
+          
+          {/* Produce Graphic Decorative Edges */}
+          <div className="absolute left-0 top-0 bottom-0 w-32 pointer-events-none opacity-20 hidden md:block">
+            <Image
+              src="/images/products/tomato.jpg"
+              alt=""
+              fill
+              className="object-cover rounded-l-3xl"
+            />
           </div>
-          <h2 className="font-display text-3xl md:text-5xl text-white font-bold tracking-tight">
-            Grow With <span className="text-amber-400">FlashKart</span>
-          </h2>
-          <div className="font-display text-xl md:text-2xl text-purple-200 mt-2 font-medium">
-            Start Your Own FlashKart Fresh Produce Shop
+          <div className="absolute right-0 top-0 bottom-0 w-32 pointer-events-none opacity-20 hidden md:block">
+            <Image
+              src="/images/products/apple.jpg"
+              alt=""
+              fill
+              className="object-cover rounded-r-3xl"
+            />
           </div>
-          <p className="mt-4 text-purple-200 text-sm md:text-base leading-relaxed">
-            Become a FlashKart franchise partner and build your own fresh vegetables & seasonal fruits business with our brand, supply network, and operational guidance.
-          </p>
-        </div>
 
-        {/* Benefits Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {benefits.map((b, idx) => (
-            <motion.div
-              key={b.title}
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.08, duration: 0.4 }}
-              className="bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 p-6 hover:bg-white/10 hover:border-amber-400/30 transition-all duration-300 group"
-            >
-              <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <b.icon className="w-6 h-6" />
-              </div>
-              <h3 className="font-display text-xl font-bold text-white mb-2">{b.title}</h3>
-              <p className="text-purple-200 text-xs md:text-sm leading-relaxed">{b.desc}</p>
-            </motion.div>
-          ))}
-        </div>
+          {/* Center Content */}
+          <div className="relative z-10 max-w-2xl text-center md:text-left flex flex-col md:flex-row items-center md:items-start gap-5">
+            {/* Store Badge Icon */}
+            <div className="w-14 h-14 rounded-2xl bg-emerald-100/80 text-[#067a46] border border-emerald-200 flex items-center justify-center shrink-0 shadow-sm">
+              <Store className="w-7 h-7" />
+            </div>
 
-        {/* Action Card / Quick Contact */}
-        <div className="rounded-3xl bg-white/10 backdrop-blur-md border border-white/15 p-8 md:p-10 flex flex-col lg:flex-row items-center justify-between gap-8">
-          <div className="max-w-xl text-center lg:text-left">
-            <h3 className="font-display text-2xl md:text-3xl text-white font-bold">
-              Ready to Launch Your FlashKart Shop in Gandhinagar or Gujarat?
-            </h3>
-            <p className="text-purple-200 text-sm mt-2 leading-relaxed">
-              Connect directly with our founding leadership to discuss location suitability, store setup requirements, and supply onboarding.
-            </p>
-            <div className="mt-4 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs font-semibold text-amber-300">
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> Low Entry Barrier</span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> Direct Farm Sourcing</span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> Complete Setup Assistance</span>
+            <div>
+              <h2 className="font-display text-2xl md:text-3xl font-extrabold text-slate-900">
+                Bring FlashKart to Your Area
+              </h2>
+              <p className="mt-1.5 text-slate-600 text-sm md:text-base leading-relaxed font-medium">
+                Interested in starting a FlashKart shop? <br className="hidden sm:inline" />
+                Explore our franchise opportunity.
+              </p>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto shrink-0">
+          {/* Right CTA Button */}
+          <div className="relative z-10 shrink-0">
             <Link
               href="/franchise"
-              className="bg-amber-500 hover:bg-amber-400 text-purple-950 font-bold px-7 py-3.5 rounded-full text-sm transition shadow-glow-cta flex items-center justify-center gap-2"
+              className="bg-[#063b25] hover:bg-[#042a1a] text-white font-extrabold px-7 py-3.5 rounded-full text-xs md:text-sm transition shadow-md flex items-center gap-2 group"
             >
-              Explore Franchise Details <ArrowRight className="w-4 h-4" />
+              <span>Know More About Franchise</span>
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
-            <a
-              href="tel:+919773271029"
-              className="bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-3.5 rounded-full text-sm border border-white/20 transition flex items-center justify-center gap-2"
-            >
-              <PhoneCall className="w-4 h-4 text-amber-400" /> Call Om Patel
-            </a>
           </div>
+
         </div>
+
       </div>
     </section>
   );

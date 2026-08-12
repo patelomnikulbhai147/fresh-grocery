@@ -1,86 +1,34 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/home/Hero";
-
-import { BrandMarquee } from "@/components/home/BrandMarquee";
+import { HomepageProduceShowcase } from "@/components/home/HomepageProduceShowcase";
 import { WhereWeSupplySection } from "@/components/home/WhereWeSupplySection";
-import { CategoryGrid } from "@/components/home/CategoryGrid";
-import { ProductSection } from "@/components/home/ProductSection";
-import { DealsCountdown } from "@/components/home/DealsCountdown";
 import { FranchiseSection } from "@/components/home/FranchiseSection";
-import { WhyChooseUs } from "@/components/home/WhyChooseUs";
-import { Reviews } from "@/components/home/Reviews";
-import { PincodeChecker } from "@/components/home/PincodeChecker";
-import { MobileApp } from "@/components/home/MobileApp";
-import {
-  bestSellers,
-  vegetableProducts,
-  fruitProducts,
-} from "@/data/catalog";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "FlashKart | Fresh Vegetables & Seasonal Fruits",
+  title: "FlashKart | Fresh Vegetables & Seasonal Fruits Direct Supply",
   description:
-    "FlashKart provides fresh vegetables and seasonal fruits with a focus on quality, fair pricing and reliable supply for hostels, PGs, hotels and shops.",
+    "FlashKart provides fresh vegetables and seasonal fruits with direct supply to hostels, PGs, hotels and shops across Gandhinagar and Gujarat.",
   alternates: { canonical: "https://flashkart.co" },
 };
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[#fafaf9] text-purple-950 flex flex-col">
+    <div className="min-h-screen bg-white text-slate-900 flex flex-col font-sans">
       <Header />
       <main className="flex-1">
-
-
-        {/* 1. Hero Section */}
+        {/* 1. Independence Day Hero Section + Benefit Strip */}
         <Hero />
 
-        {/* 2. Tagline Marquee */}
-        <BrandMarquee />
+        {/* 2. Side-by-Side Vegetables & Seasonal Fruits Showcase */}
+        <HomepageProduceShowcase />
 
-        {/* 3. Currently Serving / Where We Supply + Direct Purchase */}
+        {/* 3. Where We Supply Section (Hostels, Hotels, Shops) */}
         <WhereWeSupplySection />
 
-        {/* 4. Product Categories (Vegetables & Seasonal Fruits) */}
-        <CategoryGrid />
-
-        {/* 5. Fresh Vegetables Showcase */}
-        <ProductSection
-          eyebrow="Fresh Vegetables"
-          title={<>Farm-Fresh Produce at <span className="italic text-purple-700">Better Rates</span>.</>}
-          description="Hand-graded daily vegetables sourced from partner farms for our hostels, kitchens, and local store network."
-          products={vegetableProducts.slice(0, 8)}
-          cta={{ label: "View All Vegetables", href: "/shop?cat=vegetables" }}
-        />
-
-        {/* 6. Daily Specials & WhatsApp Community */}
-        <DealsCountdown />
-
-        {/* 7. Seasonal Fruits Section */}
-        <ProductSection
-          eyebrow="Seasonal Fruits"
-          title={<>Naturally Ripened <span className="italic text-amber-600">Seasonal Fruits</span>.</>}
-          description="Fresh seasonal fruits available according to current season and farm availability."
-          products={fruitProducts.slice(0, 4)}
-          cta={{ label: "View All Fruits", href: "/shop?cat=fruits" }}
-          columns={4}
-        />
-
-        {/* 8. Franchise Program */}
+        {/* 4. FlashKart Shop Franchise Banner */}
         <FranchiseSection />
-
-        {/* 9. Why FlashKart? 5 Pillars */}
-        <WhyChooseUs />
-
-        {/* 10. Reviews & Testimonials */}
-        <Reviews />
-
-        {/* 11. Gandhinagar Supply Hub Checker */}
-        <PincodeChecker />
-
-        {/* 12. Digital Mobile Experience */}
-        <MobileApp />
       </main>
       <Footer />
     </div>
