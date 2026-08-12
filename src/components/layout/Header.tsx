@@ -70,34 +70,7 @@ export function Header() {
 
   return (
     <>
-      {/* Top Announcement Strip */}
-      <div className="hidden md:block bg-purple-950 text-purple-100 text-xs border-b border-purple-900/60 select-none">
-        <div className="mx-auto max-w-7xl px-6 py-2 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5 font-semibold text-amber-400">
-              <Sparkles className="w-3.5 h-3.5" /> Fresh Vegetables & Seasonal Fruits
-            </span>
-            <span className="opacity-40">|</span>
-            <span className="flex items-center gap-1.5 text-purple-200">
-              <Building className="w-3.5 h-3.5 text-purple-400" /> Supplying Hostels, PGs, Hotels & Shops
-            </span>
-            <span className="opacity-40">|</span>
-            <span className="text-emerald-400 font-medium">Gandhinagar, Gujarat</span>
-          </div>
-          <div className="flex items-center gap-4 text-purple-200">
-            <Link href="/franchise" className="hover:text-amber-300 font-bold text-amber-400 transition">
-              Franchise Opportunity →
-            </Link>
-            <span className="opacity-40">|</span>
-            <a href="tel:+916352856495" className="hover:text-white font-medium">
-              📞 6352856495 (Kaushik)
-            </a>
-            <a href="tel:+919773271029" className="hover:text-white font-medium">
-              📞 9773271029 (Om)
-            </a>
-          </div>
-        </div>
-      </div>
+
 
       <header
         className={cn(
