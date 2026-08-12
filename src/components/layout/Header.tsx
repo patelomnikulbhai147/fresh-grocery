@@ -70,8 +70,9 @@ export function Header() {
 
   return (
     <>
-
-
+      {/* Tricolor Independence Day Header Accent */}
+      <div className="h-1.5 w-full bg-gradient-to-r from-india-saffron via-white to-india-green" />
+      
       <header
         className={cn(
           "sticky top-0 z-50 transition-all duration-300",

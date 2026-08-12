@@ -162,7 +162,7 @@ export function Hero() {
             >
               <Link
                 href={slide.cta.href}
-                className="bg-amber-500 hover:bg-amber-400 text-purple-950 font-bold px-7 py-3.5 rounded-full text-sm md:text-base transition shadow-glow-cta flex items-center gap-2 group"
+                className="bg-india-saffron hover:bg-orange-500 text-white font-bold px-7 py-3.5 rounded-full text-sm md:text-base transition shadow-glow-cta flex items-center gap-2 group"
               >
                 {slide.cta.label}
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />

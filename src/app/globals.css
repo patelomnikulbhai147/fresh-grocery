@@ -40,6 +40,11 @@
   --color-peach: #f6a86b;
   --color-berry: #c94b6b;
   --color-lemon: #f5d547;
+  /* Independence Day Theme Colors */
+  --color-india-saffron: #FF9933;
+  --color-india-white: #FFFFFF;
+  --color-india-green: #138808;
+  --color-india-navy: #000080;
 }
 
 @layer base {

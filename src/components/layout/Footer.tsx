@@ -38,7 +38,10 @@ const supplySegments = [
 
 export function Footer() {
   return (
-    <footer className="relative bg-purple-950 text-purple-100 overflow-hidden border-t border-purple-900/80">
+    <>
+      {/* Tricolor Independence Day Footer Accent */}
+      <div className="h-1.5 w-full bg-gradient-to-r from-india-saffron via-white to-india-green" />
+      <footer className="relative bg-purple-950 text-purple-100 overflow-hidden">
       {/* Background Decorative Glow */}
       <div
         aria-hidden
@@ -186,5 +189,6 @@ export function Footer() {
         </div>
       </div>
     </footer>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/home/Hero";
+import { IndependenceDayBanner } from "@/components/home/IndependenceDayBanner";
 import { BrandMarquee } from "@/components/home/BrandMarquee";
 import { WhereWeSupplySection } from "@/components/home/WhereWeSupplySection";
 import { CategoryGrid } from "@/components/home/CategoryGrid";
@@ -30,6 +31,9 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#fafaf9] text-purple-950 flex flex-col">
       <Header />
       <main className="flex-1">
+        {/* Independence Day Banner */}
+        <IndependenceDayBanner />
+
         {/* 1. Hero Section */}
         <Hero />
 
