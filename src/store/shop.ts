@@ -122,7 +122,7 @@ export const useCart = create<CartState>()(
           .items.filter((i) => i.mode === mode)
           .reduce((s, i) => s + i.quantity, 0),
     }),
-    { name: "farmora-cart-v2" }
+    { name: "flashkart-cart-v1" }
   )
 );
 
@@ -145,7 +145,7 @@ export const useWishlist = create<Wishlist>()(
         ),
       has: (id) => get().ids.includes(id),
     }),
-    { name: "farmora-wishlist" }
+    { name: "flashkart-wishlist" }
   )
 );
 
@@ -181,7 +181,7 @@ type CityState = {
 export const useCity = create<CityState>()(
   persist(
     (set) => ({
-      slug: "ahmedabad",
+      slug: "gandhinagar",
       setCity: (slug) => {
         const city = cities.find((c) => c.slug === slug);
         if (city && !city.live) {
@@ -194,6 +194,6 @@ export const useCity = create<CityState>()(
       openNotify: () => set({ notifyModalOpen: true }),
       closeNotify: () => set({ notifyModalOpen: false }),
     }),
-    { name: "farmora-city" }
+    { name: "flashkart-city" }
   )
 );

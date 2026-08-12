@@ -24,7 +24,7 @@ export function CouponManagement() {
     }
     setEditingCoupon(null);
     setFormData({
-      code: "FARMORA30",
+      code: "FLASH30",
       title: "Flat 30% Off on Fresh Produce",
       discountType: "Percentage",
       value: 30,
@@ -193,7 +193,7 @@ export function CouponManagement() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. FARMORA50"
+                    placeholder="e.g. FLASH50"
                     value={formData.code || ""}
                     onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
                     className="w-full bg-brand-50/70 dark:bg-zinc-800 border border-brand-200 dark:border-zinc-700 rounded-xl px-3.5 py-2.5 font-mono font-bold text-sm text-brand-950 dark:text-zinc-100 outline-none"

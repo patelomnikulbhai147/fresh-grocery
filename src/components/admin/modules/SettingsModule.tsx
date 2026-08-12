@@ -10,18 +10,18 @@ export function SettingsModule() {
   const pushToast = useToasts((s) => s.push);
 
   const [settings, setSettings] = useState({
-    storeName: "Farmora Premium Grocery",
-    storeUrl: "https://farmora-grocery.vercel.app",
-    contactEmail: "support@farmora.com",
-    helpline: "+91 80000 12345",
+    storeName: "FlashKart — Fresh Vegetables & Seasonal Fruits",
+    storeUrl: "https://flashkart.co",
+    contactEmail: "flashkart.co@gmail.com",
+    helpline: "+91 6352856495 / 9773271029",
     currency: "INR (₹)",
     defaultGstRate: 5,
-    freeDeliveryThreshold: 499,
-    minOrderAmount: 149,
+    freeDeliveryThreshold: 0,
+    minOrderAmount: 100,
     maintenanceMode: false,
     orderSmsAlerts: true,
     emailNotifications: true,
-    autoAssignDrivers: true,
+    autoAssignDrivers: false,
     lowStockThresholdAlert: 10
   });
 

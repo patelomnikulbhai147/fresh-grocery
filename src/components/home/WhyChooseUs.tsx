@@ -1,87 +1,91 @@
-import {
-  Leaf,
-  Truck,
-  ShieldCheck,
-  FlaskConical,
-  RotateCcw,
-  Lock,
-  Sparkles,
-} from "lucide-react";
+"use client";
+import { ShieldCheck, Percent, Leaf, Truck, Users, Sparkles, CheckCircle2 } from "lucide-react";
+import { motion } from "framer-motion";
 
-const reasons = [
+const benefits = [
+  {
+    icon: ShieldCheck,
+    title: "Best Quality",
+    tagline: "Rigorous Hand-Selection",
+    text: "Carefully selected and graded fresh produce with zero compromise on crispness, taste, and nutrition.",
+    accent: "from-purple-100 to-purple-50",
+    iconColor: "text-purple-700",
+  },
+  {
+    icon: Percent,
+    title: "Best Rates",
+    tagline: "Fair & Transparent Pricing",
+    text: "Competitive and wholesale rates enabled by direct farm sourcing, passing genuine savings to our partners and buyers.",
+    accent: "from-amber-100 to-amber-50",
+    iconColor: "text-amber-700",
+  },
   {
     icon: Leaf,
-    title: "Farm Fresh",
-    text: "Harvested at peak ripeness from 140+ partner farms within 120 km.",
-    accent: "from-emerald-100 to-green-50",
+    title: "Fresh Products",
+    tagline: "Vegetables & Seasonal Fruits",
+    text: "Exclusively focused on high-quality daily vegetables and naturally ripened seasonal fruits.",
+    accent: "from-emerald-100 to-emerald-50",
+    iconColor: "text-emerald-700",
   },
   {
     icon: Truck,
-    title: "Same-Day Delivery",
-    text: "Order by 2 pm and receive before dinner. Cold-chained end-to-end.",
-    accent: "from-sky-100 to-blue-50",
+    title: "Direct Supply",
+    tagline: "Business-Focused Supply",
+    text: "Dedicated fulfillment for hostels, PGs, hotel commercial kitchens, and local retail stores without intermediaries.",
+    accent: "from-indigo-100 to-indigo-50",
+    iconColor: "text-indigo-700",
   },
   {
-    icon: ShieldCheck,
-    title: "Quality Checked",
-    text: "Every batch hand-graded by our in-house quality team before packing.",
-    accent: "from-amber-100 to-orange-50",
-  },
-  {
-    icon: Sparkles,
-    title: "100% Fresh",
-    text: "No cold-storage shortcuts. What reaches you was in the field this morning.",
-    accent: "from-lime-100 to-emerald-50",
-  },
-  {
-    icon: FlaskConical,
-    title: "Residue Tested",
-    text: "Lab-tested for pesticides and adulterants — reports shared with every order.",
-    accent: "from-rose-100 to-pink-50",
-  },
-  {
-    icon: RotateCcw,
-    title: "Easy Returns",
-    text: "Not happy? Tap 'return' in the app — no questions asked, instant refund.",
-    accent: "from-violet-100 to-purple-50",
-  },
-  {
-    icon: Lock,
-    title: "Secure Payments",
-    text: "PCI-DSS compliant checkout. UPI, cards, wallets, COD — you pick.",
-    accent: "from-cyan-100 to-sky-50",
+    icon: Users,
+    title: "Trust & Service",
+    tagline: "Long-Term Partnerships",
+    text: "Dedicated personal support from founders Kaushik Patel and Om Patel to ensure seamless daily supply operations.",
+    accent: "from-rose-100 to-rose-50",
+    iconColor: "text-rose-700",
   },
 ];
 
 export function WhyChooseUs() {
   return (
-    <section className="py-16 md:py-24 bg-white">
+    <section className="py-16 md:py-24 bg-purple-50/40 relative">
       <div className="mx-auto max-w-7xl px-5 md:px-8">
-        <div className="max-w-2xl mb-12">
-          <div className="text-xs uppercase tracking-[0.24em] text-brand-600 mb-2">
-            Why Farmora
+        <div className="max-w-3xl mb-12">
+          <div className="inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.24em] font-bold text-purple-700 mb-2 bg-purple-100 px-3 py-1 rounded-full border border-purple-200">
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            Why FlashKart
           </div>
-          <h2 className="font-display text-3xl md:text-5xl text-brand-950 text-balance">
-            Seven small promises that make us <span className="italic text-brand-600">different</span>.
+          <h2 className="font-display text-3xl md:text-5xl text-purple-950 text-balance leading-tight">
+            Five core commitments that make us <span className="italic text-amber-600">reliable</span>.
           </h2>
+          <p className="mt-3 text-slate-600 text-sm md:text-base leading-relaxed">
+            Good Food • Good Price • Good Life. We bridge the gap between quality farms and Gandhinagar’s kitchens and stores.
+          </p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
-          {reasons.map((r, i) => (
-            <div
-              key={r.title}
-              className="group relative rounded-3xl border border-brand-100 p-6 hover:shadow-lift hover:-translate-y-0.5 transition-all duration-300 bg-cream-50"
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-5">
+          {benefits.map((b, i) => (
+            <motion.div
+              key={b.title}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.08, duration: 0.4 }}
+              className="group relative rounded-3xl border border-purple-100 p-6 hover:shadow-lift hover:-translate-y-1 transition-all duration-300 bg-white flex flex-col justify-between"
             >
-              <div
-                className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${r.accent} grid place-items-center mb-4 group-hover:scale-110 transition-transform`}
-              >
-                <r.icon className="w-6 h-6 text-brand-800" strokeWidth={1.8} />
+              <div>
+                <div
+                  className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${b.accent} grid place-items-center mb-4 group-hover:scale-110 transition-transform`}
+                >
+                  <b.icon className={`w-6 h-6 ${b.iconColor}`} strokeWidth={2} />
+                </div>
+                <div className="font-display text-lg font-bold text-purple-950 mb-1">{b.title}</div>
+                <div className="text-[11px] font-bold text-amber-600 uppercase tracking-wider mb-2">{b.tagline}</div>
+                <p className="text-xs text-slate-600 leading-relaxed">{b.text}</p>
               </div>
-              <div className="font-display text-lg text-brand-950 mb-1.5">{r.title}</div>
-              <p className="text-sm text-brand-700 leading-relaxed">{r.text}</p>
-              <div className="absolute top-4 right-4 text-[10px] font-mono text-brand-400">
+              <div className="mt-4 pt-3 border-t border-purple-50 text-[10px] font-mono text-purple-400">
                 0{i + 1}
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

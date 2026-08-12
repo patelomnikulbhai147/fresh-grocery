@@ -145,9 +145,9 @@ export function ProductManagement() {
       barcode: `890100${Math.floor(1000 + Math.random() * 9000)}`,
       category: categories[0]?.slug || "vegetables",
       subcategory: "Fresh Produce",
-      brand: "Farmora Organic",
-      tagline: "Farm fresh organic produce",
-      description: "Hand-picked daily from partner farms, tested for 100% pesticide-free quality.",
+      brand: "FlashKart Fresh",
+      tagline: "Farm fresh produce",
+      description: "Hand-picked daily from partner farms, tested for high quality.",
       image: "/images/categories/vegetables.png",
       gallery: ["/images/categories/vegetables.png"],
       weights: [{ label: "1 unit (500g)", grams: 500, price: 90, mrp: 110 }],
@@ -159,15 +159,15 @@ export function ProductManagement() {
       availableStock: 50,
       minStock: 15,
       maxStock: 250,
-      warehouse: "Hub-A (North Ahmedabad)",
+      warehouse: "Gandhinagar Central Hub",
       batchNumber: `BATCH-2026-${Math.floor(100 + Math.random()*900)}`,
       status: "Active",
       labels: ["Fresh", "Organic"],
       badge: "Discount",
-      deliveryTime: "30 Min",
-      seoTitle: "Fresh Produce Online at Farmora",
-      seoDescription: "Buy farm-fresh produce delivered in 30 minutes.",
-      seoKeywords: "fresh groceries, organic vegetables, farmora",
+      deliveryTime: "Morning",
+      seoTitle: "Fresh Produce Online at FlashKart",
+      seoDescription: "Buy farm-fresh produce directly from FlashKart.",
+      seoKeywords: "fresh vegetables, seasonal fruits, flashkart",
       ogImage: "/images/categories/vegetables.png",
       benefits: ["100% Pesticide Free", "Harvested This Morning", "Rich in Vitamins"],
       storage: "Store in a cool dry place or refrigerate.",
@@ -345,7 +345,7 @@ export function ProductManagement() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `farmora_products_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute("download", `flashkart_products_export_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1491,10 +1491,10 @@ export function ProductManagement() {
                       {formData.seoTitle || formData.name || "Product Title"}
                     </div>
                     <div className="text-xs text-emerald-700 dark:text-emerald-400 font-mono">
-                      https://farmora.vercel.app/product/{formData.slug || "product-slug"}
+                      https://flashkart.co/product/{formData.slug || "product-slug"}
                     </div>
                     <div className="text-xs text-brand-700 dark:text-zinc-400 line-clamp-2">
-                      {formData.seoDescription || formData.description || "Fresh grocery delivery from Farmora in 30 minutes."}
+                      {formData.seoDescription || formData.description || "Fresh produce supply from FlashKart."}
                     </div>
                   </div>
                 </div>

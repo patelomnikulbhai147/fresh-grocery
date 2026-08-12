@@ -25,7 +25,7 @@ Don't miss today's fresh offers:
 🥬 Leafy Greens – 20% OFF
 🧅 Onions – 15% OFF
 
-🛒 Shop Now: https://farmora.vercel.app
+🛒 Shop Now: https://flashkart.co
 
 ⏰ Offer ends at midnight tonight!
 

@@ -157,7 +157,7 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      response.cookies.set("farmora_session", token, {
+      response.cookies.set("flashkart_session", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
@@ -183,7 +183,7 @@ export async function POST(req: NextRequest) {
           "Welcome! It looks like you're new here. Please complete your profile to create your account.",
       });
 
-      response.cookies.set("farmora_reg_token", regToken, {
+      response.cookies.set("flashkart_reg_token", regToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",

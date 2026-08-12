@@ -2,7 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Plus, Minus, Trash2, Tag, Gift, Truck, ArrowRight, Zap, Package, Milk } from "lucide-react";
+import { X, Plus, Minus, Trash2, Tag, ArrowRight, Sparkles, Package, Building } from "lucide-react";
 import { useCart } from "@/store/shop";
 import { formatINR } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -11,11 +11,11 @@ import { useRouter } from "next/navigation";
 import { useCustomerAuth } from "@/store/customerAuth";
 import type { DeliveryMode } from "@/data/catalog";
 
-const TABS: { id: DeliveryMode | "all"; label: string; icon: typeof Zap; desc: string }[] = [
-  { id: "all", label: "All", icon: Tag, desc: "All items" },
-  { id: "instant", label: "Instant", icon: Zap, desc: "30–40 min" },
-  { id: "bulk", label: "Bulk", icon: Package, desc: "Next-day" },
-  { id: "subscription", label: "Dairy", icon: Milk, desc: "Daily" },
+const TABS: { id: DeliveryMode | "all"; label: string; icon: typeof Sparkles }[] = [
+  { id: "all", label: "All Items", icon: Tag },
+  { id: "instant", label: "Direct Produce", icon: Sparkles },
+  { id: "bulk", label: "Wholesale", icon: Package },
+  { id: "subscription", label: "Supply", icon: Building },
 ];
 
 export function CartDrawer() {
@@ -30,8 +30,7 @@ export function CartDrawer() {
   const discount = useCart((s) => s.discount());
   const [tab, setTab] = useState<DeliveryMode | "all">("all");
 
-  const deliveryFee = subtotal > 499 || subtotal === 0 ? 0 : 39;
-  const total = subtotal + deliveryFee;
+  const total = subtotal;
 
   const visible = tab === "all" ? items : items.filter((i) => i.mode === tab);
   const counts = {
@@ -50,197 +49,143 @@ export function CartDrawer() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={close}
-            className="fixed inset-0 bg-brand-950/40 z-[60]"
+            className="fixed inset-0 bg-purple-950/50 backdrop-blur-sm z-[60]"
           />
           <motion.aside
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 260 }}
-            className="fixed inset-y-0 right-0 w-full sm:w-[460px] bg-cream-50 z-[70] flex flex-col shadow-lift"
+            className="fixed inset-y-0 right-0 w-full sm:w-[460px] bg-white z-[70] flex flex-col shadow-lift border-l border-purple-100"
             aria-label="Cart"
           >
             {/* Header */}
-            <div className="p-5 border-b border-brand-100 flex items-center justify-between">
+            <div className="p-5 border-b border-purple-100 flex items-center justify-between">
               <div>
-                <div className="text-xs uppercase tracking-widest text-brand-500">Your Basket</div>
-                <div className="font-display text-2xl text-brand-900">
-                  {items.length === 0 ? "Empty for now" : `${items.length} item${items.length > 1 ? "s" : ""}`}
+                <div className="text-[10px] uppercase font-bold tracking-widest text-purple-600">FlashKart Order</div>
+                <div className="font-display text-2xl font-black text-purple-950">
+                  {items.length === 0 ? "Basket is Empty" : `${items.length} produce item${items.length > 1 ? "s" : ""}`}
                 </div>
               </div>
-              <button onClick={close} className="p-2 rounded-full hover:bg-brand-100 transition" aria-label="Close cart">
+              <button onClick={close} className="p-2 rounded-full hover:bg-purple-50 text-purple-950 transition" aria-label="Close cart">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Tabs */}
             {items.length > 0 && (
-              <div className="px-5 pt-4 flex gap-1.5 overflow-x-auto scrollbar-hide">
+              <div className="px-5 pt-3 pb-2 flex gap-1.5 overflow-x-auto scrollbar-hide border-b border-purple-50">
                 {TABS.map((t) => (
                   <button
                     key={t.id}
                     onClick={() => setTab(t.id)}
                     className={cn(
-                      "shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition",
+                      "shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition",
                       tab === t.id
-                        ? "bg-brand-900 text-white border-brand-900"
-                        : "bg-white text-brand-700 border-brand-200 hover:border-brand-400"
+                        ? "bg-purple-950 text-white border-purple-950"
+                        : "bg-white text-purple-900 border-purple-200 hover:border-purple-300"
                     )}
                   >
                     <t.icon className="w-3.5 h-3.5" />
                     {t.label}
                     <span className={cn(
-                      "text-[10px] px-1.5 py-0.5 rounded-full",
-                      tab === t.id ? "bg-white/20" : "bg-brand-100"
+                      "text-[10px] px-1.5 py-0.2 rounded-full",
+                      tab === t.id ? "bg-white/20 text-amber-300" : "bg-purple-100 text-purple-800"
                     )}>{counts[t.id]}</span>
                   </button>
                 ))}
               </div>
             )}
 
-            {/* Items */}
+            {/* Items list */}
             <div className="flex-1 overflow-y-auto p-5 space-y-3">
-              {visible.length === 0 ? (
-                <div className="h-full grid place-items-center text-center py-16">
-                  <div>
-                    <div className="mx-auto w-20 h-20 rounded-3xl bg-brand-50 grid place-items-center mb-4">
-                      <Tag className="w-10 h-10 text-brand-400" />
-                    </div>
-                    <div className="font-display text-xl text-brand-900">Nothing in {tab}</div>
-                    <p className="text-sm text-brand-600 mt-1 max-w-xs mx-auto">
-                      {tab === "subscription" ? "Subscribe to milk, paneer or curd for daily morning delivery." : "Start with something fresh — our bestsellers are a great place to begin."}
-                    </p>
-                    <Link
-                      href={tab === "subscription" ? "/subscription" : tab === "bulk" ? "/bulk" : "/shop"}
-                      onClick={close}
-                      className="mt-5 inline-flex items-center gap-2 bg-brand-900 text-white px-5 py-2.5 rounded-full text-sm font-medium"
-                    >
-                      Start shopping <ArrowRight className="w-4 h-4" />
-                    </Link>
+              {items.length === 0 ? (
+                <div className="py-20 text-center">
+                  <div className="w-16 h-16 rounded-full bg-purple-50 text-purple-800 grid place-items-center mx-auto mb-4 text-2xl">
+                    🥦
                   </div>
+                  <h3 className="font-display text-xl font-bold text-purple-950">Your basket is empty</h3>
+                  <p className="text-xs text-slate-500 max-w-xs mx-auto mt-1 mb-6">
+                    Add fresh vegetables and seasonal fruits directly from our farm-fresh catalog.
+                  </p>
+                  <button
+                    onClick={() => { close(); router.push("/shop"); }}
+                    className="px-6 py-3 bg-purple-950 text-white text-xs font-bold rounded-full hover:bg-purple-900"
+                  >
+                    Browse Fresh Produce
+                  </button>
+                </div>
+              ) : visible.length === 0 ? (
+                <div className="py-12 text-center text-xs text-slate-500">
+                  No items in this category tab.
                 </div>
               ) : (
-                <AnimatePresence initial={false}>
-                  {visible.map((item) => (
-                    <motion.div
-                      key={item.productId + item.weight + item.mode}
-                      layout
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: 30 }}
-                      className="flex items-center gap-3 bg-white rounded-2xl p-3 border border-brand-100"
-                    >
-                      <div className="w-16 h-16 rounded-xl overflow-hidden bg-brand-50 shrink-0 relative">
-                        <Image src={item.image} alt={item.name} width={64} height={64} className="w-full h-full object-cover" />
-                        <div className={cn(
-                          "absolute top-0 right-0 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-bl-lg rounded-tr-xl",
-                          item.mode === "instant" ? "bg-cta-500 text-white"
-                            : item.mode === "bulk" ? "bg-brand-900 text-white"
-                            : "bg-sky-600 text-white"
-                        )}>
-                          {item.mode === "instant" ? "⚡" : item.mode === "bulk" ? "Bulk" : "Daily"}
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium truncate">{item.name}</div>
-                        <div className="text-xs text-brand-500">{item.weight}</div>
-                        {item.days && (
-                          <div className="text-[10px] text-brand-600 mt-0.5">Deliver: {item.days.join(", ")}</div>
-                        )}
-                        {item.deliveryDate && (
-                          <div className="text-[10px] text-brand-600 mt-0.5">Deliver: {item.deliveryDate}</div>
-                        )}
-                        <div className="flex items-baseline gap-2 mt-1">
-                          <div className="text-sm font-semibold text-brand-900">{formatINR(item.price)}</div>
-                          {item.mrp > item.price && (
-                            <div className="text-xs text-brand-400 line-through">{formatINR(item.mrp)}</div>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <button
-                          onClick={() => remove(item.productId, item.weight, item.mode)}
-                          className="text-brand-400 hover:text-brand-700 p-1"
-                          aria-label="Remove"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                        <div className="flex items-center gap-1 bg-brand-50 rounded-full p-0.5">
+                visible.map((it) => (
+                  <div key={`${it.productId}-${it.weight}-${it.mode}`} className="flex gap-3 bg-purple-50/40 p-3 rounded-2xl border border-purple-100">
+                    <div className="w-16 h-16 rounded-xl bg-white overflow-hidden shrink-0 border border-purple-100 relative">
+                      <Image src={it.image} alt={it.name} fill className="object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="font-display text-sm font-bold text-purple-950 truncate">{it.name}</h4>
                           <button
-                            onClick={() => updateQty(item.productId, item.weight, item.mode, item.quantity - 1)}
-                            className="w-7 h-7 grid place-items-center rounded-full bg-white border border-brand-100 hover:border-brand-300"
-                            aria-label="Decrease"
+                            onClick={() => remove(it.productId, it.weight, it.mode)}
+                            className="text-slate-400 hover:text-rose-600 p-0.5"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <div className="text-[11px] text-purple-700 font-medium">{it.weight}</div>
+                      </div>
+
+                      <div className="flex items-center justify-between mt-2">
+                        <div className="flex items-center gap-1 bg-white border border-purple-200 rounded-full p-0.5">
+                          <button
+                            onClick={() => updateQty(it.productId, it.weight, it.mode, it.quantity - 1)}
+                            className="w-5 h-5 grid place-items-center rounded-full hover:bg-purple-50 text-purple-950"
                           >
                             <Minus className="w-3 h-3" />
                           </button>
-                          <div className="w-6 text-center text-sm font-semibold">{item.quantity}</div>
+                          <span className="w-5 text-center text-xs font-bold text-purple-950">{it.quantity}</span>
                           <button
-                            onClick={() => updateQty(item.productId, item.weight, item.mode, item.quantity + 1)}
-                            className="w-7 h-7 grid place-items-center rounded-full bg-brand-600 text-white hover:bg-brand-700"
-                            aria-label="Increase"
+                            onClick={() => updateQty(it.productId, it.weight, it.mode, it.quantity + 1)}
+                            className="w-5 h-5 grid place-items-center rounded-full hover:bg-purple-50 text-purple-950"
                           >
                             <Plus className="w-3 h-3" />
                           </button>
                         </div>
+                        <div className="font-display font-black text-sm text-purple-950">
+                          {formatINR(it.price * it.quantity)}
+                        </div>
                       </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
+                    </div>
+                  </div>
+                ))
               )}
             </div>
 
             {/* Footer */}
             {items.length > 0 && (
-              <div className="border-t border-brand-100 bg-white p-5 space-y-3">
-                <div className="flex items-center gap-2 text-sm bg-brand-50 border border-brand-100 rounded-xl px-3 py-2.5">
-                  <Tag className="w-4 h-4 text-brand-600" />
-                  <input
-                    placeholder="Apply coupon code"
-                    className="flex-1 bg-transparent outline-none text-sm placeholder:text-brand-400"
-                  />
-                  <button className="text-xs font-semibold text-brand-700 uppercase tracking-wide">Apply</button>
+              <div className="p-5 border-t border-purple-100 bg-[#fafaf9] space-y-3">
+                <div className="flex justify-between text-xs text-slate-600">
+                  <span>Subtotal</span>
+                  <span className="font-bold text-purple-950">{formatINR(subtotal)}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm bg-peach/10 border border-peach/30 rounded-xl px-3 py-2.5">
-                  <Gift className="w-4 h-4 text-peach" />
-                  <input
-                    placeholder="Gift card or referral code"
-                    className="flex-1 bg-transparent outline-none text-sm placeholder:text-brand-500"
-                  />
-                </div>
-
-                <div className="space-y-1.5 text-sm pt-2">
-                  <div className="flex justify-between text-brand-700">
-                    <span>Subtotal</span><span>{formatINR(subtotal)}</span>
-                  </div>
-                  {discount > 0 && (
-                    <div className="flex justify-between text-brand-600">
-                      <span>You save</span><span className="text-brand-600">- {formatINR(discount)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-brand-700">
-                    <span className="flex items-center gap-1"><Truck className="w-3.5 h-3.5" /> Delivery</span>
-                    <span>{deliveryFee === 0 ? <span className="text-brand-600">Free</span> : formatINR(deliveryFee)}</span>
-                  </div>
-                  <div className="flex justify-between text-brand-950 text-base font-semibold pt-2 border-t border-dashed border-brand-100">
-                    <span>Total</span><span>{formatINR(total)}</span>
-                  </div>
+                <div className="flex justify-between text-sm font-black text-purple-950 pt-2 border-t border-purple-100">
+                  <span>Total Amount</span>
+                  <span className="text-lg">{formatINR(total)}</span>
                 </div>
 
                 <button
                   onClick={() => {
                     close();
-                    if (isAuthenticated) {
-                      router.push("/checkout");
-                    } else {
-                      openLoginModal("/checkout", { type: "checkout" });
-                    }
+                    if (isAuthenticated) router.push("/checkout");
+                    else openLoginModal("/checkout");
                   }}
-                  className="mt-2 w-full flex items-center justify-center gap-2 bg-cta-500 hover:bg-cta-600 text-white py-3.5 rounded-full font-semibold text-sm transition shadow-glow-cta"
+                  className="w-full bg-amber-500 hover:bg-amber-400 text-purple-950 font-black py-3.5 rounded-full text-sm flex items-center justify-center gap-2 shadow-md transition"
                 >
-                  Checkout · {formatINR(total)} <ArrowRight className="w-4 h-4" />
-                </button>
-                <button onClick={close} className="w-full text-center text-xs text-brand-600 hover:text-brand-900 py-2">
-                  Continue shopping
+                  Proceed to Order Fulfillment <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             )}

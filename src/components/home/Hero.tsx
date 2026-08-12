@@ -1,82 +1,60 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ChevronLeft, ChevronRight, Zap, Package, Milk, MapPin, Leaf } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Sparkles, Store, Building, Hotel, CheckCircle2, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useCity } from "@/store/shop";
-import { cities } from "@/data/catalog";
 
 type Slide = {
   eyebrow: string;
   title: string;
   subtitle: string;
-  mode: "instant" | "bulk" | "subscription";
+  tag: string;
   cta: { label: string; href: string };
-  secondary?: { label: string; href: string };
+  secondary: { label: string; href: string };
   image: string;
-  gradient: string;
+  badge: string;
 };
 
 const slides: Slide[] = [
   {
-    eyebrow: "Instant Delivery · 30-40 Minutes",
-    title: "Farm-picked,\nat your door in a flash.",
+    eyebrow: "FlashKart · Fresh. Fast. Reliable.",
+    title: "Fresh Vegetables & Seasonal Fruits,\nDirect From FlashKart",
     subtitle:
-      "Every tomato, potato, onion and spinach bunch travels from our partner farms to your kitchen in under 14 hours — delivered in 30-40 minutes inside Ahmedabad & Gandhinagar.",
-    mode: "instant",
-    cta: { label: "⚡ Order instant", href: "/shop?mode=instant" },
-    secondary: { label: "Check pincode", href: "#pincode" },
+      "Quality-focused fresh produce at better rates, supplied through our growing network of hostels, PGs, hotels and shops.",
+    tag: "Gandhinagar Hub",
+    cta: { label: "Explore Our Products", href: "/shop" },
+    secondary: { label: "Become a Franchise Partner", href: "/franchise" },
     image: "/images/products/tomato.jpg",
-    gradient: "from-cta-700 via-cta-600 to-cta-500",
+    badge: "Direct Farm Fresh Produce",
   },
   {
-    eyebrow: "Bulk Orders · Next-Day Delivery",
-    title: "For restaurants, caterers\nand big societies.",
+    eyebrow: "Institutional & Business Sourcing",
+    title: "Regular Morning Supply for\nHostels, PGs, Hotels & Shops",
     subtitle:
-      "Wholesale pricing on farm-fresh vegetables. Scheduled next-day morning delivery, GST invoices, and a dedicated account manager for orders above ₹5,000.",
-    mode: "bulk",
-    cta: { label: "📦 Plan bulk order", href: "/bulk" },
-    secondary: { label: "Corporate enquiry", href: "/bulk#corporate" },
+      "Carefully sorted, pesticide-checked fresh vegetables and seasonal fruits with dependable morning fulfillment and fair pricing.",
+    tag: "Supply Network",
+    cta: { label: "Where We Supply", href: "/where-we-supply" },
+    secondary: { label: "Contact Leadership", href: "/contact" },
     image: "/images/products/potato.jpg",
-    gradient: "from-brand-900 via-brand-800 to-emerald-700",
+    badge: "Hostels · Hotels · Shops",
   },
   {
-    eyebrow: "Daily Sabzi Subscription",
-    title: "Your daily salad & sabzi,\nfresh every morning.",
+    eyebrow: "Franchise Opportunity in Gujarat",
+    title: "Start Your Own FlashKart\nFresh Produce Shop",
     subtitle:
-      "Fresh cucumbers, carrots, beetroot, and leafy greens delivered automatically every morning before 7 AM. Pause on vacations, skip tomorrow, or modify anytime from the app.",
-    mode: "subscription",
-    cta: { label: "🥗 Start sabzi plan", href: "/subscription" },
-    secondary: { label: "How it works", href: "/subscription#how" },
+      "Partner with an established brand, get reliable daily produce supply, and build your own fresh vegetable and fruit retail business.",
+    tag: "Grow With FlashKart",
+    cta: { label: "Franchise Details", href: "/franchise" },
+    secondary: { label: "Explore Products", href: "/shop" },
     image: "/images/products/cucumber.jpg",
-    gradient: "from-emerald-900 via-emerald-800 to-teal-700",
+    badge: "Franchise Inquiries Open",
   },
 ];
-
-const modeColor: Record<Slide["mode"], string> = {
-  instant: "bg-cta-500 text-white shadow-glow-cta",
-  bulk: "bg-white text-brand-900",
-  subscription: "bg-emerald-500 text-white",
-};
 
 export function Hero() {
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
-  const citySlug = useCity((s) => s.slug);
-  const currentCity = cities.find((c) => c.slug === citySlug) ?? cities[0];
-  const [showDairyModal, setShowDairyModal] = useState(false);
-
-  useEffect(() => {
-    if (!showDairyModal) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setShowDairyModal(false);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [showDairyModal]);
 
   useEffect(() => {
     if (paused) return;
@@ -90,191 +68,145 @@ export function Hero() {
 
   return (
     <section
-      className="relative"
+      className="relative overflow-hidden bg-purple-950 text-white"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <div className="relative h-[560px] md:h-[680px] overflow-hidden">
+      <div className="relative min-h-[580px] md:min-h-[640px] flex items-center">
+        {/* Background Image Carousel with Purple Gradient Overlays */}
         <AnimatePresence mode="popLayout">
           <motion.div
             key={idx}
-            initial={{ opacity: 0, scale: 1.08 }}
+            initial={{ opacity: 0, scale: 1.06 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute inset-0"
+            transition={{ duration: 1.0, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute inset-0 z-0"
           >
-            <Image src={slide.image} alt="" fill priority={idx === 0} sizes="100vw" className="object-cover" />
-            <div className={`absolute inset-0 bg-gradient-to-br ${slide.gradient} opacity-[0.55]`} />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+            <Image
+              src={slide.image}
+              alt="FlashKart Fresh Produce"
+              fill
+              priority={idx === 0}
+              sizes="100vw"
+              className="object-cover object-center opacity-30"
+            />
+            {/* Multi-layered Purple & Amber Atmosphere */}
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-950 via-purple-950/90 to-purple-900/60" />
+            <div className="absolute inset-0 bg-gradient-to-t from-purple-950 via-transparent to-purple-950/40" />
           </motion.div>
         </AnimatePresence>
 
-        {/* Content */}
-        <div className="relative mx-auto max-w-7xl h-full px-5 md:px-8 flex items-center">
-          <div className="max-w-2xl text-white">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.6 }}
+        {/* Hero Content Container */}
+        <div className="relative z-10 mx-auto max-w-7xl px-5 md:px-8 py-16 md:py-24 w-full">
+          <div className="max-w-3xl">
+            {/* Pill Eyebrow */}
+            <motion.div
+              key={`eyebrow-${idx}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-2 bg-amber-400/20 text-amber-300 border border-amber-400/30 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-5"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              {slide.eyebrow}
+            </motion.div>
+
+            {/* Main Headline */}
+            <motion.h1
+              key={`title-${idx}`}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.5 }}
+              className="font-display text-4xl sm:text-5xl md:text-6xl font-extrabold text-white leading-[1.12] tracking-tight whitespace-pre-line text-balance"
+            >
+              {slide.title}
+            </motion.h1>
+
+            {/* Subtitle */}
+            <motion.p
+              key={`sub-${idx}`}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="mt-5 text-base md:text-lg text-purple-100/90 leading-relaxed max-w-2xl"
+            >
+              {slide.subtitle}
+            </motion.p>
+
+            {/* Supporting Trust Badges */}
+            <motion.div
+              key={`badges-${idx}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.25 }}
+              className="mt-6 flex flex-wrap items-center gap-3 text-xs text-purple-200"
+            >
+              <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full border border-white/10">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Best Quality • Best Rate
+              </span>
+              <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full border border-white/10">
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-400" /> Direct Farm Sourcing
+              </span>
+              <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full border border-white/10">
+                <Store className="w-3.5 h-3.5 text-purple-300" /> Hostels, Hotels & Shops
+              </span>
+            </motion.div>
+
+            {/* CTAs */}
+            <motion.div
+              key={`cta-${idx}`}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="mt-8 flex flex-wrap gap-4"
+            >
+              <Link
+                href={slide.cta.href}
+                className="bg-amber-500 hover:bg-amber-400 text-purple-950 font-bold px-7 py-3.5 rounded-full text-sm md:text-base transition shadow-glow-cta flex items-center gap-2 group"
               >
-                <div className="flex items-center gap-2 flex-wrap mb-5">
-                  <span className={`inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full ${modeColor[slide.mode]}`}>
-                    {slide.mode === "instant" && <Zap className="w-3.5 h-3.5"/>}
-                    {slide.mode === "bulk" && <Package className="w-3.5 h-3.5"/>}
-                    {slide.mode === "subscription" && <Leaf className="w-3.5 h-3.5"/>}
-                    {slide.eyebrow}
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 text-xs bg-white/15 backdrop-blur text-white px-3 py-1.5 rounded-full border border-white/20">
-                    <MapPin className="w-3 h-3" /> {currentCity.name}
-                    {currentCity.live ? (
-                      <span className="w-1.5 h-1.5 rounded-full bg-lime-300 pulse-ring" />
-                    ) : (
-                      <span className="text-amber-300">· coming soon</span>
-                    )}
-                  </span>
-                </div>
-                <h1 className="font-display text-[40px] md:text-[68px] leading-[0.98] whitespace-pre-line text-balance">
-                  {slide.title}
-                </h1>
-                <p className="mt-5 text-base md:text-lg text-white/90 max-w-lg leading-relaxed">
-                  {slide.subtitle}
-                </p>
-                <div className="mt-8 flex flex-wrap gap-3">
-                  <Link
-                    href={slide.cta.href}
-                    className="inline-flex items-center gap-2 bg-white text-brand-900 px-6 py-3.5 rounded-full font-semibold text-sm hover:bg-brand-50 transition"
-                  >
-                    {slide.cta.label} <ArrowRight className="w-4 h-4" />
-                  </Link>
-                  {slide.secondary && (
-                    <Link
-                      href={slide.secondary.href}
-                      className="inline-flex items-center gap-2 border border-white/30 hover:border-white/60 text-white px-6 py-3.5 rounded-full font-medium text-sm backdrop-blur"
-                    >
-                      {slide.secondary.label}
-                    </Link>
-                  )}
-                </div>
-              </motion.div>
-            </AnimatePresence>
+                {slide.cta.label}
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+              <Link
+                href={slide.secondary.href}
+                className="bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-3.5 rounded-full text-sm md:text-base border border-white/20 transition backdrop-blur-sm"
+              >
+                {slide.secondary.label}
+              </Link>
+            </motion.div>
           </div>
         </div>
 
-        {/* Controls */}
-        <div className="absolute bottom-6 left-0 right-0 mx-auto max-w-7xl px-5 md:px-8 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        {/* Carousel Navigation Controls */}
+        <div className="absolute bottom-6 right-6 z-20 flex items-center gap-2">
+          <button
+            onClick={prev}
+            aria-label="Previous Slide"
+            className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20 grid place-items-center transition"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <div className="flex gap-1.5 px-2">
             {slides.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setIdx(i)}
                 aria-label={`Go to slide ${i + 1}`}
-                className={`h-1.5 rounded-full transition-all ${
-                  i === idx ? "w-10 bg-white" : "w-5 bg-white/30 hover:bg-white/60"
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === idx ? "w-7 bg-amber-400" : "w-2 bg-white/30"
                 }`}
               />
             ))}
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={prev} aria-label="Previous slide" className="w-10 h-10 grid place-items-center rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur border border-white/10">
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button onClick={next} aria-label="Next slide" className="w-10 h-10 grid place-items-center rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur border border-white/10">
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
+          <button
+            onClick={next}
+            aria-label="Next Slide"
+            className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20 grid place-items-center transition"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
         </div>
       </div>
-
-      {/* Mode cards overlapping hero */}
-      <div className="relative mx-auto max-w-7xl px-5 md:px-8 -mt-16 md:-mt-20 z-10">
-        <div className="grid md:grid-cols-3 gap-4">
-          {[
-            { icon: Zap, mode: "instant", title: "Instant Delivery", desc: "Fresh vegetables in 30–40 mins", bg: "from-cta-500 to-orange-500", cta: "Shop now", href: "/shop?mode=instant", live: "Live in Ahmedabad · Gandhinagar", isModal: false },
-            { icon: Package, mode: "bulk", title: "Bulk Orders", desc: "Next-day for restaurants & caterers", bg: "from-brand-800 to-brand-600", cta: "Plan bulk", href: "/bulk", live: "GST invoices · from ₹5,000", isModal: false },
-            { icon: Milk, mode: "dairy", title: "Dairy Products", desc: "Fresh milk, paneer, curd, butter & more.", bg: "from-emerald-600 to-teal-600", cta: "Coming Soon", href: "#", live: "COMING SOON", isModal: true },
-          ].map((c) => {
-            const cardContent = (
-              <>
-                <div className="flex items-start justify-between mb-8">
-                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur grid place-items-center">
-                    <c.icon className="w-6 h-6" />
-                  </div>
-                  {!c.isModal && <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition" />}
-                </div>
-                <div className="font-display text-2xl leading-tight">{c.title}</div>
-                <div className="text-sm text-white/85 mt-1">{c.desc}</div>
-                <div className="text-[11px] mt-3 text-white/70 uppercase tracking-wider">{c.live}</div>
-              </>
-            );
-
-            if (c.isModal) {
-              return (
-                <button
-                  key={c.mode}
-                  onClick={() => setShowDairyModal(true)}
-                  className={`group relative overflow-hidden rounded-3xl p-5 text-left text-white bg-gradient-to-br ${c.bg} shadow-lift hover:-translate-y-1 hover:scale-[1.02] hover:shadow-2xl transition-all duration-300 focus:outline-none`}
-                >
-                  {cardContent}
-                </button>
-              );
-            }
-
-            return (
-              <Link
-                key={c.mode}
-                href={c.href}
-                className={`group relative overflow-hidden rounded-3xl p-5 text-white bg-gradient-to-br ${c.bg} shadow-lift hover:-translate-y-1 transition-transform`}
-              >
-                {cardContent}
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Dairy Coming Soon Modal */}
-      <AnimatePresence>
-        {showDairyModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-950/60 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0"
-              onClick={() => setShowDairyModal(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative w-full max-w-md overflow-hidden bg-cream-50 border border-brand-100 rounded-3xl p-6 md:p-8 text-center shadow-lift z-10"
-            >
-              <div className="mx-auto w-16 h-16 rounded-2xl bg-brand-100 grid place-items-center text-4xl mb-4">
-                🥛
-              </div>
-              <h3 className="font-display text-2xl text-brand-900 mb-1">
-                Dairy Products
-              </h3>
-              <div className="text-xs font-bold text-cta-600 uppercase tracking-widest mb-3">
-                Coming Soon
-              </div>
-              <p className="text-sm text-brand-700 leading-relaxed mb-6">
-                We&apos;re working hard to bring fresh dairy products to your doorstep. Stay tuned!
-              </p>
-              <button
-                onClick={() => setShowDairyModal(false)}
-                className="w-full bg-brand-900 hover:bg-brand-950 text-white rounded-full py-3 font-semibold text-sm transition"
-              >
-                Close
-              </button>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </section>
   );
 }

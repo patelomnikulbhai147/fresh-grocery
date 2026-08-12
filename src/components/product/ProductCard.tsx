@@ -3,19 +3,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Heart, Plus, Minus, Star, Leaf as LeafIcon, Timer, Zap, Package, Milk } from "lucide-react";
+import { Heart, Plus, Minus, Star, Leaf as LeafIcon, Package, Sparkles, Building, Store } from "lucide-react";
 import type { DeliveryMode, Product } from "@/data/catalog";
 import { cn, formatINR, percentOff } from "@/lib/utils";
 import { useCart, useWishlist, useToasts } from "@/store/shop";
 import { useCustomerAuth } from "@/store/customerAuth";
 import { useAdminStore } from "@/store/adminStore";
 import { isCategoryComingSoon } from "@/lib/categoryHelper";
-
-const MODE_ICON: Record<DeliveryMode, typeof Zap> = {
-  instant: Zap,
-  bulk: Package,
-  subscription: Milk,
-};
 
 export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
   const [weightIdx, setWeightIdx] = useState(0);
@@ -46,19 +40,18 @@ export function ProductCard({ product, priority = false }: { product: Product; p
   );
   const isWished = wishlist.includes(product.id);
   const off = percentOff(mrp, price);
-  const lowStock = product.stock < 15;
 
   return (
     <motion.article
       layout
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.4 }}
-      className="group relative bg-white rounded-3xl border border-brand-100/70 hover:border-brand-200 hover:shadow-lift transition-all duration-300 overflow-hidden flex flex-col"
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.35 }}
+      className="group relative bg-white rounded-3xl border border-purple-100 hover:border-purple-300 hover:shadow-lift transition-all duration-300 overflow-hidden flex flex-col"
     >
       {/* Image Container */}
-      <div className="relative block aspect-[5/4] overflow-hidden bg-gradient-to-br from-brand-50 to-cream-100">
+      <div className="relative block aspect-[5/4] overflow-hidden bg-gradient-to-br from-purple-50 to-amber-50/50">
         <Link href={`/product/${product.slug}`} className="absolute inset-0 z-0">
           <Image
             src={product.image}
@@ -72,18 +65,18 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5 pointer-events-none z-10">
           {off > 0 && (
-            <span className="inline-flex items-center gap-1 bg-cta-500 text-white text-[11px] font-semibold px-2 py-1 rounded-full shadow-glow-cta">
+            <span className="inline-flex items-center gap-1 bg-amber-500 text-purple-950 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full shadow-sm">
               {off}% OFF
             </span>
           )}
           {product.organic && (
-            <span className="inline-flex items-center gap-1 bg-white/90 text-brand-800 text-[11px] font-semibold px-2 py-1 rounded-full border border-brand-100">
-              <LeafIcon className="w-3 h-3" /> Organic
+            <span className="inline-flex items-center gap-1 bg-white/95 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+              <LeafIcon className="w-3 h-3 text-emerald-600" /> Organic
             </span>
           )}
           {product.newArrival && (
-            <span className="inline-flex items-center gap-1 bg-brand-900 text-white text-[11px] font-semibold px-2 py-1 rounded-full">
-              New
+            <span className="inline-flex items-center gap-1 bg-purple-950 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+              Seasonal
             </span>
           )}
         </div>
@@ -101,14 +94,12 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           }}
           aria-label="Wishlist"
           className={cn(
-            "absolute top-3 right-3 w-9 h-9 grid place-items-center rounded-full backdrop-blur transition z-10",
-            isWished ? "bg-rose-500 text-white" : "bg-white/80 hover:bg-white text-brand-700"
+            "absolute top-3 right-3 w-8 h-8 grid place-items-center rounded-full backdrop-blur transition z-10 shadow-sm",
+            isWished ? "bg-rose-500 text-white" : "bg-white/80 hover:bg-white text-purple-800"
           )}
         >
-          <Heart className="w-4 h-4" fill={isWished ? "currentColor" : "none"} />
+          <Heart className="w-3.5 h-3.5" fill={isWished ? "currentColor" : "none"} />
         </button>
-
-
       </div>
 
       {/* Content */}
@@ -116,39 +107,39 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         {/* Mode pills */}
         <div className="flex flex-wrap gap-1">
           {product.modes.map((m) => {
-            const Icon = MODE_ICON[m];
             return (
               <button
                 key={m}
                 onClick={() => setMode(m)}
                 className={cn(
-                  "text-[10px] font-semibold uppercase tracking-wide px-2 py-1 rounded-full border flex items-center gap-1 transition",
+                  "text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full border flex items-center gap-1 transition",
                   m === mode
-                    ? m === "instant" ? "bg-cta-500 text-white border-cta-500"
-                      : m === "bulk" ? "bg-brand-900 text-white border-brand-900"
-                      : "bg-sky-600 text-white border-sky-600"
-                    : "bg-white text-brand-700 border-brand-200 hover:border-brand-400"
+                    ? m === "instant"
+                      ? "bg-purple-900 text-white border-purple-900"
+                      : m === "bulk"
+                      ? "bg-amber-500 text-purple-950 border-amber-500 font-extrabold"
+                      : "bg-emerald-700 text-white border-emerald-700"
+                    : "bg-white text-purple-900 border-purple-200 hover:border-purple-400"
                 )}
               >
-                <Icon className="w-3 h-3" />
-                {m === "instant" ? "30 min" : m === "bulk" ? "Bulk" : "Subscribe"}
+                {m === "instant" ? "Direct" : m === "bulk" ? "Wholesale" : "Supply"}
               </button>
             );
           })}
         </div>
 
-        <div className="text-[11px] uppercase tracking-widest text-brand-500">{product.subcategory}</div>
-        <Link href={`/product/${product.slug}`} className="font-display text-[17px] leading-snug text-brand-950 hover:text-brand-700 line-clamp-2">
+        <div className="text-[10px] uppercase font-bold tracking-widest text-purple-600">{product.subcategory}</div>
+        <Link href={`/product/${product.slug}`} className="font-display text-[16px] leading-snug font-bold text-purple-950 hover:text-amber-600 line-clamp-2">
           {product.name}
         </Link>
 
         <div className="flex items-center gap-2 text-xs">
           <div className="flex items-center gap-0.5 text-amber-500">
-            <Star className="w-3.5 h-3.5" fill="currentColor" />
-            <span className="font-semibold text-brand-800">{product.rating.toFixed(1)}</span>
+            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+            <span className="font-bold text-purple-950">{product.rating.toFixed(1)}</span>
           </div>
-          <span className="text-brand-400">·</span>
-          <span className="text-brand-500">{product.reviews} reviews</span>
+          <span className="text-purple-300">·</span>
+          <span className="text-slate-500 text-[11px]">{product.reviews} reviews</span>
         </div>
 
         {/* Weight selector */}
@@ -159,10 +150,10 @@ export function ProductCard({ product, priority = false }: { product: Product; p
                 key={w.label}
                 onClick={() => setWeightIdx(i)}
                 className={cn(
-                  "text-[11px] font-medium px-2.5 py-1 rounded-full border transition",
+                  "text-[10px] font-semibold px-2 py-0.5 rounded-full border transition",
                   i === weightIdx
-                    ? "bg-brand-900 text-white border-brand-900"
-                    : "bg-white text-brand-700 border-brand-200 hover:border-brand-400"
+                    ? "bg-purple-950 text-white border-purple-950"
+                    : "bg-white text-purple-900 border-purple-100 hover:border-purple-300"
                 )}
               >
                 {w.label}
@@ -172,61 +163,45 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         )}
 
         {/* Price + CTA */}
-        <div className="mt-auto pt-3 flex items-end justify-between gap-2">
+        <div className="mt-auto pt-3 flex items-end justify-between gap-2 border-t border-purple-50">
           <div>
             <div className="flex items-baseline gap-2">
-              <div className="font-display text-xl text-brand-950">{formatINR(price)}</div>
+              <div className="font-display text-lg font-black text-purple-950">{formatINR(price)}</div>
               {mrp > price && (
-                <div className="text-xs text-brand-400 line-through">{formatINR(mrp)}</div>
+                <div className="text-xs text-slate-400 line-through">{formatINR(mrp)}</div>
               )}
             </div>
-            <div className="flex items-center gap-1 text-[11px] text-brand-500 mt-0.5">
-              {mode === "instant" && <><Zap className="w-3 h-3 text-cta-500" /> Delivers in 30–40 min</>}
-              {mode === "bulk" && <><Package className="w-3 h-3" /> MOQ {weight.bulk?.moq} · next day</>}
-              {mode === "subscription" && <><Milk className="w-3 h-3 text-sky-600" /> Every morning</>}
+            <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-0.5 font-medium">
+              {mode === "instant" && <><Sparkles className="w-3 h-3 text-amber-500" /> Direct Farm Fresh</>}
+              {mode === "bulk" && <><Package className="w-3 h-3 text-purple-700" /> MOQ {weight.bulk?.moq} units</>}
+              {mode === "subscription" && <><Building className="w-3 h-3 text-emerald-600" /> Regular Supply</>}
             </div>
           </div>
 
-          {isComingSoon ? (
-            <button
-              disabled
-              className="inline-flex items-center gap-1 text-xs font-bold px-3.5 py-2.5 rounded-full bg-amber-500/10 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 border border-amber-300/60 dark:border-amber-700/50 cursor-not-allowed opacity-90 shadow-sm"
-              title="This category is launching soon"
-            >
-              <span>🚀</span>
-              <span>Coming Soon</span>
-            </button>
-          ) : !inCart ? (
+          {!inCart ? (
             <button
               onClick={() => {
                 add(product, weightIdx, mode);
-                push(`${product.name} added`);
+                push(`${product.name} added to order`);
               }}
-              className={cn(
-                "inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2.5 rounded-full transition-all",
-                mode === "instant"
-                  ? "bg-cta-500 hover:bg-cta-600 text-white shadow-glow-cta"
-                  : mode === "bulk"
-                  ? "bg-brand-900 hover:bg-brand-800 text-white"
-                  : "bg-sky-600 hover:bg-sky-700 text-white"
-              )}
+              className="inline-flex items-center gap-1 text-xs font-bold px-3.5 py-2 rounded-full bg-amber-500 hover:bg-amber-400 text-purple-950 transition-all shadow-sm"
             >
               <Plus className="w-3.5 h-3.5" />
-              {mode === "subscription" ? "Subscribe" : "Add"}
+              <span>Add</span>
             </button>
           ) : (
-            <div className="flex items-center gap-1 bg-brand-900 text-white rounded-full p-0.5">
+            <div className="flex items-center gap-1 bg-purple-950 text-white rounded-full p-0.5">
               <button
                 onClick={() => updateQty(product.id, weight.label, mode, inCart.quantity - 1)}
-                className="w-7 h-7 grid place-items-center rounded-full hover:bg-brand-700"
+                className="w-6 h-6 grid place-items-center rounded-full hover:bg-purple-800"
                 aria-label="Decrease"
               >
                 <Minus className="w-3 h-3" />
               </button>
-              <span className="w-5 text-center text-xs font-semibold">{inCart.quantity}</span>
+              <span className="w-4 text-center text-xs font-bold">{inCart.quantity}</span>
               <button
                 onClick={() => updateQty(product.id, weight.label, mode, inCart.quantity + 1)}
-                className="w-7 h-7 grid place-items-center rounded-full hover:bg-brand-700"
+                className="w-6 h-6 grid place-items-center rounded-full hover:bg-purple-800"
                 aria-label="Increase"
               >
                 <Plus className="w-3 h-3" />

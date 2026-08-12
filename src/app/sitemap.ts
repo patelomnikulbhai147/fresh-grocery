@@ -2,13 +2,15 @@ import type { MetadataRoute } from "next";
 import { products, categories } from "@/data/catalog";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://farmora.vercel.app";
+  const base = "https://flashkart.co";
   const today = new Date().toISOString();
   return [
     { url: base, lastModified: today, changeFrequency: "daily", priority: 1 },
     { url: `${base}/shop`, lastModified: today, changeFrequency: "daily", priority: 0.9 },
-    { url: `${base}/about`, lastModified: today, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${base}/contact`, lastModified: today, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/where-we-supply`, lastModified: today, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${base}/franchise`, lastModified: today, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${base}/about`, lastModified: today, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/contact`, lastModified: today, changeFrequency: "monthly", priority: 0.6 },
     ...categories.map((c) => ({
       url: `${base}/shop?cat=${c.slug}`,
       lastModified: today,

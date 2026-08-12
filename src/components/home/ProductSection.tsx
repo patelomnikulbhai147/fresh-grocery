@@ -26,20 +26,22 @@ export function ProductSection({
       ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
       : "grid-cols-2 md:grid-cols-3";
   return (
-    <section className="py-14 md:py-20">
+    <section className="py-14 md:py-20 bg-white">
       <div className="mx-auto max-w-7xl px-5 md:px-8">
         <div className="flex items-end justify-between mb-8 gap-4">
           <div>
-            <div className="text-xs uppercase tracking-[0.24em] text-brand-600 mb-2">{eyebrow}</div>
-            <h2 className="font-display text-3xl md:text-5xl text-brand-950 text-balance">{title}</h2>
-            {description && <p className="mt-3 text-brand-700 max-w-xl">{description}</p>}
+            <div className="inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.24em] font-bold text-purple-700 mb-2 bg-purple-50 px-3 py-1 rounded-full border border-purple-100">
+              {eyebrow}
+            </div>
+            <h2 className="font-display text-3xl md:text-5xl text-purple-950 text-balance leading-tight">{title}</h2>
+            {description && <p className="mt-2 text-slate-600 max-w-xl text-sm md:text-base">{description}</p>}
           </div>
           {cta && (
             <Link
               href={cta.href}
-              className="hidden md:inline-flex items-center gap-1.5 text-sm font-semibold text-brand-800 hover:text-brand-600 whitespace-nowrap"
+              className="hidden md:inline-flex items-center gap-1.5 text-sm font-bold text-purple-900 hover:text-amber-600 transition whitespace-nowrap group"
             >
-              {cta.label} <ArrowUpRight className="w-4 h-4" />
+              {cta.label} <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </Link>
           )}
         </div>

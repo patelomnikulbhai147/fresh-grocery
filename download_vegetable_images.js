@@ -42,7 +42,7 @@ async function run() {
   const dir = path.join(__dirname, 'public', 'images', 'products');
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
-  console.log("Starting download of 23 authentic Farmora vegetable images...");
+  console.log("Starting download of 23 authentic FlashKart vegetable images...");
   
   if (fs.existsSync(path.join(dir, 'tomato-hybrid.png'))) {
     fs.copyFileSync(path.join(dir, 'tomato-hybrid.png'), path.join(dir, 'tomato.png'));

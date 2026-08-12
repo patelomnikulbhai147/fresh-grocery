@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   const userAgent = req.headers.get("user-agent") ?? "unknown";
 
   // ── Security gate: verify the registration token from the OTP step ──
-  const regToken = req.cookies.get("farmora_reg_token")?.value;
+  const regToken = req.cookies.get("flashkart_reg_token")?.value;
   if (!regToken) {
     return NextResponse.json(
       { error: "Registration session expired. Please verify your OTP again." },
@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    response.cookies.set("farmora_session", token, {
+    response.cookies.set("flashkart_session", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Clear temp registration cookie
-    response.cookies.set("farmora_reg_token", "", {
+    response.cookies.set("flashkart_reg_token", "", {
       httpOnly: true,
       maxAge: 0,
       path: "/",

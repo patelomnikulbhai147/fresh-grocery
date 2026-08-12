@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="favPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7e22ce" />
+      <stop offset="100%" stop-color="#4a044e" />
+    </linearGradient>
+    <linearGradient id="favLightning" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#ea580c" />
+    </linearGradient>
+    <linearGradient id="favGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4ade80" />
+      <stop offset="100%" stop-color="#15803d" />
+    </linearGradient>
+  </defs>
+
+  <!-- Shopping Bag Body -->
+  <path d="M12 22 C12 16 16 12 22 12 L42 12 C48 12 52 16 52 22 L56 54 C56 59 52 62 46 62 L18 62 C12 62 8 59 8 54 Z" fill="url(#favPurple)" />
+  
+  <!-- Bag Handle -->
+  <path d="M22 12 C22 4 42 4 42 12" stroke="#c084fc" stroke-width="4" stroke-linecap="round" fill="none" />
+  
+  <!-- Fresh Leaf & Tomato -->
+  <circle cx="26" cy="24" r="5" fill="#ef4444" />
+  <circle cx="38" cy="23" r="4.5" fill="#f97316" />
+  <path d="M32 20 C32 15 36 17 37 21 C34 22 33 22 32 20 Z" fill="url(#favGreen)" />
+
+  <!-- Lightning Bolt Flash -->
+  <path d="M36 14 L22 34 L32 34 L24 54 L44 28 L33 28 Z" fill="url(#favLightning)" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round" />
+</svg>

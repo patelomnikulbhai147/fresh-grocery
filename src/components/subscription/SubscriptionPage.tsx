@@ -2,17 +2,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { motion } from "framer-motion";
-import {
-  Plus,
-  Minus,
-  PauseCircle,
-  CalendarDays,
-  SkipForward,
-  CheckCircle2,
-  Calendar,
-} from "lucide-react";
-import { subscriptionProducts } from "@/data/catalog";
+import { Plus, Minus, Calendar, CheckCircle2, Sparkles, Building } from "lucide-react";
+import { subscriptionProducts, type Product } from "@/data/catalog";
 import { useCart, useToasts } from "@/store/shop";
 import { formatINR } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -22,44 +13,50 @@ const DAY_OPTIONS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 export function SubscriptionPage() {
   const add = useCart((s) => s.add);
   const push = useToasts((s) => s.push);
+
   return (
     <div>
       <div className="mb-10">
-        <div className="text-xs text-brand-500 mb-2"><a href="/" className="hover:text-brand-700">Home</a> / Dairy Subscription</div>
-        <h1 className="font-display text-4xl md:text-6xl text-brand-950 text-balance">
-          Daily dairy, delivered <span className="italic text-brand-600">before your chai</span>.
+        <div className="text-xs text-purple-600 font-bold mb-2">
+          <a href="/" className="hover:text-purple-800">Home</a> / Regular Kitchen Produce Supply
+        </div>
+        <h1 className="font-display text-4xl md:text-6xl text-purple-950 font-black text-balance">
+          Scheduled daily produce for <span className="italic text-amber-600">hostels & kitchens</span>.
         </h1>
-        <p className="mt-3 text-brand-700 max-w-2xl">
-          Farm-fresh A2 milk, paneer, curd and more — delivered every morning before 7 AM.
-          Pause on vacation, skip tomorrow, increase quantity anytime.
+        <p className="mt-3 text-slate-600 max-w-2xl text-sm md:text-base leading-relaxed">
+          Daily morning supply of fresh vegetables, leafy greens, and seasonal fruits for hostel messes, PG accommodations, and hotel kitchens across Gandhinagar.
         </p>
       </div>
 
       {/* How it works */}
       <div className="grid md:grid-cols-5 gap-3 mb-14">
         {[
-          { step: "01", title: "Subscribe", desc: "Pick your products" },
-          { step: "02", title: "Choose quantity", desc: "250 ml to 2 L" },
-          { step: "03", title: "Pick days", desc: "Daily or alternate" },
-          { step: "04", title: "Auto billing", desc: "Monthly cycle" },
-          { step: "05", title: "Morning delivery", desc: "Before 7 AM" },
+          { step: "01", title: "Select Produce", desc: "Choose staple veggies & fruits" },
+          { step: "02", title: "Set Daily Quantity", desc: "Per kg or crate packs" },
+          { step: "03", title: "Select Days", desc: "Daily or specific days" },
+          { step: "04", title: "Scheduled Delivery", desc: "Before 7:30 AM morning" },
+          { step: "05", title: "Simple Billing", desc: "Weekly / monthly accounts" },
         ].map((s) => (
-          <div key={s.step} className="bg-white rounded-2xl border border-brand-100 p-4">
-            <div className="text-xs font-mono text-cta-500 mb-1">{s.step}</div>
-            <div className="font-display text-lg">{s.title}</div>
-            <div className="text-xs text-brand-600 mt-0.5">{s.desc}</div>
+          <div key={s.step} className="bg-white rounded-2xl border border-purple-100 p-4 shadow-sm">
+            <div className="text-xs font-mono font-bold text-amber-600 mb-1">{s.step}</div>
+            <div className="font-display text-base font-bold text-purple-950">{s.title}</div>
+            <div className="text-[11px] text-slate-500 mt-0.5">{s.desc}</div>
           </div>
         ))}
       </div>
 
       {/* Products */}
-      <h2 className="font-display text-2xl md:text-3xl mb-5">Choose your daily products</h2>
+      <h2 className="font-display text-2xl md:text-3xl font-bold text-purple-950 mb-5">Select Regular Produce Items</h2>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {subscriptionProducts.map((p) => (
-          <SubscriptionProductCard key={p.id} product={p} onAdd={(days) => {
-            add(p, 0, "subscription", { days });
-            push(`${p.name} added to subscription`);
-          }} />
+        {subscriptionProducts.map((p: Product) => (
+          <SubscriptionProductCard
+            key={p.id}
+            product={p}
+            onAdd={(days) => {
+              add(p, 0, "subscription", { days } as any);
+              push(`${p.name} added to scheduled supply`);
+            }}
+          />
         ))}
       </div>
     </div>
@@ -70,7 +67,7 @@ function SubscriptionProductCard({
   product,
   onAdd,
 }: {
-  product: (typeof subscriptionProducts)[number];
+  product: Product;
   onAdd: (days: string[]) => void;
 }) {
   const [qty, setQty] = useState(1);
@@ -84,63 +81,65 @@ function SubscriptionProductCard({
   const monthly = price * qty * Math.max(1, days.length) * 4;
 
   return (
-    <div className="bg-white rounded-3xl border border-brand-100 overflow-hidden">
-      <div className="relative aspect-[4/3] overflow-hidden bg-brand-50">
-        <Image src={product.image} alt={product.name} fill className="object-cover" />
-        <div className="absolute top-3 left-3 bg-sky-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
-          DAILY · {formatINR(price)}/{w.label}
+    <div className="bg-white rounded-3xl border border-purple-100 p-5 flex flex-col justify-between shadow-soft">
+      <div>
+        <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-4 bg-purple-50">
+          <Image src={product.image} alt={product.name} fill className="object-cover" />
+          <div className="absolute top-2.5 left-2.5 bg-purple-950 text-amber-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+            <Building className="w-3 h-3" /> REGULAR SUPPLY
+          </div>
+        </div>
+        <h3 className="font-display text-lg font-bold text-purple-950">{product.name}</h3>
+        <p className="text-xs text-slate-500 mt-0.5">{product.tagline}</p>
+
+        <div className="mt-3 flex items-baseline gap-2">
+          <div className="font-display text-xl font-bold text-purple-950">{formatINR(price)}</div>
+          <div className="text-[11px] text-slate-500">per {w.label}</div>
+        </div>
+
+        {/* Days selector */}
+        <div className="mt-4">
+          <div className="text-[11px] font-bold text-purple-950 mb-1.5 flex items-center gap-1">
+            <Calendar className="w-3 h-3 text-purple-700" /> Supply Days:
+          </div>
+          <div className="flex gap-1">
+            {DAY_OPTIONS.map((d) => {
+              const active = days.includes(d);
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => toggleDay(d)}
+                  className={cn(
+                    "flex-1 py-1 rounded-lg text-[10px] font-bold transition",
+                    active ? "bg-purple-950 text-white" : "bg-purple-50 text-purple-900 hover:bg-purple-100"
+                  )}
+                >
+                  {d[0]}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
-      <div className="p-5">
-        <div className="font-display text-xl">{product.name}</div>
-        <div className="text-sm text-brand-600 mt-1">{product.tagline}</div>
 
-        <div className="mt-4">
-          <div className="text-xs font-semibold text-brand-800 mb-2">Quantity per delivery</div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => setQty(Math.max(1, qty - 1))} className="w-9 h-9 rounded-full bg-brand-50 grid place-items-center hover:bg-brand-100">
-              <Minus className="w-4 h-4" />
-            </button>
-            <div className="flex-1 text-center font-semibold">{qty} × {w.label}</div>
-            <button onClick={() => setQty(qty + 1)} className="w-9 h-9 rounded-full bg-brand-600 text-white grid place-items-center">
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-4">
-          <div className="text-xs font-semibold text-brand-800 mb-2">Delivery days</div>
-          <div className="flex flex-wrap gap-1.5">
-            {DAY_OPTIONS.map((d) => (
-              <button
-                key={d}
-                onClick={() => toggleDay(d)}
-                className={cn(
-                  "px-3 py-1.5 rounded-full text-xs font-semibold border transition",
-                  days.includes(d)
-                    ? "bg-sky-600 text-white border-sky-600"
-                    : "bg-white text-brand-700 border-brand-200 hover:border-brand-400"
-                )}
-              >
-                {d}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-5 pt-4 border-t border-dashed border-brand-100 flex items-center justify-between">
-          <div>
-            <div className="text-xs text-brand-500">Est. monthly</div>
-            <div className="font-display text-xl">{formatINR(monthly)}</div>
-          </div>
-          <button
-            disabled={days.length === 0}
-            onClick={() => onAdd(days)}
-            className="bg-sky-600 hover:bg-sky-700 disabled:bg-brand-300 text-white rounded-full px-5 py-2.5 text-sm font-semibold flex items-center gap-1.5"
-          >
-            <CalendarDays className="w-4 h-4" /> Subscribe
+      <div className="mt-5 pt-3 border-t border-purple-50 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1 bg-purple-50 rounded-full p-0.5 border border-purple-100">
+          <button onClick={() => setQty(Math.max(1, qty - 1))} className="w-6 h-6 grid place-items-center rounded-full hover:bg-purple-200 text-purple-950 font-bold">
+            -
+          </button>
+          <span className="w-5 text-center text-xs font-bold text-purple-950">{qty}</span>
+          <button onClick={() => setQty(qty + 1)} className="w-6 h-6 grid place-items-center rounded-full hover:bg-purple-200 text-purple-950 font-bold">
+            +
           </button>
         </div>
+
+        <button
+          onClick={() => onAdd(days)}
+          className="flex-1 bg-amber-500 hover:bg-amber-400 text-purple-950 font-bold py-2 rounded-full text-xs transition shadow-sm"
+        >
+          Add to Supply Schedule
+        </button>
       </div>
     </div>
   );

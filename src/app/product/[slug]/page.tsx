@@ -13,12 +13,12 @@ type Params = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const p = getProductBySlug(slug);
-  if (!p) return { title: "Product not found" };
+  if (!p) return { title: "Product not found · FlashKart" };
   return {
-    title: `${p.name} — ${formatINR(p.weights[0].price)}`,
+    title: `${p.name} — ${formatINR(p.weights[0].price)} · FlashKart`,
     description: p.tagline + " " + p.description.slice(0, 120),
     openGraph: {
-      title: p.name,
+      title: `${p.name} · FlashKart`,
       description: p.tagline,
       images: [p.image],
     },
@@ -37,9 +37,6 @@ export default async function ProductPage({ params }: Params) {
   const related = products
     .filter((p) => p.category === product.category && p.id !== product.id)
     .slice(0, 4);
-  const similar = products
-    .filter((p) => p.id !== product.id && p.subcategory === product.subcategory)
-    .slice(0, 8);
 
   const schema = {
     "@context": "https://schema.org",
@@ -47,7 +44,7 @@ export default async function ProductPage({ params }: Params) {
     name: product.name,
     image: product.gallery,
     description: product.description,
-    brand: { "@type": "Brand", name: "Farmora" },
+    brand: { "@type": "Brand", name: "FlashKart" },
     offers: {
       "@type": "Offer",
       priceCurrency: "INR",
@@ -62,31 +59,21 @@ export default async function ProductPage({ params }: Params) {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#fafaf9] text-purple-950 flex flex-col">
       <Header />
       <JsonLd data={schema} />
-      <main className="mx-auto max-w-7xl px-5 md:px-8 py-10 md:py-14">
+      <main className="flex-1 mx-auto max-w-7xl w-full px-5 md:px-8 py-10 md:py-14">
         <ProductDetail product={product} />
 
         {related.length > 0 && (
-          <div className="mt-20">
+          <div className="mt-16">
             <ProductSection
-              eyebrow="Related"
-              title={<>More in <span className="italic text-brand-600">{product.subcategory}</span></>}
+              eyebrow="Related Produce"
+              title={<>More from <span className="italic text-amber-600">{product.subcategory}</span>.</>}
               products={related}
-              columns={4}
             />
           </div>
         )}
-
-        <div className="mt-10">
-          <ProductSection
-            eyebrow="You may also like"
-            title={<>Similar products</>}
-            products={similar.slice(0, 4)}
-            columns={4}
-          />
-        </div>
       </main>
       <Footer />
     </div>

@@ -2,177 +2,186 @@ import Link from "next/link";
 import {
   ShieldCheck,
   Leaf,
-  Truck,
-  RotateCcw,
-  CreditCard,
-  Smartphone,
-  AtSign,
-  Hash,
-  MessageCircle,
-  Play,
+  Store,
+  Phone,
+  Mail,
+  MapPin,
+  Building,
+  Sparkles,
+  ArrowRight,
 } from "lucide-react";
-import { NewsletterForm } from "./NewsletterForm";
+import { FlashKartLogo } from "./FlashKartLogo";
 
-const columns = [
-  {
-    title: "Shop",
-    items: [
-      ["Fresh Vegetables", "/shop?cat=vegetables"],
-      ["Fruits", "/shop?cat=fruits"],
-      ["Dairy & Milk", "/shop?cat=dairy"],
-      ["Bakery", "/shop?cat=bakery"],
-      ["Dry Fruits", "/shop?cat=dry-fruits"],
-      ["Cold-Pressed Juices", "/shop?cat=juices"],
-    ],
-  },
-  {
-    title: "Company",
-    items: [
-      ["About Farmora", "/about"],
-      ["Our Farms", "/farms"],
-      ["Sustainability", "/sustainability"],
-      ["Careers", "/careers"],
-      ["Press", "/press"],
-      ["Blog", "/blog"],
-    ],
-  },
-  {
-    title: "Support",
-    items: [
-      ["Help Centre", "/help"],
-      ["Contact Us", "/contact"],
-      ["Shipping Info", "/shipping"],
-      ["Returns & Refunds", "/returns"],
-      ["Track Order", "/track"],
-      ["FAQs", "/faq"],
-    ],
-  },
-  {
-    title: "Policies",
-    items: [
-      ["Privacy Policy", "/privacy"],
-      ["Terms of Service", "/terms"],
-      ["Refund Policy", "/refund"],
-      ["Cookie Policy", "/cookies"],
-    ],
-  },
+const quickLinks = [
+  { label: "Home", href: "/" },
+  { label: "Products", href: "/shop" },
+  { label: "Where We Supply", href: "/where-we-supply" },
+  { label: "Franchise Opportunity", href: "/franchise" },
+  { label: "About Us", href: "/about" },
+  { label: "Contact Us", href: "/contact" },
+];
+
+const categoriesLinks = [
+  { label: "Fresh Vegetables", href: "/shop?cat=vegetables" },
+  { label: "Seasonal Fruits", href: "/shop?cat=fruits" },
+  { label: "Leafy Greens", href: "/shop?cat=leafy-greens" },
+  { label: "Exotic & Salad Veggies", href: "/shop?cat=exotic" },
+  { label: "Certified Organic Produce", href: "/shop?cat=organic" },
+];
+
+const supplySegments = [
+  { label: "Hostels & PGs Supply", href: "/where-we-supply#hostels-pgs" },
+  { label: "Hotels & Kitchens", href: "/where-we-supply#hotels" },
+  { label: "Retail Shops & Marts", href: "/where-we-supply#shops" },
+  { label: "Institutional Inquiries", href: "/contact" },
 ];
 
 export function Footer() {
   return (
-    <footer className="relative bg-brand-950 text-brand-100 overflow-hidden">
+    <footer className="relative bg-purple-950 text-purple-100 overflow-hidden border-t border-purple-900/80">
+      {/* Background Decorative Glow */}
       <div
         aria-hidden
-        className="absolute inset-0 opacity-[0.06] pointer-events-none"
+        className="absolute inset-0 opacity-10 pointer-events-none"
         style={{
           backgroundImage:
-            "radial-gradient(circle at 20% 10%, #fff 0, transparent 40%), radial-gradient(circle at 80% 90%, #fff 0, transparent 45%)",
+            "radial-gradient(circle at 15% 20%, #a855f7 0, transparent 40%), radial-gradient(circle at 85% 80%, #f59e0b 0, transparent 45%)",
         }}
       />
 
-      {/* CTA band */}
-      <div className="relative border-b border-white/10">
-        <div className="mx-auto max-w-7xl px-6 py-12 grid md:grid-cols-2 gap-8 items-center">
+      {/* Top Banner Band */}
+      <div className="relative border-b border-purple-900/60 bg-purple-900/40">
+        <div className="mx-auto max-w-7xl px-6 py-10 grid md:grid-cols-2 gap-8 items-center">
           <div>
-            <h3 className="font-display text-3xl md:text-4xl text-white">
-              Get ₹200 off your first basket
+            <div className="inline-flex items-center gap-2 bg-amber-400/20 text-amber-300 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
+              <Sparkles className="w-3.5 h-3.5" /> Best Quality • Best Rate • Best Service
+            </div>
+            <h3 className="font-display text-2xl md:text-3xl text-white font-bold">
+              Looking for Fresh Produce Supply in Gandhinagar?
             </h3>
-            <p className="text-brand-200 mt-2 max-w-md">
-              Join 250,000+ households who start their week with Farmora. Free delivery on your first order.
+            <p className="text-purple-200 mt-1 text-sm">
+              We supply fresh vegetables and seasonal fruits directly to hostels, PGs, hotels, and shops.
             </p>
           </div>
-          <NewsletterForm />
+          <div className="flex flex-wrap items-center gap-3 md:justify-end">
+            <Link
+              href="/contact"
+              className="bg-amber-500 hover:bg-amber-400 text-purple-950 font-bold px-6 py-3 rounded-full text-xs md:text-sm transition shadow-md flex items-center gap-2"
+            >
+              Get Daily Supply Rates <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/franchise"
+              className="bg-white/10 hover:bg-white/20 text-white font-semibold px-5 py-3 rounded-full text-xs md:text-sm border border-white/20 transition"
+            >
+              Franchise Inquiries
+            </Link>
+          </div>
         </div>
       </div>
 
-      <div className="relative mx-auto max-w-7xl px-6 py-14 grid lg:grid-cols-5 gap-10">
-        {/* Brand */}
-        <div className="lg:col-span-2 space-y-5">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 grid place-items-center">
-              <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2c-3 3-5 6-5 10a5 5 0 0 0 10 0c0-4-2-7-5-10Z"/>
-                <path d="M12 12c-1.5 0-3 .5-4 1.5"/>
-              </svg>
-            </div>
-            <div>
-              <div className="font-display text-2xl text-white">Farmora</div>
-              <div className="text-[10px] uppercase tracking-[0.18em] text-brand-300">Farm · Flora · Fresh</div>
-            </div>
-          </div>
-          <p className="text-brand-200 max-w-sm text-sm leading-relaxed">
-            Farmora is a new kind of grocer — partnering directly with 140+ small farms to bring
-            hand-picked, residue-tested produce to your door, same day.
+      {/* Main Footer Links */}
+      <div className="relative mx-auto max-w-7xl px-6 py-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
+        {/* Brand Information */}
+        <div className="lg:col-span-2 space-y-4">
+          <FlashKartLogo variant="dark" size="lg" showTagline={true} />
+          
+          <p className="text-purple-200 text-sm leading-relaxed max-w-sm">
+            FlashKart is a modern fresh produce brand focused on supplying carefully selected fresh vegetables and seasonal fruits at fair rates directly to hostels, PGs, hotels, and retail shops.
           </p>
 
-          <div className="flex flex-wrap gap-2 text-xs">
-            <span className="inline-flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full"><ShieldCheck className="w-3.5 h-3.5 text-brand-300"/>Residue Tested</span>
-            <span className="inline-flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full"><Leaf className="w-3.5 h-3.5 text-brand-300"/>No Adulterants</span>
-            <span className="inline-flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full"><Truck className="w-3.5 h-3.5 text-brand-300"/>Same-Day Delivery</span>
-            <span className="inline-flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full"><RotateCcw className="w-3.5 h-3.5 text-brand-300"/>Easy Returns</span>
-          </div>
-
-          <div>
-            <div className="text-xs uppercase tracking-wider text-brand-300 mb-3">Download the app</div>
-            <div className="flex flex-wrap gap-3">
-              <a className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl px-4 py-2.5" href="#">
-                <Smartphone className="w-5 h-5" />
-                <div className="leading-tight">
-                  <div className="text-[10px] text-brand-300">Get it on</div>
-                  <div className="text-sm font-medium">Google Play</div>
-                </div>
-              </a>
-              <a className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl px-4 py-2.5" href="#">
-                <Smartphone className="w-5 h-5" />
-                <div className="leading-tight">
-                  <div className="text-[10px] text-brand-300">Download on</div>
-                  <div className="text-sm font-medium">App Store</div>
-                </div>
-              </a>
-            </div>
+          <div className="flex flex-wrap gap-2 text-xs pt-1">
+            <span className="inline-flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full text-purple-200">
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-400" /> Direct Farm Sourcing
+            </span>
+            <span className="inline-flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full text-purple-200">
+              <Leaf className="w-3.5 h-3.5 text-emerald-400" /> Quality Checked
+            </span>
+            <span className="inline-flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full text-purple-200">
+              <Building className="w-3.5 h-3.5 text-purple-300" /> Hostels & Hotels
+            </span>
+            <span className="inline-flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full text-purple-200">
+              <Store className="w-3.5 h-3.5 text-amber-300" /> Shop Franchise
+            </span>
           </div>
         </div>
 
-        {/* Columns */}
-        {columns.map((c) => (
-          <div key={c.title}>
-            <div className="text-sm font-semibold text-white mb-4">{c.title}</div>
-            <ul className="space-y-2.5 text-sm">
-              {c.items.map(([label, href]) => (
-                <li key={href}>
-                  <Link href={href} className="text-brand-200 hover:text-white transition">
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+        {/* Quick Links */}
+        <div>
+          <div className="text-sm font-bold text-white uppercase tracking-wider mb-4">Quick Links</div>
+          <ul className="space-y-2.5 text-xs font-semibold">
+            {quickLinks.map((item) => (
+              <li key={item.href}>
+                <Link href={item.href} className="text-purple-200 hover:text-amber-300 transition">
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Categories */}
+        <div>
+          <div className="text-sm font-bold text-white uppercase tracking-wider mb-4">Fresh Produce</div>
+          <ul className="space-y-2.5 text-xs font-semibold">
+            {categoriesLinks.map((item) => (
+              <li key={item.href}>
+                <Link href={item.href} className="text-purple-200 hover:text-amber-300 transition">
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Direct Contact Details */}
+        <div>
+          <div className="text-sm font-bold text-white uppercase tracking-wider mb-4">Contact FlashKart</div>
+          <ul className="space-y-3 text-xs text-purple-200">
+            <li className="flex items-start gap-2.5">
+              <Phone className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <div>
+                <a href="tel:+916352856495" className="font-bold hover:text-white block">
+                  6352856495
+                </a>
+                <span className="text-[11px] text-purple-300">Kaushik Patel</span>
+              </div>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <Phone className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <div>
+                <a href="tel:+919773271029" className="font-bold hover:text-white block">
+                  9773271029
+                </a>
+                <span className="text-[11px] text-purple-300">Om Patel</span>
+              </div>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <Mail className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <div>
+                <a href="mailto:flashkart.co@gmail.com" className="font-bold hover:text-white break-all">
+                  flashkart.co@gmail.com
+                </a>
+              </div>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <MapPin className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold block">Gandhinagar, Gujarat, India</span>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
 
-      {/* Bottom */}
-      <div className="relative border-t border-white/10">
-        <div className="mx-auto max-w-7xl px-6 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-sm text-brand-300">
-          <div>© {new Date().getFullYear()} Farmora Foods Pvt. Ltd. All rights reserved.</div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-brand-400">We accept</span>
-            {[CreditCard, ShieldCheck].map((Icon, i) => (
-              <div key={i} className="bg-white/5 border border-white/10 rounded-lg w-10 h-7 grid place-items-center">
-                <Icon className="w-4 h-4 text-brand-200" />
-              </div>
-            ))}
-            {["VISA", "MC", "UPI", "AMEX", "RuPay"].map((p) => (
-              <div key={p} className="bg-white/5 border border-white/10 rounded-lg px-2 h-7 grid place-items-center text-[10px] font-bold tracking-wide">
-                {p}
-              </div>
-            ))}
+      {/* Bottom Bar */}
+      <div className="relative border-t border-purple-900/60 bg-purple-950/80">
+        <div className="mx-auto max-w-7xl px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-purple-300">
+          <div>
+            © {new Date().getFullYear()} FlashKart. All rights reserved. • Fresh Vegetables & Seasonal Fruits
           </div>
-          <div className="flex items-center gap-4">
-            {[AtSign, Hash, MessageCircle, Play].map((Icon, i) => (
-              <a key={i} href="#" aria-label="social" className="text-brand-300 hover:text-white transition">
-                <Icon className="w-4.5 h-4.5" />
-              </a>
-            ))}
+          <div className="text-[11px] text-purple-300 font-medium">
+            Gandhinagar, Gujarat • Direct Supply & Franchise Partner Network
           </div>
         </div>
       </div>

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Inter, Fraunces } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { CartDrawer } from "@/components/cart/CartDrawer";
@@ -8,78 +7,93 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { CityNotifyAuto } from "@/components/city/CityModal";
 import { CustomerLoginModal } from "@/components/auth/CustomerLoginModal";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-fraunces",
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
-});
-
 export const metadata: Metadata = {
-  metadataBase: new URL("https://farmora.vercel.app"),
+  metadataBase: new URL("https://flashkart.co"),
   title: {
-    default: "Farmora — Farm Fresh Groceries, Delivered in Hours",
-    template: "%s · Farmora",
+    default: "FlashKart | Fresh Vegetables & Seasonal Fruits",
+    template: "%s · FlashKart",
   },
   description:
-    "Hand-picked fruits, crisp vegetables, farm-fresh dairy and wholesome pantry staples. Farmora delivers premium, pesticide-tested groceries to your doorstep, same day.",
+    "FlashKart provides fresh vegetables and seasonal fruits with a focus on quality, fair pricing and reliable supply for hostels, PGs, hotels and shops.",
   keywords: [
-    "fresh vegetables online",
-    "organic fruits delivery",
-    "farm fresh groceries",
-    "dairy delivery",
-    "healthy food online",
-    "same day grocery delivery",
+    "FlashKart",
+    "fresh vegetables Gandhinagar",
+    "seasonal fruits Gujarat",
+    "hostel vegetable supply",
+    "PG grocery supply",
+    "hotel produce supplier",
+    "fresh produce franchise",
+    "buy fresh vegetables direct",
+    "FlashKart franchise",
   ],
-  authors: [{ name: "Farmora" }],
+  authors: [{ name: "FlashKart" }],
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
   openGraph: {
     type: "website",
     locale: "en_IN",
-    siteName: "Farmora",
-    title: "Farmora — Farm Fresh Groceries, Delivered in Hours",
+    siteName: "FlashKart",
+    title: "FlashKart | Fresh Vegetables & Seasonal Fruits",
     description:
-      "Hand-picked, pesticide-tested produce delivered same-day from partner farms.",
-    images: ["/og-cover.jpg"],
+      "Quality-focused fresh produce at better rates, supplied through our growing network of hostels, PGs, hotels and shops.",
+    images: ["/logo.svg"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Farmora — Farm Fresh Groceries",
-    description: "Premium, same-day grocery delivery from partner farms.",
-    images: ["/og-cover.jpg"],
+    title: "FlashKart — Fresh. Fast. Reliable.",
+    description: "Fresh vegetables and seasonal fruits supplied directly to hostels, PGs, hotels and shops.",
+    images: ["/logo.svg"],
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: "https://farmora.vercel.app" },
+  alternates: { canonical: "https://flashkart.co" },
 };
 
 const organizationSchema = {
   "@context": "https://schema.org",
-  "@type": "GroceryStore",
-  name: "Farmora",
-  url: "https://farmora.vercel.app",
-  logo: "https://farmora.vercel.app/logo.svg",
-  sameAs: [
-    "https://instagram.com/farmora",
-    "https://facebook.com/farmora",
-  ],
-  contactPoint: {
-    "@type": "ContactPoint",
-    telephone: "+91-1800-000-0000",
-    contactType: "customer service",
-    areaServed: "IN",
-    availableLanguage: ["English", "Hindi"],
+  "@type": "Organization",
+  name: "FlashKart",
+  url: "https://flashkart.co",
+  logo: "https://flashkart.co/logo.svg",
+  description: "Fresh vegetables and seasonal fruits supplied directly for hostels, PGs, hotels and shops.",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Gandhinagar",
+    addressRegion: "Gujarat",
+    addressCountry: "IN",
   },
+  contactPoint: [
+    {
+      "@type": "ContactPoint",
+      telephone: "+91-6352856495",
+      contactType: "sales and partnerships",
+      contactOption: "Kaushik Patel",
+      areaServed: "IN",
+    },
+    {
+      "@type": "ContactPoint",
+      telephone: "+91-9773271029",
+      contactType: "operations and franchise",
+      contactOption: "Om Patel",
+      areaServed: "IN",
+    },
+  ],
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
-      <body className="bg-cream-50 text-brand-950 antialiased">
+    <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="bg-[#fafaf9] text-purple-950 antialiased font-sans">
         <JsonLd data={organizationSchema} />
         {children}
         <CartDrawer />

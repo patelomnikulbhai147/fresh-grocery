@@ -20,12 +20,12 @@ export function SecurityRBAC() {
   const pushToast = useToasts((s) => s.push);
 
   const [staff, setStaff] = useState<StaffMember[]>([
-    { id: "stf-1", name: "Super Admin (You)", email: "+91 9773271029", role: "Super Admin", status: "Active", twoFactor: true, lastLogin: "Just Now (Online)" },
-    { id: "stf-2", name: "Vikram Mehta", email: "vikram.ops@farmora.com", role: "Admin", status: "Active", twoFactor: true, lastLogin: "2 hours ago" },
-    { id: "stf-3", name: "Rakesh Godown", email: "inventory@farmora.com", role: "Inventory Manager", status: "Active", twoFactor: false, lastLogin: "Yesterday" },
-    { id: "stf-4", name: "Sneha Marketing", email: "growth@farmora.com", role: "Marketing Manager", status: "Active", twoFactor: true, lastLogin: "3 hours ago" },
-    { id: "stf-5", name: "Amit Support Desk", email: "care@farmora.com", role: "Customer Support", status: "Active", twoFactor: true, lastLogin: "10 mins ago" },
-    { id: "stf-6", name: "Logistics Fleet Hub", email: "fleet@farmora.com", role: "Delivery Manager", status: "Active", twoFactor: false, lastLogin: "4 hours ago" }
+    { id: "stf-1", name: "Super Admin (Om Patel)", email: "+91 9773271029", role: "Super Admin", status: "Active", twoFactor: true, lastLogin: "Just Now (Online)" },
+    { id: "stf-2", name: "Kaushik Patel", email: "+91 6352856495", role: "Admin", status: "Active", twoFactor: true, lastLogin: "10 mins ago" },
+    { id: "stf-3", name: "Rakesh Godown", email: "inventory@flashkart.co", role: "Inventory Manager", status: "Active", twoFactor: false, lastLogin: "Yesterday" },
+    { id: "stf-4", name: "Sneha Marketing", email: "growth@flashkart.co", role: "Marketing Manager", status: "Active", twoFactor: true, lastLogin: "3 hours ago" },
+    { id: "stf-5", name: "Amit Support Desk", email: "flashkart.co@gmail.com", role: "Customer Support", status: "Active", twoFactor: true, lastLogin: "10 mins ago" },
+    { id: "stf-6", name: "Logistics Hub Desk", email: "dispatch@flashkart.co", role: "Delivery Manager", status: "Active", twoFactor: false, lastLogin: "4 hours ago" }
   ]);
 
   const [enforce2FA, setEnforce2FA] = useState(true);

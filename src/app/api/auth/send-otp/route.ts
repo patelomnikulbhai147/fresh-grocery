@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
   // Production: integrate Twilio / MSG91 / Fast2SMS here
   // Development: OTP is printed to server console & returned in response
   console.log(`\n╔══════════════════════════════════════╗`);
-  console.log(`║   FARMORA OTP — DEVELOPMENT MODE     ║`);
+  console.log(`║   FLASHKART OTP — DEVELOPMENT MODE   ║`);
   console.log(`║   Mobile  : +91 ${mobile}             ║`);
   console.log(`║   OTP     : ${otp}                     ║`);
   console.log(`║   Expires : ${OTP_EXPIRY_MINUTES} minutes                  ║`);

@@ -164,7 +164,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                 <h2 className="font-display text-xl font-bold text-brand-950 dark:text-zinc-100 flex items-center gap-2">
                   <BarChart2 className="w-5 h-5 text-brand-600 dark:text-brand-400" /> Platform Performance
                 </h2>
-                <p className="text-xs text-brand-600 dark:text-zinc-400">Visual analytics for Farmora grocery orders and inventory.</p>
+                <p className="text-xs text-brand-600 dark:text-zinc-400">Visual analytics for FlashKart produce orders and supply inventory.</p>
               </div>
               <div className="flex items-center bg-brand-50 dark:bg-zinc-800 p-1 rounded-xl border border-brand-100 dark:border-zinc-700 text-xs font-semibold">
                 <button

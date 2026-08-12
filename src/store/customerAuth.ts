@@ -98,6 +98,6 @@ export const useCustomerAuth = create<CustomerAuthState>()(
       setLoginStep: (step) => set({ loginStep: step }),
       setPendingMobile: (mobile) => set({ pendingMobile: mobile }),
     }),
-    { name: "farmora-customer-auth" }
+    { name: "flashkart-customer-auth" }
   )
 );

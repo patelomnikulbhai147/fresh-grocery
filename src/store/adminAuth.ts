@@ -90,10 +90,10 @@ function simulateHash(str: string): string {
     hash = (hash << 5) - hash + char;
     hash = hash & hash;
   }
-  return "bcrypt_sha256_" + Math.abs(hash).toString(16) + "_farmora_secure";
+  return "bcrypt_sha256_" + Math.abs(hash).toString(16) + "_flashkart_secure";
 }
 
-const DEFAULT_ADMIN_EMAIL = "admin@farmora.com";
+const DEFAULT_ADMIN_EMAIL = "admin@flashkart.co";
 const ADMIN_MOBILE = "9773271029";
 const DEFAULT_ADMIN_PASS_HASH = simulateHash("Admin@12345");
 
@@ -278,6 +278,6 @@ export const useAdminAuth = create<AdminAuthState>()(
 
       resetAttempts: () => set({ loginAttempts: 0, lockoutUntil: null })
     }),
-    { name: "farmora-admin-auth-v1" }
+    { name: "flashkart-admin-auth-v1" }
   )
 );

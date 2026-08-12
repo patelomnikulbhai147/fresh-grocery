@@ -54,7 +54,7 @@ export function AccountShell() {
 
   const firstName = user?.name?.split(" ")[0] || "Guest";
   const initials = user?.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "GU";
-  const isAdmin = user?.mobile === "9773271029" || user?.mobile?.includes("9773271029") || user?.email === "admin@farmora.com";
+  const isAdmin = user?.mobile === "9773271029" || user?.mobile?.includes("9773271029") || user?.email === "admin@flashkart.co";
 
   return (
     <div>
@@ -180,11 +180,11 @@ export function AccountShell() {
                 </div>
                 <h3 className="font-display text-3xl mb-2">Give ₹200, get ₹200</h3>
                 <p className="text-white/80 max-w-md text-sm">
-                  Invite a friend to Farmora. They get ₹200 off their first basket, you get ₹200 credited to your wallet.
+                  Invite a friend to FlashKart. They get ₹200 off their first produce order, you get ₹200 credited to your wallet.
                 </p>
                 <div className="mt-5 flex items-center gap-2 max-w-sm">
-                  <div className="flex-1 bg-white/10 border border-white/15 rounded-full px-4 py-2.5 text-sm font-mono">FARMORA-AARAV24</div>
-                  <button className="bg-white text-brand-900 rounded-full px-4 py-2.5 text-sm font-semibold">Copy</button>
+                  <div className="flex-1 bg-white/10 border border-white/15 rounded-full px-4 py-2.5 text-sm font-mono">FLASH-AARAV24</div>
+                  <button className="bg-white text-purple-950 rounded-full px-4 py-2.5 text-sm font-bold">Copy</button>
                 </div>
               </div>
             </div>
@@ -247,14 +247,14 @@ export function AccountShell() {
           {active === "wallet" && (
             <div className="bg-white rounded-3xl border border-brand-100 p-6 space-y-4">
               <div className="bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl p-6 text-white">
-                <div className="text-xs uppercase tracking-widest opacity-80">Farmora Wallet</div>
-                <div className="font-display text-4xl mt-1">₹420.00</div>
+                <div className="text-xs uppercase tracking-widest opacity-80 font-bold">FlashKart Wallet</div>
+                <div className="font-display text-4xl mt-1 font-black">₹420.00</div>
                 <div className="text-xs opacity-80 mt-1">Expires in 364 days</div>
               </div>
               <h4 className="font-semibold text-sm">Transaction history</h4>
               {[
                 { label: "Referral bonus · Nisha P.", amt: "+₹200", date: "Yesterday", tone: "credit" },
-                { label: "Cashback on order FRM-821990", amt: "+₹70", date: "3 days ago", tone: "credit" },
+                { label: "Cashback on order FLK-821990", amt: "+₹70", date: "3 days ago", tone: "credit" },
                 { label: "Applied at checkout", amt: "-₹150", date: "Last week", tone: "debit" },
               ].map((t, i) => (
                 <div key={i} className="flex items-center justify-between p-3 rounded-xl hover:bg-brand-50">

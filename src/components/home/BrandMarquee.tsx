@@ -1,35 +1,28 @@
-import { Leaf, ShieldCheck, Truck, Star } from "lucide-react";
+import { Leaf, ShieldCheck, Sparkles, Star, Store, Building } from "lucide-react";
 
-const words = [
-  "Farm Fresh · Residue Tested · Same-Day Delivery",
-  "140+ Partner Farms · No Cold Storage · Pesticide Reports Shared",
-  "Rated 4.8/5 by 48,000+ Customers · Loved in 6 Cities",
-  "Subscribe & Save 15% · First Delivery Free",
+const messages = [
+  { icon: Sparkles, text: "FlashKart • Fresh. Fast. Reliable." },
+  { icon: ShieldCheck, text: "Best Quality • Best Rate • Best Service" },
+  { icon: Leaf, text: "Fresh Vegetables & Seasonal Fruits" },
+  { icon: Building, text: "Currently Supplying Hostels, PGs, Hotels & Shops" },
+  { icon: Store, text: "Grow With FlashKart • Franchise Opportunities" },
+  { icon: Star, text: "Buy Fresh • Buy Direct • Gandhinagar, Gujarat" },
 ];
 
 export function BrandMarquee() {
-  const line = [...words, ...words];
+  const repeated = [...messages, ...messages, ...messages];
+
   return (
-    <div className="relative border-y border-brand-100 bg-brand-50/40 overflow-hidden py-4">
+    <div className="relative border-y border-purple-100 bg-purple-50/70 overflow-hidden py-3.5 select-none">
       <div className="flex marquee whitespace-nowrap">
-        {line.map((w, i) => (
+        {repeated.map((m, i) => (
           <div
             key={i}
-            className="inline-flex items-center gap-6 px-8 text-sm text-brand-800 font-medium"
+            className="inline-flex items-center gap-3 px-6 text-xs md:text-sm text-purple-950 font-bold tracking-wide"
           >
-            <span className="inline-flex items-center gap-2">
-              <Leaf className="w-4 h-4 text-brand-600" /> {w.split(" · ")[0]}
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-brand-600" /> {w.split(" · ")[1]}
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <Truck className="w-4 h-4 text-brand-600" /> {w.split(" · ")[2]}
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <Star className="w-4 h-4 text-brand-600" /> {w.split(" · ")[3] ?? words[0].split(" · ")[3]}
-            </span>
-            <span className="text-brand-300">✦</span>
+            <m.icon className="w-4 h-4 text-amber-600 shrink-0" />
+            <span>{m.text}</span>
+            <span className="text-purple-300 ml-3">✦</span>
           </div>
         ))}
       </div>

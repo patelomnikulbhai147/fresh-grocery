@@ -10,83 +10,98 @@ import {
   MapPin,
   CheckCircle2,
   ShieldCheck,
+  Building,
+  Store,
+  Hotel,
 } from "lucide-react";
+import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "About Farmora — Our Story & Our Farms",
+  title: "About FlashKart — Fresh Vegetables & Seasonal Fruits",
   description:
-    "Farmora partners with 140+ small farms to deliver hand-picked, residue-tested produce to your doorstep the same day.",
+    "FlashKart connects regional partner farms directly with hostels, PGs, hotels, and retail shops in Gandhinagar, delivering premium quality produce at better rates.",
 };
 
 const milestones = [
-  { year: "2021", title: "First basket delivered", text: "From three partner farms in Hoskote to 12 households in Indiranagar." },
-  { year: "2022", title: "In-house lab launched", text: "We began residue-testing every batch before dispatch." },
-  { year: "2023", title: "Expanded to 4 cities", text: "Mumbai, Delhi-NCR, Hyderabad joined Bengaluru." },
-  { year: "2024", title: "140+ farm partners", text: "Covering 23 districts and 60+ heirloom varieties." },
-  { year: "2025", title: "Subscription launched", text: "Weekly curated baskets, now serving 250,000+ households." },
+  { year: "2023", title: "FlashKart Inception", text: "Founded with the mission to eliminate middlemen in the vegetable supply chain and deliver fresh produce directly to kitchens." },
+  { year: "2024", title: "Institutional Supply Network", text: "Expanded daily morning vegetable supply to top student hostels and PG accommodations across Gandhinagar." },
+  { year: "2025", title: "Hotel & Kitchen Partnerships", text: "Commenced commercial-grade vegetable and seasonal fruit supply for leading hotels, banquet caterers, and restaurants." },
+  { year: "2026", title: "Franchise Program Launch", text: "Launched the FlashKart shop franchise model to empower local entrepreneurs with branded fresh produce outlets." },
 ];
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#fafaf9] text-purple-950 flex flex-col">
       <Header />
-      <main>
+      <main className="flex-1">
         {/* Hero */}
-        <section className="relative overflow-hidden">
-          <div
-            className="absolute inset-0 bg-cover bg-center opacity-30"
-            style={{
-              backgroundImage:
-                "url(/placeholder.jpg)",
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-br from-brand-950/70 via-brand-900/40 to-transparent" />
-          <div className="relative mx-auto max-w-7xl px-5 md:px-8 py-24 md:py-36 text-white max-w-3xl">
-            <div className="text-xs uppercase tracking-[0.24em] text-brand-200 mb-3">Our Story</div>
-            <h1 className="font-display text-4xl md:text-6xl leading-tight text-balance">
-              A better way to feed the people we love.
+        <section className="relative overflow-hidden bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 text-white py-20 md:py-28">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative mx-auto max-w-7xl px-5 md:px-8 max-w-3xl text-center">
+            <div className="text-xs uppercase font-bold tracking-[0.24em] text-amber-400 mb-3 bg-amber-400/20 inline-block px-3.5 py-1 rounded-full border border-amber-400/30">
+              Our Mission
+            </div>
+            <h1 className="font-display text-4xl md:text-6xl font-extrabold leading-tight text-balance">
+              Fresh Produce. Direct Supply. <span className="text-amber-400">Better Value.</span>
             </h1>
-            <p className="mt-5 text-lg text-white/85 max-w-2xl leading-relaxed">
-              Farmora began in 2021 as a small WhatsApp group of friends asking a simple question:
-              <em> what if groceries were harvested this morning, not three weeks ago?</em>
+            <p className="mt-5 text-base md:text-lg text-purple-100/90 max-w-2xl mx-auto leading-relaxed">
+              FlashKart was founded in Gandhinagar, Gujarat, with a straightforward purpose: to source fresh vegetables and seasonal fruits directly from farmers and supply them at fair, transparent rates to hostels, PGs, hotels, and retail shops.
             </p>
           </div>
         </section>
 
-        {/* Mission */}
+        {/* 3 Core Pillars */}
         <section className="py-16 md:py-24">
           <div className="mx-auto max-w-7xl px-5 md:px-8 grid md:grid-cols-3 gap-8">
             {[
-              { icon: Leaf, title: "Farm-first sourcing", text: "We work directly with 140+ small farms, cutting out the seven layers of middlemen that age produce." },
-              { icon: ShieldCheck, title: "Radical transparency", text: "Every basket ships with a lab report — residue levels, harvest date, and the name of the farmer who grew it." },
-              { icon: Sprout, title: "Same-day freshness", text: "Our cold-chain logistics deliver within 14 hours of harvest. No shortcuts, no cold-storage shortcuts." },
+              {
+                icon: Leaf,
+                title: "Direct Farm Sourcing",
+                text: "We work directly with regional growers in Gujarat, cutting unnecessary wholesale layers and delivering produce within hours of harvest.",
+              },
+              {
+                icon: ShieldCheck,
+                title: "Strict Quality Grading",
+                text: "Every crate is hand-sorted and inspected for freshness, crispness, and minimum prep waste before morning dispatch.",
+              },
+              {
+                icon: Store,
+                title: "Community & Franchise Focus",
+                text: "We supply institutional kitchens and empower shopkeepers through our dedicated FlashKart Franchise program.",
+              },
             ].map((m) => (
-              <div key={m.title} className="bg-white rounded-3xl border border-brand-100 p-8">
-                <div className="w-12 h-12 rounded-2xl bg-brand-50 grid place-items-center text-brand-700 mb-4">
+              <div key={m.title} className="bg-white rounded-3xl border border-purple-100 p-8 shadow-soft">
+                <div className="w-12 h-12 rounded-2xl bg-purple-50 grid place-items-center text-purple-800 mb-4 border border-purple-100">
                   <m.icon className="w-6 h-6" />
                 </div>
-                <h3 className="font-display text-2xl mb-2 text-brand-950">{m.title}</h3>
-                <p className="text-brand-700 text-sm leading-relaxed">{m.text}</p>
+                <h3 className="font-display text-2xl font-bold mb-2 text-purple-950">{m.title}</h3>
+                <p className="text-slate-600 text-sm leading-relaxed">{m.text}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Numbers */}
-        <section className="py-14 md:py-20 bg-brand-950 text-white">
-          <div className="mx-auto max-w-7xl px-5 md:px-8 grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { value: "250K+", label: "Households served", icon: Users },
-              { value: "140+", label: "Partner farms", icon: Sprout },
-              { value: "6", label: "Cities live", icon: MapPin },
-              { value: "4.8★", label: "Average rating", icon: Award },
-            ].map((n) => (
-              <div key={n.label}>
-                <n.icon className="w-6 h-6 text-brand-300 mb-3" />
-                <div className="font-display text-4xl md:text-5xl">{n.value}</div>
-                <div className="text-brand-300 text-sm mt-1">{n.label}</div>
-              </div>
-            ))}
+        {/* Supply Channels */}
+        <section className="py-14 md:py-20 bg-purple-950 text-white">
+          <div className="mx-auto max-w-7xl px-5 md:px-8">
+            <div className="text-center max-w-2xl mx-auto mb-12">
+              <div className="text-xs uppercase font-bold tracking-[0.24em] text-amber-400 mb-2">Our Supply Reach</div>
+              <h2 className="font-display text-3xl md:text-4xl font-extrabold">Who We Supply Daily</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                { label: "Hostels & PGs", count: "30+ Messes", icon: Building, desc: "Daily morning vegetable supply for student hostels & private PGs in Gandhinagar." },
+                { label: "Hotels & Kitchens", count: "15+ Hotels", icon: Hotel, desc: "Chef-graded fresh produce for hotel dining, banquet halls, and restaurant pantries." },
+                { label: "Retail Shops", count: "25+ Stores", icon: Store, desc: "Wholesale crates supplied directly to local grocery & vegetable shops." },
+              ].map((n) => (
+                <div key={n.label} className="bg-white/5 border border-white/10 rounded-3xl p-6 text-center">
+                  <n.icon className="w-8 h-8 text-amber-400 mx-auto mb-3" />
+                  <div className="font-display text-3xl font-extrabold text-white">{n.count}</div>
+                  <div className="text-amber-300 text-sm font-bold mt-1">{n.label}</div>
+                  <p className="text-xs text-purple-200 mt-2 leading-relaxed">{n.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -94,21 +109,21 @@ export default function AboutPage() {
         <section className="py-16 md:py-24">
           <div className="mx-auto max-w-4xl px-5 md:px-8">
             <div className="text-center mb-12">
-              <div className="text-xs uppercase tracking-[0.24em] text-brand-600 mb-2">Our Journey</div>
-              <h2 className="font-display text-3xl md:text-5xl text-brand-950">Five years of small, stubborn wins.</h2>
+              <div className="text-xs uppercase font-bold tracking-[0.24em] text-purple-700 mb-2">Our Journey</div>
+              <h2 className="font-display text-3xl md:text-5xl font-extrabold text-purple-950">Building a Reliable Supply Chain</h2>
             </div>
             <div className="relative">
-              <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-brand-200" />
+              <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-purple-200" />
               {milestones.map((m, i) => (
-                <div key={m.year} className={`relative mb-10 md:mb-14 grid md:grid-cols-2 gap-6 ${i % 2 === 0 ? "" : "md:direction-rtl"}`}>
+                <div key={m.year} className={`relative mb-10 md:mb-14 grid md:grid-cols-2 gap-6`}>
                   <div className={`md:pr-10 ${i % 2 === 1 ? "md:col-start-2" : ""}`}>
-                    <div className="bg-white border border-brand-100 rounded-2xl p-5 ml-10 md:ml-0 shadow-soft">
-                      <div className="text-xs uppercase tracking-widest text-brand-600 mb-1">{m.year}</div>
-                      <div className="font-display text-xl text-brand-950">{m.title}</div>
-                      <p className="text-sm text-brand-700 mt-1">{m.text}</p>
+                    <div className="bg-white border border-purple-100 rounded-3xl p-6 ml-10 md:ml-0 shadow-soft">
+                      <div className="text-xs font-bold uppercase tracking-widest text-amber-600 mb-1">{m.year}</div>
+                      <div className="font-display text-xl font-bold text-purple-950">{m.title}</div>
+                      <p className="text-xs md:text-sm text-slate-600 mt-1 leading-relaxed">{m.text}</p>
                     </div>
                   </div>
-                  <div className="absolute left-4 md:left-1/2 top-4 -translate-x-1/2 w-3 h-3 rounded-full bg-brand-600 ring-4 ring-cream-50" />
+                  <div className="absolute left-4 md:left-1/2 top-4 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-purple-700 ring-4 ring-purple-100" />
                 </div>
               ))}
             </div>
@@ -116,43 +131,50 @@ export default function AboutPage() {
         </section>
 
         {/* Values */}
-        <section className="py-14 md:py-20 bg-white">
+        <section className="py-14 md:py-20 bg-white border-t border-purple-100">
           <div className="mx-auto max-w-7xl px-5 md:px-8">
             <div className="max-w-2xl mb-12">
-              <div className="text-xs uppercase tracking-[0.24em] text-brand-600 mb-2">Our Values</div>
-              <h2 className="font-display text-3xl md:text-5xl text-brand-950">What we won&apos;t compromise on.</h2>
+              <div className="text-xs uppercase font-bold tracking-[0.24em] text-purple-700 mb-2">Our Standards</div>
+              <h2 className="font-display text-3xl md:text-5xl font-extrabold text-purple-950">What FlashKart Stands For</h2>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               {[
-                "No cold-storage shortcuts. Ever.",
-                "Farmers are paid within 48 hours of delivery.",
-                "Lab reports are public — no cherry-picking.",
-                "Packaging is 92% plastic-free and counting.",
-                "Every hire spends a week on a partner farm before onboarding.",
-                "Customers can trace every basket back to the grower.",
+                "100% focus on fresh vegetables and seasonal fruits.",
+                "Zero unnecessary middlemen markups — direct value to kitchens.",
+                "Prompt daily morning deliveries before culinary prep starts.",
+                "Full support for local FlashKart Franchise entrepreneurs.",
+                "Honest, transparent pricing for all partner hostels and hotels.",
+                "Direct contact with founders Kaushik Patel and Om Patel.",
               ].map((v) => (
-                <div key={v} className="flex items-start gap-3 bg-cream-50 rounded-2xl p-5 border border-brand-100">
-                  <CheckCircle2 className="w-5 h-5 text-brand-600 shrink-0 mt-0.5" />
-                  <span className="text-brand-900">{v}</span>
+                <div key={v} className="flex items-start gap-3 bg-purple-50/60 rounded-2xl p-5 border border-purple-100">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                  <span className="text-purple-950 text-sm font-semibold">{v}</span>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="py-16 md:py-20">
+        {/* Bottom CTA */}
+        <section className="py-16 md:py-20 bg-purple-50/40">
           <div className="mx-auto max-w-3xl px-5 md:px-8 text-center">
-            <TrendingUp className="w-10 h-10 mx-auto text-brand-600 mb-4" />
-            <h2 className="font-display text-3xl md:text-5xl text-brand-950 text-balance">
-              We&apos;re just getting started.
+            <TrendingUp className="w-10 h-10 mx-auto text-purple-800 mb-4" />
+            <h2 className="font-display text-3xl md:text-5xl font-extrabold text-purple-950 text-balance">
+              Partner with FlashKart Today
             </h2>
-            <p className="mt-4 text-brand-700 leading-relaxed">
-              By 2028, we aim to reach 1 million households across 25 cities — and make the
-              farm-to-home supply chain the most transparent in India. Join us.
+            <p className="mt-4 text-slate-600 text-sm md:text-base leading-relaxed">
+              Whether you need daily supply for your hostel/hotel kitchen, or want to start your own FlashKart fresh produce shop, we are ready to assist you.
             </p>
             <div className="mt-8 flex gap-3 justify-center flex-wrap">
-              <a href="/shop" className="bg-brand-900 text-white rounded-full px-6 py-3.5 font-semibold text-sm">Start shopping</a>
-              <a href="/careers" className="bg-white border border-brand-200 rounded-full px-6 py-3.5 font-semibold text-sm">Work with us</a>
+              <Link href="/shop" className="bg-purple-950 text-white rounded-full px-6 py-3.5 font-bold text-xs md:text-sm hover:bg-purple-900 transition">
+                Explore Produce
+              </Link>
+              <Link href="/franchise" className="bg-amber-500 text-purple-950 rounded-full px-6 py-3.5 font-bold text-xs md:text-sm hover:bg-amber-400 transition shadow-sm">
+                Franchise Opportunity
+              </Link>
+              <Link href="/contact" className="bg-white border border-purple-200 text-purple-950 rounded-full px-6 py-3.5 font-bold text-xs md:text-sm hover:bg-purple-50 transition">
+                Contact Leadership
+              </Link>
             </div>
           </div>
         </section>

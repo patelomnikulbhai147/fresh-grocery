@@ -3,7 +3,6 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ShopClient } from "@/components/shop/ShopClient";
 import { categories, products } from "@/data/catalog";
-import { getCategoryStatus } from "@/lib/categoryHelper";
 
 export async function generateMetadata({
   params,
@@ -14,30 +13,17 @@ export async function generateMetadata({
   const cat = categories.find((c) => c.slug.toLowerCase() === slug.toLowerCase());
   if (!cat) {
     return {
-      title: "Category Not Found · Farmora",
-      description: "Browse Farmora's full catalog of fresh groceries.",
-    };
-  }
-
-  const status = getCategoryStatus(cat);
-  if (status === "Coming Soon") {
-    return {
-      title: `${cat.name} – Coming Soon | Farmora`,
-      description: `${cat.name} are coming soon to Farmora. Currently delivering premium fresh vegetables with more categories launching soon.`,
-      openGraph: {
-        title: `${cat.name} – Coming Soon | Farmora`,
-        description: `${cat.name} are coming soon to Farmora. Currently delivering premium fresh vegetables with more categories launching soon.`,
-        images: [cat.image],
-      },
+      title: "Category Not Found · FlashKart",
+      description: "Browse FlashKart's full produce catalog.",
     };
   }
 
   return {
-    title: `${cat.name} · Shop Fresh | Farmora`,
-    description: `Order farm-fresh ${cat.name.toLowerCase()} online. Delivered in 30–40 minutes direct from local farms.`,
+    title: `${cat.name} · FlashKart Fresh Produce`,
+    description: `Order farm-fresh ${cat.name.toLowerCase()} direct from FlashKart in Gandhinagar, Gujarat.`,
     openGraph: {
-      title: `${cat.name} · Shop Fresh | Farmora`,
-      description: `Order farm-fresh ${cat.name.toLowerCase()} online. Delivered in 30–40 minutes direct from local farms.`,
+      title: `${cat.name} · FlashKart Fresh Produce`,
+      description: `Order farm-fresh ${cat.name.toLowerCase()} direct from FlashKart in Gandhinagar, Gujarat.`,
       images: [cat.image],
     },
   };
@@ -54,7 +40,7 @@ export default async function CategoryPage({
   const sp = await searchParams;
 
   return (
-    <div className="min-h-screen flex flex-col bg-cream-50 dark:bg-zinc-950">
+    <div className="min-h-screen flex flex-col bg-[#fafaf9] text-purple-950">
       <Header />
       <main className="flex-1 mx-auto max-w-7xl w-full px-5 md:px-8 py-10 md:py-14">
         <ShopClient

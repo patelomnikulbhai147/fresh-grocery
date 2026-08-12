@@ -281,7 +281,7 @@ export function CustomerLoginModal() {
       }
 
       login(data.user);
-      pushToast(`Account created! Welcome to Farmora, ${data.user.name}! 🎉`, "success");
+      pushToast(`Account created! Welcome to FlashKart, ${data.user.name}! 🎉`, "success");
       handlePostLogin();
     } catch {
       setGeneralError("Network error. Please check your connection.");
@@ -344,7 +344,7 @@ export function CustomerLoginModal() {
 
   // ── Header text per step ──
   const headerText: Record<string, string> = {
-    mobile: "Welcome to Farmora",
+    mobile: "Welcome to FlashKart",
     otp: "Verify Your Mobile",
     register: "Almost there! 🎉",
   };

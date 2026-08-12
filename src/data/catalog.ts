@@ -1,4 +1,4 @@
-// Multi-mode product catalog: Instant / Bulk / Subscription
+// FlashKart Product Catalog: Fresh Vegetables & Seasonal Fruits
 
 export type DeliveryMode = "instant" | "bulk" | "subscription";
 
@@ -7,9 +7,9 @@ export type Weight = {
   grams: number;
   price: number;
   mrp: number;
-  // bulk price tier (optional)
+  // bulk price tier
   bulk?: { moq: number; unit: number; discount: number };
-  // subscription recurring price (optional)
+  // recurring / supply rate
   subscription?: number;
 };
 
@@ -38,7 +38,6 @@ export type Product = {
   shelfLife?: string;
   nutrition: { label: string; value: string }[];
   tags: string[];
-  // Which ordering modes are available for this product
   modes: DeliveryMode[];
 };
 
@@ -55,37 +54,29 @@ export type City = {
   slug: string;
   name: string;
   live: boolean;
-  pincode?: string[]; // sample prefixes
+  pincode?: string[];
   eta?: string;
 };
 
-const img = (id: string, w = 900) => {
-  return `/images/avatars/${id}.jpg`;
-};
-// ──────────────────────── Cities ────────────────────────
+// ──────────────────────── Cities / Operational Hubs ────────────────────────
 export const cities: City[] = [
-  { slug: "ahmedabad", name: "Ahmedabad", live: true, pincode: ["3800"], eta: "30-40 min" },
-  { slug: "gandhinagar", name: "Gandhinagar", live: true, pincode: ["3820"], eta: "30-40 min" },
-  { slug: "surat", name: "Surat", live: false },
-  { slug: "vadodara", name: "Vadodara", live: false },
-  { slug: "rajkot", name: "Rajkot", live: false },
-  { slug: "anand", name: "Anand", live: false },
-  { slug: "mehsana", name: "Mehsana", live: false },
+  { slug: "gandhinagar", name: "Gandhinagar (Main Hub)", live: true, pincode: ["3820", "3824"], eta: "Direct Supply" },
+  { slug: "ahmedabad", name: "Ahmedabad", live: true, pincode: ["3800"], eta: "Network Hub" },
+  { slug: "surat", name: "Surat (Franchise Upcoming)", live: false },
+  { slug: "vadodara", name: "Vadodara (Franchise Upcoming)", live: false },
+  { slug: "rajkot", name: "Rajkot (Franchise Upcoming)", live: false },
 ];
 
-// ──────────────────────── Categories ────────────────────────
+// ──────────────────────── Categories (Fresh Vegetables & Seasonal Fruits ONLY) ────────────────────────
 export const categories: Category[] = [
-  { slug: "vegetables", name: "Fresh Vegetables", image: "/images/categories/vegetables.png", count: 23, accent: "from-emerald-200 to-emerald-100", status: "Active" },
-  { slug: "fruits", name: "Fresh Fruits", image: "/images/categories/fruits.png", count: 62, accent: "from-amber-200 to-orange-100", status: "Coming Soon" },
-  { slug: "leafy-greens", name: "Leafy Greens", image: "/images/categories/leafy-greens.png", count: 28, accent: "from-lime-200 to-green-100", status: "Coming Soon" },
-  { slug: "exotic", name: "Exotic Vegetables", image: "/images/categories/exotic.png", count: 19, accent: "from-purple-200 to-fuchsia-100", status: "Coming Soon" },
-  { slug: "organic", name: "Organic Produce", image: "/images/categories/organic.png", count: 41, accent: "from-green-200 to-teal-100", status: "Coming Soon" },
-  { slug: "seasonal", name: "Seasonal Fruits", image: "/images/categories/seasonal.png", count: 23, accent: "from-rose-200 to-pink-100", status: "Coming Soon" },
-  { slug: "dairy", name: "Milk & Dairy", image: "/images/categories/dairy.png", count: 34, accent: "from-sky-200 to-blue-100", status: "Coming Soon" },
-  { slug: "bakery", name: "Bakery", image: "/images/categories/bakery.png", count: 22, accent: "from-yellow-200 to-amber-100", status: "Coming Soon" },
+  { slug: "vegetables", name: "Fresh Vegetables", image: "/images/categories/vegetables.png", count: 24, accent: "from-purple-200 to-amber-100", status: "Active" },
+  { slug: "fruits", name: "Seasonal Fruits", image: "/images/categories/fruits.png", count: 12, accent: "from-amber-200 to-orange-100", status: "Active" },
+  { slug: "leafy-greens", name: "Leafy Greens", image: "/images/categories/leafy-greens.png", count: 8, accent: "from-lime-200 to-green-100", status: "Active" },
+  { slug: "exotic", name: "Exotic & Salad Veggies", image: "/images/categories/exotic.png", count: 7, accent: "from-purple-200 to-fuchsia-100", status: "Active" },
+  { slug: "organic", name: "Certified Organic Produce", image: "/images/categories/organic.png", count: 14, accent: "from-emerald-200 to-teal-100", status: "Active" },
 ];
 
-// ──────────────────────── Product factory ────────────────────────
+// Helper product factory
 const p = (
   id: string,
   name: string,
@@ -105,125 +96,84 @@ const p = (
   subcategory,
   tagline,
   description:
-    "Sourced from trusted partner farms within 120 km of our sorting facility. Hand-graded the morning of dispatch, tested for residues, and cold-chained to your door.",
+    "Directly sourced from trusted regional farms for FlashKart. Hand-sorted at peak freshness to ensure premium quality, high nutrition, and fair pricing for our partner hostels, hotels, shops, and direct buyers.",
   image: image || `/images/products/${id}.jpg`,
   gallery: gallery && gallery.length > 0 ? gallery : [image || `/images/products/${id}.jpg`],
   weights,
-  rating: 4.6,
-  reviews: Math.floor(Math.random() * 300) + 80,
-  stock: Math.floor(Math.random() * 240) + 10,
+  rating: 4.8,
+  reviews: Math.floor(Math.random() * 200) + 110,
+  stock: Math.floor(Math.random() * 300) + 50,
   benefits: [
     "Hand-picked at peak ripeness and freshness",
-    "Residue-tested in our in-house quality lab",
-    "Cold-chain logistics for maximum shelf life & nutrition",
+    "Direct farm sourcing cutting unnecessary middlemen",
+    "Tested for quality, crispness, and optimum shelf-life",
   ],
-  storage: "Refrigerate at 2–4°C in a perforated bag. Best consumed within 3–5 days of delivery.",
-  origin: "Partner Farms, Gujarat",
-  farm: "Shree Hari Organics",
-  harvestDate: "This morning",
-  shelfLife: "5–7 days refrigerated",
+  storage: "Keep in a cool, ventilated area or refrigerate in a perforated bag to maintain natural crispness.",
+  origin: "Regional Farms, Gujarat, India",
+  farm: "FlashKart Direct Partner Farms",
+  harvestDate: "Daily morning dispatch",
+  shelfLife: "4–6 days fresh",
   nutrition: [
-    { label: "Energy", value: "28 kcal" },
-    { label: "Carbs", value: "6 g" },
-    { label: "Fibre", value: "2.1 g" },
-    { label: "Protein", value: "1.2 g" },
+    { label: "Energy", value: "32 kcal" },
+    { label: "Carbs", value: "6.5 g" },
+    { label: "Fibre", value: "2.4 g" },
+    { label: "Protein", value: "1.4 g" },
   ],
-  tags: [subcategory, category],
+  tags: [subcategory, category, "FlashKart Fresh"],
   modes,
   ...meta,
 });
 
-// ──────────────────────── Products ────────────────────────
+// ──────────────────────── Products (Vegetables & Seasonal Fruits) ────────────────────────
 export const products: Product[] = [
-  // ── 23 Phase 1 Vegetables (Active) ──
+  // ── Fresh Vegetables ──
   p(
-    "cucumber",
-    "Fresh English Cucumber / Khira Kakdi",
+    "tomato",
+    "Vine-Ripened Fresh Tomatoes / Tameta",
     "vegetables",
     "Fresh Vegetables",
-    "Crisp, hydrating & farm-fresh",
-    "/images/products/cucumber.jpg",
-    ["/images/products/cucumber.jpg"],
+    "Plump, firm & rich in flavour",
+    "/images/products/tomato.jpg",
+    ["/images/products/tomato.jpg"],
     [
-      { label: "500 g", grams: 500, price: 18, mrp: 22, subscription: 16 },
-      { label: "1 kg", grams: 1000, price: 35, mrp: 44, bulk: { moq: 10, unit: 30, discount: 15 } },
+      { label: "500 g", grams: 500, price: 20, mrp: 25, subscription: 18 },
+      { label: "1 kg", grams: 1000, price: 38, mrp: 48, bulk: { moq: 10, unit: 32, discount: 16 } },
+      { label: "5 kg Crates", grams: 5000, price: 180, mrp: 240, bulk: { moq: 2, unit: 160, discount: 20 } },
     ],
     ["instant", "bulk", "subscription"],
-    { stock: 115, bestSeller: true, organic: true }
+    { stock: 240, bestSeller: true, organic: true }
   ),
   p(
-    "okra",
-    "Tender Green Okra / Bhindi",
+    "potato",
+    "Farm-Fresh Potatoes / Bataka / Aloo",
     "vegetables",
     "Fresh Vegetables",
-    "Hand-graded, crisp & tender pods",
-    "/images/products/okra.jpg",
-    ["/images/products/okra.jpg"],
+    "Premium golden potatoes, versatile & clean",
+    "/images/products/potato.jpg",
+    ["/images/products/potato.jpg"],
     [
-      { label: "500 g", grams: 500, price: 12, mrp: 15, subscription: 11 },
-      { label: "1 kg", grams: 1000, price: 23, mrp: 30, bulk: { moq: 10, unit: 20, discount: 15 } },
+      { label: "1 kg", grams: 1000, price: 22, mrp: 28, subscription: 20 },
+      { label: "2 kg", grams: 2000, price: 42, mrp: 55, bulk: { moq: 10, unit: 38, discount: 15 } },
+      { label: "5 kg Sack", grams: 5000, price: 100, mrp: 135, bulk: { moq: 5, unit: 90, discount: 20 } },
     ],
     ["instant", "bulk", "subscription"],
-    { stock: 64, organic: true }
+    { stock: 320, bestSeller: true }
   ),
   p(
-    "bitter-gourd",
-    "Fresh Karela / Bitter Gourd",
+    "onion",
+    "Red Onions / Dungari / Pyaaz",
     "vegetables",
     "Fresh Vegetables",
-    "Deep green, rich in antioxidants",
-    "/images/products/bitter-gourd.jpg",
-    ["/images/products/bitter-gourd.jpg"],
+    "Firm, dry-cured red onions with pungent aroma",
+    "/images/products/onion.jpg",
+    ["/images/products/onion.jpg"],
     [
-      { label: "500 g", grams: 500, price: 12, mrp: 15, subscription: 11 },
-      { label: "1 kg", grams: 1000, price: 23, mrp: 30 },
-    ],
-    ["instant", "subscription"],
-    { stock: 42, organic: true }
-  ),
-  p(
-    "bottle-gourd",
-    "Fresh Dudhi / Bottle Gourd / Lauki",
-    "vegetables",
-    "Fresh Vegetables",
-    "Tender, naturally sweet & cooling",
-    "/images/products/bottle-gourd.jpg",
-    ["/images/products/bottle-gourd.jpg"],
-    [
-      { label: "1 pc (approx 600g-800g)", grams: 700, price: 16, mrp: 20, subscription: 14 },
-    ],
-    ["instant", "subscription"],
-    { stock: 88, newArrival: true }
-  ),
-  p(
-    "sponge-gourd",
-    "Fresh Galka / Ridge Gourd / Turiya",
-    "vegetables",
-    "Fresh Vegetables",
-    "Soft texture, farm-picked this morning",
-    "/images/products/sponge-gourd.jpg",
-    ["/images/products/sponge-gourd.jpg"],
-    [
-      { label: "500 g", grams: 500, price: 8, mrp: 10, subscription: 7 },
-      { label: "1 kg", grams: 1000, price: 15, mrp: 20 },
-    ],
-    ["instant", "subscription"],
-    { stock: 35 }
-  ),
-  p(
-    "brinjal",
-    "Fresh Ringan / Brinjal / Eggplant",
-    "vegetables",
-    "Fresh Vegetables",
-    "Glossy purple, perfect for bhartha or curry",
-    "/images/products/brinjal.jpg",
-    ["/images/products/brinjal.jpg"],
-    [
-      { label: "500 g", grams: 500, price: 6, mrp: 8, subscription: 5 },
-      { label: "1 kg", grams: 1000, price: 11, mrp: 16, bulk: { moq: 10, unit: 9, discount: 20 } },
+      { label: "1 kg", grams: 1000, price: 26, mrp: 34, subscription: 24 },
+      { label: "2 kg", grams: 2000, price: 50, mrp: 68, bulk: { moq: 10, unit: 45, discount: 15 } },
+      { label: "5 kg Sack", grams: 5000, price: 120, mrp: 165, bulk: { moq: 5, unit: 110, discount: 18 } },
     ],
     ["instant", "bulk", "subscription"],
-    { stock: 95, bestSeller: true }
+    { stock: 280, bestSeller: true }
   ),
   p(
     "carrot",
@@ -234,458 +184,349 @@ export const products: Product[] = [
     "/images/products/carrot.jpg",
     ["/images/products/carrot.jpg"],
     [
-      { label: "500 g", grams: 500, price: 22, mrp: 26, subscription: 20 },
-      { label: "1 kg", grams: 1000, price: 42, mrp: 52, bulk: { moq: 10, unit: 38, discount: 15 } },
+      { label: "500 g", grams: 500, price: 22, mrp: 28, subscription: 20 },
+      { label: "1 kg", grams: 1000, price: 42, mrp: 54, bulk: { moq: 10, unit: 36, discount: 15 } },
     ],
     ["instant", "bulk", "subscription"],
-    { stock: 150, bestSeller: true, organic: true, newArrival: true }
+    { stock: 160, bestSeller: true, organic: true, newArrival: true }
   ),
   p(
-    "beetroot",
-    "Fresh Red Beetroot / Beet",
+    "cucumber",
+    "Fresh English Cucumber / Khira Kakdi",
     "vegetables",
-    "Fresh Vegetables",
-    "Earthy sweetness, high iron & folate",
-    "/images/products/beetroot.jpg",
-    ["/images/products/beetroot.jpg"],
+    "Exotic & Salad Veggies",
+    "Crisp, hydrating & salad-ready",
+    "/images/products/cucumber.jpg",
+    ["/images/products/cucumber.jpg"],
     [
-      { label: "500 g", grams: 500, price: 24, mrp: 28, subscription: 22 },
-      { label: "1 kg", grams: 1000, price: 46, mrp: 56 },
-    ],
-    ["instant", "subscription"],
-    { stock: 75, newArrival: true, organic: true }
-  ),
-  p(
-    "green-chilli",
-    "Spicy Green Chilli / Hari Mirch / Marcha",
-    "vegetables",
-    "Fresh Vegetables",
-    "Fiery heat, hand-sorted dark green pods",
-    "/images/products/green-chilli.jpg",
-    ["/images/products/green-chilli.jpg"],
-    [
-      { label: "100 g", grams: 100, price: 52, mrp: 60, subscription: 48 },
-      { label: "250 g", grams: 250, price: 125, mrp: 150 },
-    ],
-    ["instant", "subscription"],
-    { stock: 28 }
-  ),
-  p(
-    "sweet-corn",
-    "Sweet Corn Cobs / Makai",
-    "vegetables",
-    "Fresh Vegetables",
-    "Juicy, golden kernels bursting with sweetness",
-    "/images/products/sweet-corn.jpg",
-    ["/images/products/sweet-corn.jpg"],
-    [
-      { label: "2 pcs (approx 500g)", grams: 500, price: 15, mrp: 18, subscription: 14 },
-      { label: "4 pcs (approx 1kg)", grams: 1000, price: 28, mrp: 36, bulk: { moq: 10, unit: 25, discount: 15 } },
+      { label: "500 g", grams: 500, price: 18, mrp: 24, subscription: 16 },
+      { label: "1 kg", grams: 1000, price: 35, mrp: 48, bulk: { moq: 10, unit: 30, discount: 15 } },
     ],
     ["instant", "bulk", "subscription"],
-    { stock: 110, bestSeller: true, newArrival: true }
-  ),
-  p(
-    "cabbage",
-    "Fresh Green Cabbage / Kobij",
-    "vegetables",
-    "Fresh Vegetables",
-    "Tightly packed, crisp & sweet heads",
-    "/images/products/cabbage.jpg",
-    ["/images/products/cabbage.jpg"],
-    [
-      { label: "1 head (approx 800g-1kg)", grams: 900, price: 12, mrp: 15, subscription: 11 },
-    ],
-    ["instant", "bulk", "subscription"],
-    { stock: 180, bestSeller: true }
-  ),
-  p(
-    "green-leafy-bhaji",
-    "Green Amaranth Bhaji / Chaulai",
-    "vegetables",
-    "Fresh Vegetables",
-    "Tender leafy greens, nutrient-dense",
-    "/images/products/green-leafy-bhaji.jpg",
-    ["/images/products/green-leafy-bhaji.jpg"],
-    [
-      { label: "1 bunch (approx 250g)", grams: 250, price: 16, mrp: 20, subscription: 14 },
-    ],
-    ["instant", "subscription"],
-    { stock: 45, organic: true }
-  ),
-  p(
-    "spinach",
-    "Baby Spinach Bunch / Palak",
-    "vegetables",
-    "Fresh Vegetables",
-    "Tender green leaves, earthy sweetness",
-    "/images/products/spinach.jpg",
-    ["/images/products/spinach.jpg"],
-    [
-      { label: "1 bunch (approx 250g)", grams: 250, price: 11, mrp: 14, subscription: 10 },
-      { label: "500 g", grams: 500, price: 20, mrp: 28 },
-    ],
-    ["instant", "subscription"],
-    { stock: 85, bestSeller: true, organic: true }
-  ),
-  p(
-    "cluster-beans",
-    "Fresh Cluster Beans / Gawar Fali",
-    "vegetables",
-    "Fresh Vegetables",
-    "Traditional green beans, rich in dietary fiber",
-    "/images/products/cluster-beans.jpg",
-    ["/images/products/cluster-beans.jpg"],
-    [
-      { label: "500 g", grams: 500, price: 55, mrp: 65, subscription: 50 },
-      { label: "1 kg", grams: 1000, price: 105, mrp: 130 },
-    ],
-    ["instant", "subscription"],
-    { stock: 30, newArrival: true }
-  ),
-  p(
-    "potato",
-    "Farm-Fresh Potatoes / Bataka / Aloo",
-    "vegetables",
-    "Fresh Vegetables",
-    "Regular brown potatoes, versatile & clean",
-    "/images/products/potato.jpg",
-    ["/images/products/potato.jpg"],
-    [
-      { label: "1 kg", grams: 1000, price: 11, mrp: 14, subscription: 10 },
-      { label: "2 kg", grams: 2000, price: 21, mrp: 28, bulk: { moq: 10, unit: 19, discount: 15 } },
-      { label: "5 kg", grams: 5000, price: 50, mrp: 70, bulk: { moq: 5, unit: 45, discount: 20 } },
-    ],
-    ["instant", "bulk", "subscription"],
-    { stock: 240, bestSeller: true }
-  ),
-  p(
-    "onion",
-    "Red Onions / Dungari / Pyaaz",
-    "vegetables",
-    "Fresh Vegetables",
-    "Firm, pungent & dry-cured red onions",
-    "/images/products/onion.jpg",
-    ["/images/products/onion.jpg"],
-    [
-      { label: "1 kg", grams: 1000, price: 19, mrp: 23, subscription: 17 },
-      { label: "2 kg", grams: 2000, price: 37, mrp: 46, bulk: { moq: 10, unit: 34, discount: 15 } },
-      { label: "5 kg", grams: 5000, price: 90, mrp: 115, bulk: { moq: 5, unit: 82, discount: 18 } },
-    ],
-    ["instant", "bulk", "subscription"],
-    { stock: 210, bestSeller: true }
-  ),
-  p(
-    "tomato",
-    "Vine-Ripened Tomatoes / Tameta",
-    "vegetables",
-    "Fresh Vegetables",
-    "Plump, sun-blushed & bursting with umami",
-    "/images/products/tomato.jpg",
-    ["/images/products/tomato.jpg"],
-    [
-      { label: "500 g", grams: 500, price: 20, mrp: 25, subscription: 18 },
-      { label: "1 kg", grams: 1000, price: 38, mrp: 50, bulk: { moq: 10, unit: 34, discount: 15 } },
-      { label: "2 kg", grams: 2000, price: 74, mrp: 100, bulk: { moq: 5, unit: 66, discount: 18 } },
-    ],
-    ["instant", "bulk", "subscription"],
-    { stock: 190, bestSeller: true, organic: true }
+    { stock: 140, bestSeller: true, organic: true }
   ),
   p(
     "cauliflower",
     "White Cauliflower / Phool Gobi / Fulevar",
     "vegetables",
     "Fresh Vegetables",
-    "Snow-white florets, tightly packed heads",
+    "Snow-white, compact florets hand-trimmed",
     "/images/products/cauliflower.jpg",
     ["/images/products/cauliflower.jpg"],
     [
-      { label: "1 head (approx 500g-700g)", grams: 600, price: 19, mrp: 24, subscription: 17 },
+      { label: "1 head (approx 600g-800g)", grams: 700, price: 24, mrp: 32, subscription: 22 },
+      { label: "2 heads", grams: 1400, price: 45, mrp: 62, bulk: { moq: 8, unit: 40, discount: 15 } },
     ],
-    ["instant", "subscription"],
-    { stock: 70, organic: true }
+    ["instant", "bulk", "subscription"],
+    { stock: 95, bestSeller: true }
   ),
   p(
-    "green-peas",
-    "Fresh Green Peas / Vatana / Matar",
+    "cabbage",
+    "Fresh Green Cabbage / Kobij",
     "vegetables",
     "Fresh Vegetables",
-    "Sweet, popping green peas in the pod",
-    "/images/products/green-peas.jpg",
-    ["/images/products/green-peas.jpg"],
+    "Tightly layered, crunchy & sweet heads",
+    "/images/products/cabbage.jpg",
+    ["/images/products/cabbage.jpg"],
     [
-      { label: "250 g", grams: 250, price: 110, mrp: 130, subscription: 100 },
-      { label: "500 g", grams: 500, price: 215, mrp: 260 },
+      { label: "1 head (approx 800g-1kg)", grams: 900, price: 18, mrp: 24, subscription: 16 },
+      { label: "5 heads (Bulk)", grams: 4500, price: 80, mrp: 115, bulk: { moq: 4, unit: 72, discount: 18 } },
     ],
-    ["instant", "subscription"],
-    { stock: 38, bestSeller: true, newArrival: true }
-  ),
-  p(
-    "coriander-leaves",
-    "Fresh Coriander Bunch / Dhana / Kothmir",
-    "vegetables",
-    "Fresh Vegetables",
-    "Highly aromatic, freshly harvested green leaves",
-    "/images/products/coriander-leaves.jpg",
-    ["/images/products/coriander-leaves.jpg"],
-    [
-      { label: "100 g", grams: 100, price: 160, mrp: 190, subscription: 150 },
-      { label: "250 g", grams: 250, price: 390, mrp: 475 },
-    ],
-    ["instant", "subscription"],
-    { stock: 18, bestSeller: true, organic: true }
-  ),
-  p(
-    "fenugreek-leaves",
-    "Fresh Fenugreek Leaves / Methi Bhaji",
-    "vegetables",
-    "Fresh Vegetables",
-    "Tender methi leaves, classic slightly bitter aroma",
-    "/images/products/fenugreek-leaves.jpg",
-    ["/images/products/fenugreek-leaves.jpg"],
-    [
-      { label: "1 bunch (approx 200g)", grams: 200, price: 85, mrp: 100, subscription: 78 },
-    ],
-    ["instant", "subscription"],
-    { stock: 25, organic: true }
+    ["instant", "bulk", "subscription"],
+    { stock: 190, bestSeller: true }
   ),
   p(
     "capsicum",
-    "Green Capsicum / Bell Pepper",
+    "Green Bell Pepper / Capsicum / Simla Marcha",
     "vegetables",
     "Fresh Vegetables",
-    "Glossy, crunchy & mild green bell peppers",
+    "Glossy green, thick-walled & aromatic",
     "/images/products/capsicum.jpg",
     ["/images/products/capsicum.jpg"],
     [
-      { label: "250 g", grams: 250, price: 65, mrp: 75, subscription: 60 },
-      { label: "500 g", grams: 500, price: 125, mrp: 150 },
+      { label: "500 g", grams: 500, price: 28, mrp: 36, subscription: 25 },
+      { label: "1 kg", grams: 1000, price: 54, mrp: 70, bulk: { moq: 5, unit: 48, discount: 15 } },
     ],
-    ["instant", "subscription"],
-    { stock: 48, bestSeller: true }
+    ["instant", "bulk", "subscription"],
+    { stock: 110, newArrival: true }
   ),
   p(
-    "picador-chilli",
-    "Bhavnagari Marcha / Picador Salad Chilli",
+    "spinach",
+    "Fresh Baby Spinach Bunch / Palak",
+    "leafy-greens",
+    "Leafy Greens",
+    "Tender green leaves, washed & nutrient-rich",
+    "/images/products/spinach.jpg",
+    ["/images/products/spinach.jpg"],
+    [
+      { label: "1 bunch (approx 250g)", grams: 250, price: 15, mrp: 20, subscription: 13 },
+      { label: "500 g", grams: 500, price: 28, mrp: 38 },
+    ],
+    ["instant", "subscription"],
+    { stock: 120, bestSeller: true, organic: true }
+  ),
+  p(
+    "okra",
+    "Tender Green Okra / Bhindi",
     "vegetables",
     "Fresh Vegetables",
-    "Mild, thick-skinned long chillies perfect for stuffing or frying",
-    "/images/products/picador-chilli.jpg",
-    ["/images/products/picador-chilli.jpg"],
+    "Hand-graded tender pods, no stringiness",
+    "/images/products/okra.jpg",
+    ["/images/products/okra.jpg"],
     [
-      { label: "250 g", grams: 250, price: 45, mrp: 55, subscription: 40 },
-      { label: "500 g", grams: 500, price: 88, mrp: 110 },
+      { label: "500 g", grams: 500, price: 22, mrp: 28, subscription: 20 },
+      { label: "1 kg", grams: 1000, price: 42, mrp: 55, bulk: { moq: 10, unit: 36, discount: 15 } },
+    ],
+    ["instant", "bulk", "subscription"],
+    { stock: 85, organic: true }
+  ),
+  p(
+    "green-chilli",
+    "Spicy Green Chilli / Hari Mirch / Marcha",
+    "vegetables",
+    "Fresh Vegetables",
+    "Pungent, hand-sorted dark green chillies",
+    "/images/products/green-chilli.jpg",
+    ["/images/products/green-chilli.jpg"],
+    [
+      { label: "250 g", grams: 250, price: 18, mrp: 24, subscription: 16 },
+      { label: "500 g", grams: 500, price: 34, mrp: 46 },
     ],
     ["instant", "subscription"],
-    { stock: 22, newArrival: true }
+    { stock: 70 }
+  ),
+  p(
+    "bottle-gourd",
+    "Fresh Dudhi / Bottle Gourd / Lauki",
+    "vegetables",
+    "Fresh Vegetables",
+    "Tender, naturally sweet & cooling",
+    "/images/products/bottle-gourd.jpg",
+    ["/images/products/bottle-gourd.jpg"],
+    [
+      { label: "1 pc (approx 700g)", grams: 700, price: 20, mrp: 26, subscription: 18 },
+    ],
+    ["instant", "subscription"],
+    { stock: 90, newArrival: true }
+  ),
+  p(
+    "bitter-gourd",
+    "Fresh Karela / Bitter Gourd",
+    "vegetables",
+    "Fresh Vegetables",
+    "Deep green, crisp & antioxidant-rich",
+    "/images/products/bitter-gourd.jpg",
+    ["/images/products/bitter-gourd.jpg"],
+    [
+      { label: "500 g", grams: 500, price: 20, mrp: 26, subscription: 18 },
+      { label: "1 kg", grams: 1000, price: 38, mrp: 50 },
+    ],
+    ["instant", "subscription"],
+    { stock: 55, organic: true }
+  ),
+  p(
+    "brinjal",
+    "Fresh Ringan / Brinjal / Eggplant",
+    "vegetables",
+    "Fresh Vegetables",
+    "Glossy purple, ideal for Bhartha or curry",
+    "/images/products/brinjal.jpg",
+    ["/images/products/brinjal.jpg"],
+    [
+      { label: "500 g", grams: 500, price: 18, mrp: 24, subscription: 16 },
+      { label: "1 kg", grams: 1000, price: 34, mrp: 46, bulk: { moq: 10, unit: 28, discount: 18 } },
+    ],
+    ["instant", "bulk", "subscription"],
+    { stock: 105, bestSeller: true }
+  ),
+  p(
+    "sweet-corn",
+    "Sweet Corn Cobs / Makai",
+    "vegetables",
+    "Fresh Vegetables",
+    "Juicy golden kernels bursting with natural sweetness",
+    "/images/products/sweet-corn.jpg",
+    ["/images/products/sweet-corn.jpg"],
+    [
+      { label: "2 pcs (approx 500g)", grams: 500, price: 24, mrp: 30, subscription: 22 },
+      { label: "4 pcs (approx 1kg)", grams: 1000, price: 45, mrp: 58, bulk: { moq: 10, unit: 38, discount: 15 } },
+    ],
+    ["instant", "bulk", "subscription"],
+    { stock: 130, bestSeller: true }
+  ),
+  p(
+    "beetroot",
+    "Fresh Red Beetroot / Beet",
+    "vegetables",
+    "Fresh Vegetables",
+    "Earthy sweetness, rich in natural iron & antioxidants",
+    "/images/products/beetroot.jpg",
+    ["/images/products/beetroot.jpg"],
+    [
+      { label: "500 g", grams: 500, price: 24, mrp: 30, subscription: 22 },
+      { label: "1 kg", grams: 1000, price: 46, mrp: 58 },
+    ],
+    ["instant", "subscription"],
+    { stock: 80, organic: true }
+  ),
+  p(
+    "green-leafy-bhaji",
+    "Green Amaranth Bhaji / Chaulai",
+    "leafy-greens",
+    "Leafy Greens",
+    "Tender local leafy greens, iron-packed",
+    "/images/products/green-leafy-bhaji.jpg",
+    ["/images/products/green-leafy-bhaji.jpg"],
+    [
+      { label: "1 bunch (approx 250g)", grams: 250, price: 16, mrp: 22, subscription: 14 },
+    ],
+    ["instant", "subscription"],
+    { stock: 60, organic: true }
+  ),
+  p(
+    "sponge-gourd",
+    "Fresh Galka / Ridge Gourd / Turiya",
+    "vegetables",
+    "Fresh Vegetables",
+    "Soft texture, farm-picked fresh daily",
+    "/images/products/sponge-gourd.jpg",
+    ["/images/products/sponge-gourd.jpg"],
+    [
+      { label: "500 g", grams: 500, price: 18, mrp: 24, subscription: 16 },
+      { label: "1 kg", grams: 1000, price: 34, mrp: 46 },
+    ],
+    ["instant", "subscription"],
+    { stock: 45 }
   ),
 
-  // ── Future Category Products (Coming Soon - Preserved for Multi-Category Future Readiness) ──
+  // ── Seasonal Fruits ──
   p(
     "alphonso-mango",
-    "Alphonso Mango · Ratnagiri",
-    "seasonal",
-    "Seasonal Fruits",
-    "The king of mangoes, GI-tagged",
-    "/images/products/alphonso-mango.png",
-    ["/images/products/alphonso-mango.png"],
-    [
-      { label: "1 dozen", grams: 2400, price: 649, mrp: 899 },
-      { label: "6 pcs", grams: 1200, price: 349, mrp: 499 },
-    ],
-    ["instant", "bulk"],
-    { stock: 12 }
-  ),
-  p(
-    "banana-robusta",
-    "Robusta Banana",
+    "Seasonal Ratnagiri / Gir Kesar Mangoes",
     "fruits",
-    "Fresh Fruits",
-    "Creamy, naturally sweet & energy-dense",
-    "/images/products/banana-robusta.png",
-    ["/images/products/banana-robusta.png"],
-    [{ label: "6 pcs", grams: 900, price: 48, mrp: 65 }],
-    ["instant", "subscription"],
-    { stock: 120 }
-  ),
-  p(
-    "greek-yogurt",
-    "Greek Yogurt · Unsweetened",
-    "dairy",
-    "Milk & Dairy",
-    "High protein, velvety smooth",
-    "/images/products/greek-yogurt.png",
-    ["/images/products/greek-yogurt.png"],
-    [{ label: "400 g", grams: 400, price: 145, mrp: 180 }],
-    ["instant", "subscription"],
-    { stock: 44 }
-  ),
-  p(
-    "sourdough",
-    "Artisan Sourdough Loaf",
-    "bakery",
-    "Bakery",
-    "36-hour fermented, stone-baked",
-    "/images/products/sourdough.png",
-    ["/images/products/sourdough.png"],
-    [{ label: "450 g", grams: 450, price: 220, mrp: 260 }],
-    ["instant"],
-    { stock: 18 }
-  ),
-  p(
-    "almonds-california",
-    "California Almonds",
-    "dry-fruits",
-    "Dry Fruits",
-    "Crunchy, heart-healthy, premium grade",
-    "/images/products/almonds-california.png",
-    ["/images/products/almonds-california.png"],
-    [{ label: "500 g", grams: 500, price: 545, mrp: 720 }],
-    ["instant", "bulk"],
-    { stock: 90 }
-  ),
-  p(
-    "cold-pressed-orange",
-    "Cold-Pressed Orange Juice",
-    "juices",
-    "Cold Pressed Juices",
-    "100% Nagpur oranges, no added sugar",
-    "/images/products/cold-pressed-orange.png",
-    ["/images/products/cold-pressed-orange.png"],
-    [{ label: "1 L", grams: 1000, price: 199, mrp: 249 }],
-    ["instant"],
-    { stock: 36 }
-  ),
-  p(
-    "makhana-roasted",
-    "Foxnuts · Himalayan Pink Salt",
-    "snacks",
-    "Healthy Snacks",
-    "Guilt-free, protein-rich crunch",
-    "/images/products/makhana-roasted.png",
-    ["/images/products/makhana-roasted.png"],
-    [{ label: "150 g", grams: 150, price: 149, mrp: 199 }],
-    ["instant", "bulk"],
-    { stock: 60 }
-  ),
-  p(
-    "ghee-a2",
-    "A2 Cultured Cow Ghee",
-    "dairy",
-    "Milk & Dairy",
-    "Bilona-churned, single origin",
-    "/images/products/ghee-a2.png",
-    ["/images/products/ghee-a2.png"],
-    [{ label: "500 ml", grams: 500, price: 649, mrp: 799 }],
+    "Seasonal Fruits",
+    "Naturally ripened, fragrant & exceptionally sweet",
+    "/images/categories/fruits.png",
+    ["/images/categories/fruits.png"],
+    [
+      { label: "1 kg (approx 3-4 pcs)", grams: 1000, price: 140, mrp: 180, subscription: 130 },
+      { label: "1 Box (3 kg)", grams: 3000, price: 399, mrp: 520, bulk: { moq: 3, unit: 360, discount: 15 } },
+    ],
     ["instant", "bulk", "subscription"],
-    { stock: 26 }
+    { stock: 75, bestSeller: true, newArrival: true }
   ),
   p(
-    "milk-farm-fresh",
-    "Farm-Fresh Toned Milk",
-    "dairy",
-    "Milk & Dairy",
-    "Delivered every morning, before your chai",
-    "/images/products/milk-farm-fresh.png",
-    ["/images/products/milk-farm-fresh.png"],
-    [{ label: "1 L", grams: 1000, price: 60, mrp: 72 }],
+    "nagpur-orange",
+    "Juicy Nagpur Oranges / Santra",
+    "fruits",
+    "Seasonal Fruits",
+    "Tangy-sweet, vitamin C powerhouse with easy-peel skin",
+    "/images/categories/fruits.png",
+    ["/images/categories/fruits.png"],
+    [
+      { label: "1 kg (approx 5-6 pcs)", grams: 1000, price: 65, mrp: 85, subscription: 60 },
+      { label: "2 kg", grams: 2000, price: 125, mrp: 165, bulk: { moq: 5, unit: 110, discount: 15 } },
+    ],
+    ["instant", "bulk", "subscription"],
+    { stock: 120, bestSeller: true }
+  ),
+  p(
+    "shimla-apple",
+    "Royal Delicious Shimla Apples / Seb",
+    "fruits",
+    "Seasonal Fruits",
+    "Crisp, sweet & hand-graded hill orchard apples",
+    "/images/categories/fruits.png",
+    ["/images/categories/fruits.png"],
+    [
+      { label: "500 g (approx 3 pcs)", grams: 500, price: 85, mrp: 110, subscription: 80 },
+      { label: "1 kg", grams: 1000, price: 160, mrp: 210, bulk: { moq: 5, unit: 145, discount: 15 } },
+    ],
+    ["instant", "bulk", "subscription"],
+    { stock: 110, bestSeller: true, organic: true }
+  ),
+  p(
+    "fresh-banana",
+    "Fresh Robusta Bananas / Kela",
+    "fruits",
+    "Seasonal Fruits",
+    "Naturally sweet, energy-rich table bananas",
+    "/images/categories/fruits.png",
+    ["/images/categories/fruits.png"],
+    [
+      { label: "1 Dozen (12 pcs)", grams: 1200, price: 48, mrp: 60, subscription: 45 },
+      { label: "2 Dozens", grams: 2400, price: 90, mrp: 120, bulk: { moq: 5, unit: 80, discount: 15 } },
+    ],
+    ["instant", "bulk", "subscription"],
+    { stock: 160, bestSeller: true }
+  ),
+  p(
+    "pomegranate",
+    "Ruby Red Pomegranate / Anaar",
+    "fruits",
+    "Seasonal Fruits",
+    "Plump arils full of antioxidants and sweet juice",
+    "/images/categories/fruits.png",
+    ["/images/categories/fruits.png"],
+    [
+      { label: "500 g (approx 2 pcs)", grams: 500, price: 75, mrp: 95, subscription: 70 },
+      { label: "1 kg", grams: 1000, price: 145, mrp: 185, bulk: { moq: 5, unit: 130, discount: 15 } },
+    ],
+    ["instant", "bulk", "subscription"],
+    { stock: 65, newArrival: true }
+  ),
+  p(
+    "sweet-papaya",
+    "Farm-Fresh Semi-Ripe Papaya / Papaiya",
+    "fruits",
+    "Seasonal Fruits",
+    "Rich golden flesh, aiding digestion and gut wellness",
+    "/images/categories/fruits.png",
+    ["/images/categories/fruits.png"],
+    [
+      { label: "1 pc (approx 1kg)", grams: 1000, price: 45, mrp: 60, subscription: 40 },
+    ],
     ["instant", "subscription"],
-    { stock: 200 }
+    { stock: 85 }
   ),
-  p(
-    "basmati-rice",
-    "Aged Basmati Rice · Premium",
-    "essentials",
-    "Cooking Essentials",
-    "1121 steam, aged 24 months",
-    "/images/products/basmati-rice.png",
-    ["/images/products/basmati-rice.png"],
-    [{ label: "5 kg", grams: 5000, price: 820, mrp: 1050 }],
-    ["instant", "bulk"],
-    { stock: 110 }
-  ),
-];
-
-// ──────────────────────── Recipes ────────────────────────
-export const recipes = [
-  {
-    slug: "spinach-corn-curry",
-    title: "Palak Paneer / Spinach Corn Curry",
-    time: "20 min",
-    difficulty: "Easy",
-    serves: 2,
-    image: "/images/products/spinach.jpg",
-    tags: ["High Iron", "Vegetarian"],
-    ingredients: ["Baby Spinach", "Sweet Corn", "Tomatoes", "Green Chilli"],
-    excerpt: "Farm-fresh spinach blanched with sweet corn kernels and tempered with green chillies and cumin.",
-  },
-  {
-    slug: "picador-chilli-fry",
-    title: "Bhavnagari Marcha / Picador Chilli Fry",
-    time: "15 min",
-    difficulty: "Easy",
-    serves: 4,
-    image: "/images/products/picador-chilli.jpg",
-    tags: ["Traditional Snack"],
-    ingredients: ["Picador Chilli", "Gram Flour", "Coriander Leaves", "Spices"],
-    excerpt: "Pan-fried mild green chillies stuffed with seasoned chickpea flour and fresh coriander.",
-  },
-  {
-    slug: "roasted-lauki-sabzi",
-    title: "Roasted Lauki & Dhaniya Sabzi",
-    time: "25 min",
-    difficulty: "Easy",
-    serves: 3,
-    image: "/images/products/bottle-gourd.jpg",
-    tags: ["Low Calorie", "Healthy"],
-    ingredients: ["Bottle Gourd", "Coriander Leaves", "Tomatoes", "Green Chilli"],
-    excerpt: "Tender bottle gourd slow-cooked with fresh green coriander, tomatoes and aromatic spices.",
-  },
-  {
-    slug: "fresh-aloo-sabzi",
-    title: "Gujarati Bataka Poha / Aloo Sabzi",
-    time: "15 min",
-    difficulty: "Easy",
-    serves: 2,
-    image: "/images/products/potato.jpg",
-    tags: ["Comfort Food"],
-    ingredients: ["Potatoes", "Onions", "Green Chilli", "Curry Leaves"],
-    excerpt: "Classic farm-fresh potatoes tempered with mustard seeds, curry leaves and green chillies.",
-  },
 ];
 
 // ──────────────────────── Testimonials ────────────────────────
 export const testimonials = [
   {
-    name: "Ananya Raghavan",
-    location: "Satellite, Ahmedabad",
-    avatar: "/images/avatars/photo-1494790108377-be9c29b29330.jpg",
-    rating: 5,
-    text: "The difference is in the details — stems are crisp, berries aren't bruised, and the delivery window actually arrives on time. Farmora replaced my weekend market run.",
-    verified: true,
-  },
-  {
-    name: "Vikram Desai",
-    location: "Vastrapur, Ahmedabad",
+    name: "Ramesh Sharma",
+    location: "Infocity PG & Hostel Hub, Gandhinagar",
     avatar: "/images/avatars/photo-1507003211169-0a1dd7228f2d.jpg",
     rating: 5,
-    text: "My morning chai gets its milk before I wake up — that subscription is honestly the best ₹54 I spend every month.",
+    text: "FlashKart has solved our daily kitchen procurement completely. Every morning the tomatoes, onions, and greens are fresh, clean, and delivered at unmatched wholesale rates for our 200+ students.",
+    role: "Hostel & Mess Manager",
     verified: true,
   },
   {
-    name: "Priya Nair",
-    location: "Gandhinagar Sector 21",
-    avatar: img("photo-1438761681033-6461ffad8d80", 200),
+    name: "Chef Bhavesh Solanki",
+    location: "Hotel Grand Heritage Kitchen, Gandhinagar",
+    avatar: "/images/avatars/photo-1500648767791-00dcc994a43e.jpg",
     rating: 5,
-    text: "As a chef, I care about sourcing. The residue reports Farmora shares with each order genuinely set them apart from every other app I've tried.",
+    text: "The vegetable grading by FlashKart is top-tier. No bruised produce, zero wastage in our prep line, and direct billing is completely transparent. Their team is extremely reliable.",
+    role: "Executive Hotel Chef",
     verified: true,
   },
   {
-    name: "Arjun Mehta",
-    location: "SG Highway, Ahmedabad",
-    avatar: img("photo-1500648767791-00dcc994a43e", 200),
-    rating: 4,
-    text: "Our office pantry moved to Farmora's bulk plan — invoicing is clean, GST is auto-applied, and the account manager actually answers the phone.",
+    name: "Dharmesh Patel",
+    location: "Sector 21 Retail Mart, Gandhinagar",
+    avatar: "/images/avatars/photo-1494790108377-be9c29b29330.jpg",
+    rating: 5,
+    text: "We stock our shop with FlashKart fresh vegetables and seasonal fruits every morning. Customers notice the crisp quality immediately, and our margins have improved significantly.",
+    role: "Local Retail Shop Owner",
+    verified: true,
+  },
+  {
+    name: "Pooja Varma",
+    location: "Sargasan Resident, Gandhinagar",
+    avatar: "/images/avatars/photo-1438761681033-6461ffad8d80.jpg",
+    rating: 5,
+    text: "We buy directly through the FlashKart network counter near our complex. The freshness of the leafy vegetables and seasonal fruits is vastly better than ordinary mandi stalls.",
+    role: "Direct Customer",
     verified: true,
   },
 ];
@@ -694,47 +535,50 @@ export const testimonials = [
 export const getProductBySlug = (slug: string) => products.find((p) => p.slug === slug);
 export const getProductsByCategory = (cat: string) => products.filter((p) => p.category === cat);
 
-export const activeProducts = products.filter((p) => p.category === "vegetables");
-export const bestSellers = activeProducts.filter((p) => p.bestSeller);
-export const newArrivals = activeProducts.filter((p) => p.newArrival);
-export const organic = activeProducts.filter((p) => p.organic);
-export const subscriptionProducts = activeProducts.filter((p) => p.modes.includes("subscription"));
-export const bulkProducts = activeProducts.filter((p) => p.modes.includes("bulk"));
-export const instantProducts = activeProducts.filter((p) => p.modes.includes("instant"));
+export const activeProducts = products;
+export const bestSellers = products.filter((p) => p.bestSeller);
+export const newArrivals = products.filter((p) => p.newArrival);
+export const organic = products.filter((p) => p.organic);
+export const vegetableProducts = products.filter((p) => p.category === "vegetables" || p.category === "leafy-greens" || p.category === "exotic");
+export const fruitProducts = products.filter((p) => p.category === "fruits");
+export const bulkProducts = products.filter((p) => p.modes.includes("bulk"));
 
-// ──────────────────────── Farmers ────────────────────────
+// ──────────────────────── FlashKart Farmer Network ────────────────────────
 export const farmers = [
   {
     name: "Rameshbhai Patel",
-    farm: "Shree Hari Organics",
-    location: "Sanand, Ahmedabad",
-    since: "2018",
-    image: img("photo-1507003211169-0a1dd7228f2d", 800),
+    farm: "FlashKart Partner Organic Farm",
+    location: "Sanand, Ahmedabad - Gandhinagar Belt",
+    since: "2019",
+    image: "/images/avatars/photo-1507003211169-0a1dd7228f2d.jpg",
     quote:
-      "We switched to natural farming five years ago. Today our tomatoes taste like the ones my grandmother grew — and Farmora delivers them the same day.",
+      "Partnering with FlashKart means our harvest reaches hostels, hotels, and retail shops on the same day without middleman deductions. Fair prices for us and fresh produce for the community.",
     produce: ["Tomatoes", "Okra", "Brinjal"],
-    certification: "India Organic · NPOP",
-  },
-  {
-    name: "Meera Ben",
-    farm: "Amrut Valley Dairy",
-    location: "Kalol, Gandhinagar",
-    since: "2020",
-    image: img("photo-1438761681033-6461ffad8d80", 800),
-    quote:
-      "Our Gir cows graze freely and we bottle the milk within two hours of milking. That's why your morning chai tastes different.",
-    produce: ["A2 Milk", "Curd", "Paneer"],
-    certification: "FSSAI · Goshala Certified",
+    certification: "Natural Farming · Tested",
   },
   {
     name: "Harshad Solanki",
-    farm: "Greenfield Leafy Farms",
+    farm: "Shree Greenfield Hydro & Shade-Net",
     location: "Dehgam, Gandhinagar",
-    since: "2019",
-    image: img("photo-1500648767791-00dcc994a43e", 800),
+    since: "2020",
+    image: "/images/avatars/photo-1500648767791-00dcc994a43e.jpg",
     quote:
-      "I grow 22 varieties of leafy greens in shade-net houses. No pesticides, no shortcuts — and my kids eat the same produce I sell.",
-    produce: ["Spinach", "Methi", "Basil", "Kale"],
-    certification: "PGS Organic",
+      "We supply high-grade spinach, methi, coriander, and crisp cucumbers exclusively for FlashKart's supply network. Quality check happens right at the farm gate.",
+    produce: ["Spinach", "Methi", "Cucumbers", "Coriander"],
+    certification: "Clean Produce · Zero Harmful Sprays",
+  },
+  {
+    name: "Pravinbhai Chaudhary",
+    farm: "Saurashtra Fruit Orchards",
+    location: "Talala / Mahuva Region",
+    since: "2021",
+    image: "/images/avatars/photo-1500648767791-00dcc994a43e.jpg",
+    quote:
+      "Our seasonal Kesar mangoes and fresh citrus are sorted and delivered directly to FlashKart hubs, ensuring maximum sweetness and crisp freshness.",
+    produce: ["Kesar Mangoes", "Citrus", "Papaya"],
+    certification: "GI Registered · Naturally Ripened",
   },
 ];
+
+export const subscriptionProducts = products.filter((p) => p.modes.includes("subscription"));
+

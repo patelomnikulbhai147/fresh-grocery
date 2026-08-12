@@ -91,13 +91,13 @@ export default function AdminLoginPage() {
         {/* Brand Logo & Header */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center gap-2 bg-white/10 dark:bg-zinc-800/80 px-4 py-2 rounded-2xl backdrop-blur-md border border-white/10 hover:border-white/30 transition shadow-lg">
-            <span className="text-2xl">🌿</span>
-            <span className="font-display font-extrabold text-xl tracking-tight bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-              Farmora Enterprise
+            <span className="text-2xl">⚡</span>
+            <span className="font-display font-extrabold text-xl tracking-tight bg-gradient-to-r from-amber-400 to-amber-200 bg-clip-text text-transparent">
+              FlashKart Admin
             </span>
           </Link>
           <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight text-white mt-4">
-            {twoFactorPending ? "Two-Factor Verification" : "Enterprise Admin Portal"}
+            {twoFactorPending ? "Two-Factor Verification" : "FlashKart Admin Portal"}
           </h1>
           <p className="text-xs text-zinc-400">
             {twoFactorPending
@@ -117,7 +117,7 @@ export default function AdminLoginPage() {
                 </div>
                 <div className="text-sm font-bold text-white">Two-Factor Authenticator</div>
                 <div className="text-xs text-zinc-400">
-                  Open your authenticator app (Google Authenticator / Authy) and enter the 6-digit code for <strong>+91 9773271029 / admin@farmora.com</strong>
+                  Open your authenticator app (Google Authenticator / Authy) and enter the 6-digit code for <strong>+91 9773271029 / admin@flashkart.co</strong>
                 </div>
               </div>
 
@@ -167,10 +167,10 @@ export default function AdminLoginPage() {
                   <input
                     type="text"
                     required
-                    placeholder="9773271029 or admin@farmora.com"
+                    placeholder="9773271029 or admin@flashkart.co"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black/30 border border-white/15 focus:border-brand-400 text-xs text-white outline-none transition"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black/30 border border-white/15 focus:border-purple-400 text-xs text-white outline-none transition"
                   />
                 </div>
               </div>
@@ -253,7 +253,7 @@ export default function AdminLoginPage() {
               <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Admin Credentials Reference:
             </div>
             <div className="grid grid-cols-2 gap-2 font-mono text-[11px]">
-              <div className="p-2 rounded bg-white/5 truncate" title="9773271029 or admin@farmora.com">
+              <div className="p-2 rounded bg-white/5 truncate" title="9773271029 or admin@flashkart.co">
                 <span className="text-zinc-400 block text-[9px]">MOBILE / EMAIL:</span>
                 9773271029
               </div>
@@ -270,8 +270,8 @@ export default function AdminLoginPage() {
 
         {/* Footer info */}
         <div className="text-center text-xs text-zinc-400 space-y-2">
-          <div>Protected by Cloudflare Turnstile & Farmora Shield WAF.</div>
-          <Link href="/" className="inline-block text-brand-300 hover:underline">
+          <div>Protected by Cloudflare Turnstile & FlashKart Shield WAF.</div>
+          <Link href="/" className="inline-block text-amber-300 hover:underline">
             ← Return to Storefront Homepage
           </Link>
         </div>
@@ -293,7 +293,7 @@ export default function AdminLoginPage() {
                 <input
                   type="email"
                   required
-                  placeholder="admin@farmora.com"
+                  placeholder="admin@flashkart.co"
                   value={forgotEmail}
                   onChange={(e) => setForgotEmail(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/20 text-xs text-white outline-none"

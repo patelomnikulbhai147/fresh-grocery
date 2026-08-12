@@ -117,13 +117,13 @@ export function GlobalSearchModal({ isOpen, onClose, onSelectModule }: GlobalSea
             {!q ? (
               <div className="text-center py-12 text-brand-700 dark:text-zinc-400 space-y-2">
                 <Search className="w-10 h-10 mx-auto text-brand-300 dark:text-zinc-600" />
-                <p className="text-sm font-medium">Type to search the Farmora database</p>
+                <p className="text-sm font-medium">Type to search the FlashKart database</p>
                 <p className="text-xs text-brand-600 dark:text-zinc-500">Supports SKU, Barcode, Order ID, Invoice Number, Customer Email, and Coupon codes.</p>
               </div>
             ) : !hasResults ? (
               <div className="text-center py-12 text-brand-700 dark:text-zinc-400">
                 <p className="text-sm font-medium">No results found for &quot;{query}&quot;</p>
-                <p className="text-xs text-brand-600 dark:text-zinc-500 mt-1">Try searching by SKU (e.g., FRM-SKU-1000) or Customer Name.</p>
+                <p className="text-xs text-brand-600 dark:text-zinc-500 mt-1">Try searching by SKU (e.g., FLK-SKU-1000) or Customer Name.</p>
               </div>
             ) : (
               <>

@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/checkout", "/account", "/api/"],
     },
-    sitemap: "https://farmora.vercel.app/sitemap.xml",
+    sitemap: "https://flashkart.co/sitemap.xml",
   };
 }

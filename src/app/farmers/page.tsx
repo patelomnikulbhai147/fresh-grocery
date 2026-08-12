@@ -26,8 +26,8 @@ export default function Page() {
               Every basket has a <span className="italic text-cta-300">name behind it</span>.
             </h1>
             <p className="mt-5 text-lg text-white/90 max-w-2xl leading-relaxed">
-              Farmora partners directly with 140+ small farms across Gujarat — no middlemen,
-              no cold-storage shortcuts, no compromise. Meet the people who grow your food.
+              FlashKart partners directly with regional growers across Gujarat — no middlemen,
+              no cold-storage shortcuts, no compromise. Fresh vegetables and seasonal fruits sourced for our partner hostels, hotels, and retail shops.
             </p>
           </div>
         </section>

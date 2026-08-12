@@ -102,8 +102,8 @@ function CampaignModal({ onClose }: { onClose: () => void }) {
 🥕 Vegetables – 25% OFF
 🥬 Leafy Greens – 20% OFF
 
-🛒 Shop: https://farmora.vercel.app
-⏰ Ends at midnight!`}</pre>
+🛒 Shop: https://flashkart.co
+⏰ Fresh produce arrives every morning!`}</pre>
             </div>
 
             <div>

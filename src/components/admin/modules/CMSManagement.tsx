@@ -24,7 +24,7 @@ export function CMSManagement() {
     { id: "cms-3", title: "Flash Deals & 30-Min SLA Strip", type: "Timer Strip", description: "Countdown timer highlighting urgent discounts and rapid delivery promise.", enabled: true, order: 3 },
     { id: "cms-4", title: "Bestselling Grocery Showcase", type: "Product Grid", description: "Top ranking grocery items based on weekly customer purchase volume.", enabled: true, order: 4 },
     { id: "cms-5", title: "Organic Farm Story Banner", type: "Feature Story", description: "Brand storytelling banner highlighting 100% pesticide-free Gujarat farm partners.", enabled: true, order: 5 },
-    { id: "cms-6", title: "Mobile App Download Promo", type: "App Promo", description: "QR code banner prompting users to install the Farmora iOS & Android app.", enabled: true, order: 6 },
+    { id: "cms-6", title: "Mobile App Download Promo", type: "App Promo", description: "QR code banner prompting users to explore the FlashKart Digital Hub.", enabled: true, order: 6 },
     { id: "cms-7", title: "Weekly Newsletter Subscribe Box", type: "Newsletter Box", description: "Email capture input for exclusive coupon drops and recipe guides.", enabled: false, order: 7 }
   ]);
 

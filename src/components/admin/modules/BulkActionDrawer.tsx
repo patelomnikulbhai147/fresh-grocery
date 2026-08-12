@@ -53,7 +53,7 @@ export function BulkActionDrawer({
 
   // Category, Brand, Status, Delivery, Label states
   const [categoryValue, setCategoryValue] = useState(categories[0]?.slug || "vegetables");
-  const [brandValue, setBrandValue] = useState("Farmora Organic");
+  const [brandValue, setBrandValue] = useState("FlashKart Fresh");
   const [statusValue, setStatusValue] = useState<ProductStatus>("Active");
   const [deliveryValue, setDeliveryValue] = useState<DeliveryTimeOption>("30 Min");
   const [labelMode, setLabelMode] = useState<"add" | "remove">("add");

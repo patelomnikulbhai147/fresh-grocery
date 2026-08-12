@@ -178,12 +178,12 @@ export function AdminLayout({ children, activeModule, onSelectModule }: AdminLay
             {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white font-display font-bold text-lg shadow-glow-cta">
-              F
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-700 to-indigo-900 flex items-center justify-center text-amber-400 font-display font-black text-lg shadow-sm">
+              ⚡
             </div>
             <div>
-              <span className="font-display font-bold text-lg md:text-xl tracking-tight text-brand-900 dark:text-zinc-100 flex items-center gap-1.5">
-                Farmora <span className="text-[10px] font-sans font-semibold uppercase tracking-widest px-1.5 py-0.5 rounded bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-300">Admin</span>
+              <span className="font-display font-extrabold text-lg md:text-xl tracking-tight text-purple-950 dark:text-zinc-100 flex items-center gap-1.5">
+                FlashKart <span className="text-[10px] font-sans font-semibold uppercase tracking-widest px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-300">Admin</span>
               </span>
             </div>
           </div>
@@ -373,7 +373,7 @@ export function AdminLayout({ children, activeModule, onSelectModule }: AdminLay
         >
           {/* Mobile Header in Drawer */}
           <div className="h-16 px-6 flex items-center justify-between border-b border-brand-100 dark:border-zinc-800 lg:hidden">
-            <span className="font-display font-bold text-lg text-brand-900 dark:text-zinc-100">Farmora Menu</span>
+            <span className="font-display font-bold text-lg text-purple-950 dark:text-zinc-100">FlashKart Menu</span>
             <button onClick={() => setIsSidebarOpen(false)} className="p-1 text-brand-700 dark:text-zinc-400">
               <X className="w-5 h-5" />
             </button>
@@ -458,7 +458,7 @@ export function AdminLayout({ children, activeModule, onSelectModule }: AdminLay
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-brand-200/50 dark:border-zinc-800">
               <div>
                 <div className="text-xs text-brand-600 dark:text-zinc-500 font-medium flex items-center gap-1.5">
-                  <span>Farmora Admin</span> <ChevronRight className="w-3 h-3" /> <span className="text-brand-900 dark:text-zinc-300 font-semibold">{activeItemLabel}</span>
+                  <span>FlashKart Admin</span> <ChevronRight className="w-3 h-3" /> <span className="text-purple-950 dark:text-zinc-300 font-bold">{activeItemLabel}</span>
                 </div>
                 <h1 className="font-display text-2xl md:text-3xl font-bold text-brand-950 dark:text-zinc-100 mt-0.5">
                   {activeItemLabel}

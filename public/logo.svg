@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" fill="none">
+  <defs>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7e22ce" />
+      <stop offset="100%" stop-color="#4a044e" />
+    </linearGradient>
+    <linearGradient id="lightningGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#ea580c" />
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4ade80" />
+      <stop offset="100%" stop-color="#15803d" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#7e22ce" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Logo Mark Icon -->
+  <g transform="translate(10, 8)" filter="url(#glow)">
+    <!-- Shopping Bag Body -->
+    <path d="M12 24 C12 18 16 14 22 14 L46 14 C52 14 56 18 56 24 L62 56 C62 61 58 64 52 64 L16 64 C10 64 6 61 6 56 Z" fill="url(#purpleGrad)" />
+    
+    <!-- Bag Handle -->
+    <path d="M24 14 C24 6 44 6 44 14" stroke="#c084fc" stroke-width="4" stroke-linecap="round" fill="none" />
+    
+    <!-- Shopping Cart Grid Outline inside Bag -->
+    <path d="M18 36 L48 36 M20 44 L46 44 M26 36 L24 50 M40 36 L42 50" stroke="#f3e8ff" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+    
+    <!-- Fresh Veggies & Fruits inside Top of Cart/Bag -->
+    <!-- Tomato / Apple -->
+    <circle cx="27" cy="28" r="6" fill="#ef4444" />
+    <path d="M27 22 Q29 20 31 22" stroke="#22c55e" stroke-width="2" stroke-linecap="round"/>
+    
+    <!-- Carrot / Orange -->
+    <circle cx="41" cy="27" r="5.5" fill="#f97316" />
+    
+    <!-- Fresh Leaf / Greenery -->
+    <path d="M33 22 C33 16 38 18 39 23 C36 24 34 24 33 22 Z" fill="url(#greenGrad)" />
+
+    <!-- Lightning Flash Symbol -->
+    <path d="M38 14 L22 36 L33 36 L24 58 L48 30 L35 30 Z" fill="url(#lightningGrad)" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round" />
+  </g>
+
+  <!-- Typography: FlashKart -->
+  <g transform="translate(86, 48)">
+    <text font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="34" letter-spacing="-0.5">
+      <tspan fill="#3b0764">Flash</tspan>
+      <tspan fill="#ea580c">Kart</tspan>
+    </text>
+    <text y="18" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="9" letter-spacing="2.8" fill="#15803d">
+      FRESH • FAST • RELIABLE
+    </text>
+  </g>
+</svg>

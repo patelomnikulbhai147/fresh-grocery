@@ -21,7 +21,7 @@ export function BrandManagement() {
   const pushToast = useToasts((s) => s.push);
 
   const [brands, setBrands] = useState<BrandItem[]>([
-    { id: "br-1", name: "Farmora Organic", logo: "🌿", description: "100% pesticide-free fresh farm produce from Gujarat.", status: "Active", featured: true },
+    { id: "br-1", name: "FlashKart Fresh", logo: "🌿", description: "100% pesticide-free fresh farm produce from Gujarat.", status: "Active", featured: true },
     { id: "br-2", name: "Amul", logo: "🧈", description: "The Taste of India — Fresh milk, butter, cheese and dairy.", status: "Active", featured: true },
     { id: "br-3", name: "Tata Sampann", logo: "🌾", description: "Unpolished dal, spices, and besan with natural oils intact.", status: "Active", featured: true },
     { id: "br-4", name: "Britannia", logo: "🍞", description: "Fresh breads, wholesome biscuits and cakes.", status: "Active", featured: false },
@@ -196,7 +196,7 @@ export function BrandManagement() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Farmora Organic"
+                  placeholder="e.g. FlashKart Fresh"
                   value={formData.name || ""}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full bg-brand-50/70 dark:bg-zinc-800 border border-brand-200 dark:border-zinc-700 rounded-xl px-3.5 py-2.5 font-semibold text-sm text-brand-950 dark:text-zinc-100 outline-none"

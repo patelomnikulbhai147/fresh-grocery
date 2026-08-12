@@ -4,7 +4,7 @@ import { logAuditEvent, getClientIp, verifySessionToken } from "@/lib/auth";
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
   const userAgent = req.headers.get("user-agent") ?? "unknown";
-  const sessionToken = req.cookies.get("farmora_session")?.value;
+  const sessionToken = req.cookies.get("flashkart_session")?.value;
 
   // Log the logout event if we can identify the customer
   if (sessionToken) {
@@ -23,8 +23,8 @@ export async function POST(req: NextRequest) {
   const response = NextResponse.json({ success: true });
 
   // Clear all auth cookies
-  response.cookies.set("farmora_session", "", { httpOnly: true, maxAge: 0, path: "/" });
-  response.cookies.set("farmora_reg_token", "", { httpOnly: true, maxAge: 0, path: "/" });
+  response.cookies.set("flashkart_session", "", { httpOnly: true, maxAge: 0, path: "/" });
+  response.cookies.set("flashkart_reg_token", "", { httpOnly: true, maxAge: 0, path: "/" });
 
   return response;
 }

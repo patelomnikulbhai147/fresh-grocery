@@ -1,8 +1,8 @@
 // test_admin_suite.js
-// Automated verification script for Farmora Enterprise Admin Panel (RBAC, Stores, and Audit Logs)
+// Automated verification script for FlashKart Enterprise Admin Panel (RBAC, Stores, and Audit Logs)
 
 console.log("======================================================");
-console.log("🌿 STARTING FARMORA ENTERPRISE ADMIN SUITE TEST");
+console.log("🌿 STARTING FLASHKART ENTERPRISE ADMIN SUITE TEST");
 console.log("======================================================\n");
 
 let passed = 0;

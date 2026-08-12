@@ -20,7 +20,7 @@ export function generateOtp(): string {
 // ──────────────────────── OTP Hashing (SHA-256) ────────────────────────
 export function hashOtp(otp: string, mobile: string): string {
   return createHash("sha256")
-    .update(`${otp}:${mobile}:farmora-otp-secret`)
+    .update(`${otp}:${mobile}:flashkart-otp-secret`)
     .digest("hex");
 }
 
@@ -107,7 +107,7 @@ export async function logAuditEvent(params: {
 import { createHmac } from "crypto";
 
 const JWT_SECRET =
-  process.env.JWT_SECRET ?? "farmora-jwt-secret-change-in-production";
+  process.env.JWT_SECRET ?? "flashkart-jwt-secret-change-in-production";
 
 export function createSessionToken(customerId: string, mobile: string): string {
   const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");

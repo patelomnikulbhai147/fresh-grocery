@@ -5,7 +5,7 @@ import { products as initialProducts, categories as initialCategories, type Prod
 import { type AdminRole } from "./adminAuth";
 
 export type ProductStatus = "Active" | "Draft" | "Hidden" | "Out of Stock";
-export type DeliveryTimeOption = "10 Min" | "20 Min" | "30 Min" | "45 Min" | "Same Day";
+export type DeliveryTimeOption = "10 Min" | "20 Min" | "30 Min" | "45 Min" | "Same Day" | "Morning" | "Daily Morning";
 export type ProductLabel = "Organic" | "Fresh" | "Bestseller" | "Trending" | "New Arrival" | "Seasonal";
 export type ProductBadge = "Discount" | "Limited Stock" | "Combo Offer" | "None";
 
@@ -305,7 +305,7 @@ function buildInitialAdminProducts(): AdminProduct[] {
       ...p,
       sku: `FRM-SKU-${1000 + idx}`,
       barcode: `890100${2000 + idx}`,
-      brand: idx % 3 === 0 ? "Farmora Organic" : idx % 2 === 0 ? "Fresh Harvest" : "Green Valley",
+      brand: idx % 3 === 0 ? "FlashKart Fresh" : idx % 2 === 0 ? "Fresh Harvest" : "Green Valley",
       unit: defaultWeight.label,
       variant: "Standard Pack",
       costPrice,
@@ -316,15 +316,15 @@ function buildInitialAdminProducts(): AdminProduct[] {
       availableStock: (p.stock ?? 45) - Math.floor(Math.random() * 8),
       minStock: 15,
       maxStock: 250,
-      warehouse: idx % 2 === 0 ? "Hub-A (North Ahmedabad)" : "Hub-B (Gandhinagar Central)",
+      warehouse: idx % 2 === 0 ? "Hub-A (North Gandhinagar)" : "Hub-B (Gandhinagar Central)",
       batchNumber: `BATCH-2026-${100 + idx}`,
       status: p.stock && p.stock > 0 ? "Active" : "Out of Stock",
       labels: p.organic ? ["Organic", "Fresh"] : p.bestSeller ? ["Bestseller", "Fresh"] : ["Fresh"],
       badge: p.weights.some(w => w.bulk) ? "Combo Offer" : defaultWeight.price < defaultWeight.mrp ? "Discount" : "None",
-      deliveryTime: "30 Min",
-      seoTitle: `${p.name} — Fresh Online at Farmora`,
-      seoDescription: p.description || `Buy farm-fresh ${p.name} delivered to your doorstep in 30 mins.`,
-      seoKeywords: `${p.name}, fresh groceries, organic produce, farmora delivery`,
+      deliveryTime: "Daily Morning",
+      seoTitle: `${p.name} — Fresh Online at FlashKart`,
+      seoDescription: p.description || `Buy farm-fresh ${p.name} directly from FlashKart.`,
+      seoKeywords: `${p.name}, fresh vegetables, seasonal fruits, flashkart produce`,
       ogImage: p.image
     };
   });
@@ -527,7 +527,7 @@ function buildInitialBanners(): AdminBanner[] {
     { id: "BAN-2", title: "Devgad Alphonso Mangoes Same Day Delivery", slot: "Homepage Hero", imageUrl: "/images/categories/fruits.png", linkUrl: "/shop?cat=fruits", status: "Active", displayOrder: 2 },
     { id: "BAN-3", title: "Get Flat 20% Off with code FRESH20", slot: "Announcement Bar", imageUrl: "", linkUrl: "/shop", status: "Active", displayOrder: 1 },
     { id: "BAN-4", title: "Free 10 Min Delivery on Dairy Essentials", slot: "Offer Banner", imageUrl: "/images/categories/dairy.png", linkUrl: "/shop?cat=dairy", status: "Active", displayOrder: 1 },
-    { id: "BAN-5", title: "Welcome Offer: Free Farmora Tote Bag on Orders > ₹999", slot: "Popup Banner", imageUrl: "/images/categories/essentials.png", linkUrl: "/shop", status: "Active", displayOrder: 1 }
+    { id: "BAN-5", title: "Welcome Offer: Free FlashKart Produce Bag on Orders > ₹999", slot: "Popup Banner", imageUrl: "/images/categories/essentials.png", linkUrl: "/shop", status: "Active", displayOrder: 1 }
   ];
 }
 
@@ -560,36 +560,36 @@ function buildInitialZones(): DeliveryZone[] {
 
 function buildInitialNotifications(): NotificationTemplate[] {
   return [
-    { id: "NOTIF-1", name: "Order Confirmation SMS/WhatsApp", channel: "WhatsApp", triggerEvent: "Order Placed", subject: "Order Placed Successfully", content: "Hi {{customer_name}}, your Farmora order #{{order_id}} for ₹{{total}} has been placed! We are packing your fresh groceries right now.", isActive: true },
-    { id: "NOTIF-2", name: "Driver Assigned & Out for Delivery", channel: "SMS", triggerEvent: "Order Out for Delivery", content: "Your Farmora order #{{order_id}} is out for delivery with {{driver_name}} ({{driver_phone}}). Arriving in ~20 mins!", isActive: true },
-    { id: "NOTIF-3", name: "Delivery Completed Thank You Note", channel: "Email", triggerEvent: "Order Delivered", subject: "Your Farmora Groceries Have Arrived! 🥦🍎", content: "Hi {{customer_name}}, your order has been delivered! Please let us know how we did by leaving a quick review.", isActive: true },
+    { id: "NOTIF-1", name: "Order Confirmation SMS/WhatsApp", channel: "WhatsApp", triggerEvent: "Order Placed", subject: "Order Placed Successfully", content: "Hi {{customer_name}}, your FlashKart produce order #{{order_id}} for ₹{{total}} has been placed! We are preparing your fresh harvest right now.", isActive: true },
+    { id: "NOTIF-2", name: "Driver Assigned & Out for Supply", channel: "SMS", triggerEvent: "Order Out for Delivery", content: "Your FlashKart order #{{order_id}} is dispatched with {{driver_name}} ({{driver_phone}}). Arriving shortly!", isActive: true },
+    { id: "NOTIF-3", name: "Fulfillment Completed Thank You Note", channel: "Email", triggerEvent: "Order Delivered", subject: "Your FlashKart Produce Has Arrived! 🥦🍎", content: "Hi {{customer_name}}, your produce order has been fulfilled! Please let us know how we did by leaving a quick review.", isActive: true },
     { id: "NOTIF-4", name: "Low Stock Alert for Warehouse Managers", channel: "Email", triggerEvent: "Low Stock Warning", subject: "[URGENT] Low Stock Alert for {{product_name}}", content: "Alert: Product {{product_name}} (SKU: {{sku}}) has dropped below minimum threshold (Current: {{current_stock}}, Min: {{min_stock}}). Please reorder from supplier.", isActive: true }
   ];
 }
 
 function buildInitialSettings(): AdminSettings {
   return {
-    websiteName: "Farmora — Farm Fresh Groceries",
-    supportEmail: "care@farmora.com",
-    supportPhone: "+91 1800-123-4567",
+    websiteName: "FlashKart — Fresh Vegetables & Seasonal Fruits",
+    supportEmail: "flashkart.co@gmail.com",
+    supportPhone: "+91 6352856495 / 9773271029",
     currency: "₹ (INR)",
     defaultTaxPercent: 5,
-    defaultDeliveryFee: 25,
-    freeDeliveryThreshold: 499,
-    themePrimaryColor: "#3f8f36",
+    defaultDeliveryFee: 0,
+    freeDeliveryThreshold: 0,
+    themePrimaryColor: "#581c87",
     logoUrl: "/logo.svg",
     faviconUrl: "/favicon.ico",
-    smtpServer: "smtp.farmora.internal",
+    smtpServer: "smtp.flashkart.internal",
     smtpPort: "587",
-    smtpUser: "notifications@farmora.com",
+    smtpUser: "notifications@flashkart.co",
     smsApiKey: "MSG91_KEY_SIMULATED_88921",
     whatsappApiKey: "WA_META_SIMULATED_TOKEN_99812",
-    razorpayKeyId: "rzp_live_farmora_simulated_id",
+    razorpayKeyId: "rzp_live_flashkart_simulated_id",
     razorpayKeySecret: "••••••••••••••••••••••••",
-    gaId: "G-FARMORA9988",
+    gaId: "G-FLASHKART88",
     fbPixelId: "FB_PIX_881920",
-    globalMetaTitle: "Farmora — Farm Fresh Groceries, Delivered in Hours",
-    globalMetaDescription: "Hand-picked fruits, crisp vegetables, farm-fresh dairy and wholesome pantry staples delivered same-day."
+    globalMetaTitle: "FlashKart — Fresh Vegetables & Seasonal Fruits",
+    globalMetaDescription: "Fresh vegetables and seasonal fruits supplied directly to hostels, PGs, hotels, and retail shops."
   };
 }
 
@@ -921,11 +921,11 @@ export const useAdminStore = create<AdminStoreState>()(
             get().addProduct({
               name: item.name,
               slug: item.name.toLowerCase().replace(/\s+/g, "-"),
-              sku: item.sku || `FRM-SKU-${Math.floor(1000 + Math.random() * 9000)}`,
+              sku: item.sku || `FLK-SKU-${Math.floor(1000 + Math.random() * 9000)}`,
               barcode: item.barcode || `890100${Math.floor(1000 + Math.random() * 9000)}`,
               category: item.category || "vegetables",
               subcategory: item.subcategory || "Fresh Produce",
-              brand: item.brand || "Farmora Organic",
+              brand: item.brand || "FlashKart Fresh",
               tagline: item.tagline || "Fresh produce",
               description: item.description || "Fresh quality produce.",
               image: item.image || "/images/categories/vegetables.png",
@@ -939,15 +939,15 @@ export const useAdminStore = create<AdminStoreState>()(
               availableStock: item.currentStock ?? 50,
               minStock: item.minStock ?? 15,
               maxStock: item.maxStock ?? 250,
-              warehouse: item.warehouse || "Hub-A (North Ahmedabad)",
+              warehouse: item.warehouse || "Gandhinagar Central Hub",
               batchNumber: `BATCH-2026-${Math.floor(100 + Math.random()*900)}`,
               status: (item.status as any) || "Active",
               labels: (item.labels as any) || ["Fresh"],
               badge: (item.badge as any) || "None",
-              deliveryTime: (item.deliveryTime as any) || "30 Min",
-              seoTitle: `${item.name} at Farmora`,
+              deliveryTime: (item.deliveryTime as any) || "Morning",
+              seoTitle: `${item.name} at FlashKart`,
               seoDescription: `Buy fresh ${item.name}`,
-              seoKeywords: `${item.name}, fresh groceries`,
+              seoKeywords: `${item.name}, fresh vegetables, seasonal fruits`,
               ogImage: item.image || "/images/categories/vegetables.png",
               benefits: ["Fresh", "Organic"],
               storage: "Cool dry place",
@@ -1121,6 +1121,6 @@ export const useAdminStore = create<AdminStoreState>()(
         get().logAction(user, role, `Updated global store settings and API keys`, "Settings");
       }
     }),
-    { name: "farmora-admin-store-v1" }
+    { name: "flashkart-admin-store-v1" }
   )
 );
