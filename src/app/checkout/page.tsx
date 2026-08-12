@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 import { CustomerAuthGuard } from "@/components/auth/CustomerAuthGuard";
 
@@ -12,13 +10,11 @@ export const metadata: Metadata = {
 export default function CheckoutPage() {
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
       <main className="flex-1 mx-auto max-w-[1400px] w-full px-5 md:px-8 py-10 md:py-14">
         <CustomerAuthGuard>
           <CheckoutForm />
         </CustomerAuthGuard>
       </main>
-      <Footer />
     </div>
   );
 }

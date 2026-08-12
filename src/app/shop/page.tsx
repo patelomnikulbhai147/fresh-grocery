@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { ShopClient } from "@/components/shop/ShopClient";
 import { categories, products } from "@/data/catalog";
 
@@ -39,7 +37,6 @@ export default async function ShopPage({
   const sp = await searchParams;
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
       <main className="flex-1 mx-auto max-w-[1400px] w-full px-5 md:px-8 py-10 md:py-14">
         <ShopClient
           products={products}
@@ -47,7 +44,6 @@ export default async function ShopPage({
           initial={sp}
         />
       </main>
-      <Footer />
     </div>
   );
 }

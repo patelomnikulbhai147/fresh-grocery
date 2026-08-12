@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getProductBySlug, products } from "@/data/catalog";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { ProductDetail } from "@/components/product/ProductDetail";
 import { ProductSection } from "@/components/home/ProductSection";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -60,7 +58,6 @@ export default async function ProductPage({ params }: Params) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
       <JsonLd data={schema} />
       <main className="flex-1 mx-auto max-w-7xl w-full px-5 md:px-8 py-10 md:py-14">
         <ProductDetail product={product} />
@@ -75,7 +72,6 @@ export default async function ProductPage({ params }: Params) {
           </div>
         )}
       </main>
-      <Footer />
     </div>
   );
 }

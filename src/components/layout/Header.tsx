@@ -20,12 +20,12 @@ import { FlashKartLogo } from "./FlashKartLogo";
 
 const navLinks = [
   { label: "Home", href: "/" },
-  { label: "About Us", href: "/about" },
   { label: "Vegetables", href: "/shop?cat=vegetables" },
   { label: "Fruits", href: "/shop?cat=fruits" },
   { label: "Who We Supply", href: "/where-we-supply" },
   { label: "Franchise", href: "/franchise" },
   { label: "Contact Us", href: "/contact" },
+  { label: "About Us", href: "/about" },
 ];
 
 export function Header() {
@@ -59,13 +59,19 @@ export function Header() {
     <>
 
 
+      {/* Announcement Bar */}
+      <div className="bg-[#04502d] text-white text-[11px] md:text-xs font-bold text-center py-2 px-4 flex items-center justify-center gap-2 relative z-50">
+        <span>🇮🇳</span>
+        <span>Happy Independence Day! Celebrate 15 August with Freshness & Quality.</span>
+      </div>
+
       {/* Glassmorphism Navigation Bar */}
       <header
         className={cn(
           "sticky top-0 z-40 transition-all duration-300 bg-white border-b border-slate-100 shadow-sm"
         )}
       >
-        <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-3 flex items-center justify-between gap-4">
+        <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 py-3 flex items-center justify-between gap-4">
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMenuOpen(true)}

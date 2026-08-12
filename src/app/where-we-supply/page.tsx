@@ -1,7 +1,5 @@
 "use client";
 import { useState } from "react";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import {
   Building,
   Hotel,
@@ -36,7 +34,6 @@ export default function WhereWeSupplyPage() {
 
   return (
     <div className="min-h-screen bg-[#fafaf9] text-purple-950 flex flex-col">
-      <Header />
       <main className="flex-1">
         {/* Hero Section */}
         <section className="bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 text-white py-16 md:py-20 relative overflow-hidden">
@@ -365,7 +362,6 @@ export default function WhereWeSupplyPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

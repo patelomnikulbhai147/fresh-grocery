@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import {
   CheckCircle2,
   Circle,
@@ -29,7 +27,6 @@ const steps = [
 export default function TrackPage() {
   return (
     <div className="min-h-screen bg-[#fafaf9] text-purple-950 flex flex-col">
-      <Header />
       <main className="flex-1 mx-auto max-w-6xl px-5 md:px-8 py-10 md:py-14">
         <div className="mb-8">
           <div className="text-xs text-purple-600 font-bold mb-2">
@@ -137,7 +134,6 @@ export default function TrackPage() {
           </aside>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

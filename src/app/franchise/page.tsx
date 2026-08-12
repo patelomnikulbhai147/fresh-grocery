@@ -1,7 +1,5 @@
 "use client";
 import { useState } from "react";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import {
   Store,
   Truck,
@@ -37,7 +35,6 @@ export default function FranchisePage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
       <main className="flex-1">
         {/* Hero Banner */}
         <section className="relative bg-gradient-to-br from-[#04502d] via-[#067a46] to-[#04502d] text-white py-16 md:py-24 overflow-hidden">
@@ -355,7 +352,6 @@ export default function FranchisePage() {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

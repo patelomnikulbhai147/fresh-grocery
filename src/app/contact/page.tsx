@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { Mail, Phone, MapPin, Sparkles } from "lucide-react";
 
@@ -13,7 +11,6 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
       <main className="flex-1 mx-auto max-w-7xl w-full px-5 md:px-8 py-14 md:py-20">
         <div className="max-w-2xl mb-12">
           <div className="inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.24em] font-bold text-[#067a46] mb-2 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
@@ -90,7 +87,6 @@ export default function ContactPage() {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

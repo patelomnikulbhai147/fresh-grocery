@@ -8,7 +8,7 @@ export function QuickAccessCards() {
   
   return (
     <section className="py-8 md:py-12 mb-12">
-      <div className="mx-auto max-w-[1400px] px-4 md:px-8">
+      <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
           
           {/* Card 1: Category Page Preview */}

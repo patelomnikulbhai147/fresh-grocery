@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
 import { farmers } from "@/data/catalog";
 import Image from "next/image";
@@ -15,7 +13,6 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div className="min-h-screen">
-      <Header />
       <main>
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 bg-cover bg-center opacity-30" style={{ backgroundImage: "url(/placeholder.jpg)" }} />
@@ -100,7 +97,6 @@ export default function Page() {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

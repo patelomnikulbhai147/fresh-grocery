@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { ShopClient } from "@/components/shop/ShopClient";
 import { categories, products } from "@/data/catalog";
 
@@ -41,7 +39,6 @@ export default async function CategoryPage({
 
   return (
     <div className="min-h-screen flex flex-col bg-[#fafaf9] text-purple-950">
-      <Header />
       <main className="flex-1 mx-auto max-w-7xl w-full px-5 md:px-8 py-10 md:py-14">
         <ShopClient
           products={products}
@@ -49,7 +46,6 @@ export default async function CategoryPage({
           initial={{ ...sp, cat: slug }}
         />
       </main>
-      <Footer />
     </div>
   );
 }

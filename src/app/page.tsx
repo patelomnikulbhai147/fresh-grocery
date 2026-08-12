@@ -1,8 +1,7 @@
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/home/Hero";
 import { HomepageProduceShowcase } from "@/components/home/HomepageProduceShowcase";
-import { QuickAccessCards } from "@/components/home/QuickAccessCards";
+import { CategoryGridSection } from "@/components/home/CategoryGridSection";
+import { InstantOrderBulkOrderCards } from "@/components/home/InstantOrderBulkOrderCards";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -24,18 +23,19 @@ export default function HomePage() {
 
       {/* Foreground Content */}
       <div className="relative z-10 flex flex-col min-h-screen">
-        <Header />
         <main className="flex-1">
-          {/* 1. Independence Day Hero Section + Floating Glass Feature Strip */}
+          {/* 1. Independence Day Hero Section */}
           <Hero />
 
-          {/* 2. Side-by-Side Glassmorphism Produce Showcase */}
+          {/* 2. Instant Order + Bulk Order Highlight Cards (Immediately After Hero) */}
+          <InstantOrderBulkOrderCards />
+
+          {/* 3. Category Section 1: Fresh Vegetables & Seasonal Fruits Quick Panels */}
           <HomepageProduceShowcase />
 
-          {/* 3. Quick Access Cards (Option 12) */}
-          <QuickAccessCards />
+          {/* 4. Category Section 2: 3x3 Product Grid for Fresh Vegetables */}
+          <CategoryGridSection />
         </main>
-        <Footer />
       </div>
 
     </div>

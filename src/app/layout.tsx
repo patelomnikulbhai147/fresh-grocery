@@ -6,6 +6,8 @@ import { CartDrawer } from "@/components/cart/CartDrawer";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { CityNotifyAuto } from "@/components/city/CityModal";
 import { CustomerLoginModal } from "@/components/auth/CustomerLoginModal";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://flashkart.co"),
@@ -95,7 +97,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className="bg-[#fafaf9] text-purple-950 antialiased font-sans">
         <JsonLd data={organizationSchema} />
-        {children}
+        <Header />
+        <main className="flex-1">
+          {children}
+        </main>
+        <Footer />
         <CartDrawer />
         <CityNotifyAuto />
         <CustomerLoginModal />

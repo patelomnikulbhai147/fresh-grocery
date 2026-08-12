@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { SubscriptionPage } from "@/components/subscription/SubscriptionPage";
 
 export const metadata: Metadata = {
@@ -12,11 +10,9 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div className="min-h-screen">
-      <Header />
       <main className="mx-auto max-w-7xl px-5 md:px-8 py-10 md:py-14">
         <SubscriptionPage />
       </main>
-      <Footer />
     </div>
   );
 }

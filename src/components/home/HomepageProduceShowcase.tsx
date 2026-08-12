@@ -1,73 +1,85 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Leaf } from "lucide-react";
 import { products } from "@/data/catalog";
-import { formatINR } from "@/lib/utils";
+
+const vegetableItems = [
+  { name: "Tomato", slug: "fresh-tomato", priceRange: "₹20 - ₹30 / kg", fallbackImg: "/images/products/tomato.png", catId: "v-tomato" },
+  { name: "Potato", slug: "potato", priceRange: "₹18 - ₹25 / kg", fallbackImg: "/images/products/potato.png", catId: "v-potato" },
+  { name: "Onion", slug: "onion", priceRange: "₹20 - ₹25 / kg", fallbackImg: "/images/products/onion.png", catId: "v-onion" },
+  { name: "Carrot", slug: "carrot", priceRange: "₹25 - ₹35 / kg", fallbackImg: "/images/products/carrot.png", catId: "v-carrot" },
+  { name: "Capsicum", slug: "capsicum", priceRange: "₹30 - ₹45 / kg", fallbackImg: "/images/products/capsicum.png", catId: "v-capsicum" },
+  { name: "Cabbage", slug: "cabbage", priceRange: "₹15 - ₹20 / kg", fallbackImg: "/images/products/cabbage.png", catId: "v-cabbage" },
+];
+
+const fruitItems = [
+  { name: "Banana", slug: "banana", priceRange: "₹25 - ₹35 / kg", fallbackImg: "/images/products/banana.png", catId: "f-banana" },
+  { name: "Apple", slug: "apple", priceRange: "₹120 - ₹180 / kg", fallbackImg: "/images/products/apple.png", catId: "f-apple" },
+  { name: "Grapes", slug: "grapes", priceRange: "₹80 - ₹120 / kg", fallbackImg: "/images/products/grapes.png", catId: "f-grapes" },
+  { name: "Mango", slug: "mango", priceRange: "₹60 - ₹100 / kg", fallbackImg: "/images/products/mango.png", catId: "f-mango" },
+  { name: "Watermelon", slug: "watermelon", priceRange: "₹20 - ₹30 / kg", fallbackImg: "/images/products/watermelon.png", catId: "f-watermelon" },
+  { name: "Papaya", slug: "papaya", priceRange: "₹30 - ₹50 / kg", fallbackImg: "/images/products/papaya.png", catId: "f-papaya" },
+];
 
 export function HomepageProduceShowcase() {
-  const vegetables = products
-    .filter((p) => p.category === "vegetables")
-    .slice(0, 6);
-
-  const fruits = products
-    .filter((p) => p.category === "fruits")
-    .slice(0, 6);
-
   return (
-    <section className="py-12 md:py-16">
-      <div className="mx-auto max-w-[1400px] px-4 md:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+    <section className="py-6 sm:py-8 md:py-10">
+      <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           
           {/* Left: Fresh Vegetables Panel */}
-          <div className="bg-white rounded-[28px] p-6 md:p-8 border border-slate-100 shadow-sm flex flex-col justify-between">
+          <div className="bg-white rounded-[24px] md:rounded-[28px] p-5 sm:p-6 border border-slate-100 shadow-sm flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200/60">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-emerald-100/80 text-[#067a46] border border-emerald-200/80 grid place-items-center text-xl font-bold">
-                    🥦
+              {/* Header row */}
+              <div className="flex items-center justify-between mb-5 pb-3.5 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-100/70 text-[#067a46] border border-emerald-200/60 grid place-items-center shrink-0">
+                    <Leaf className="w-5 h-5 text-[#067a46]" />
                   </div>
-                  <div>
-                    <h2 className="font-display font-extrabold text-2xl text-slate-900">
-                      Fresh Vegetables
-                    </h2>
-                    <p className="text-xs text-slate-500 font-medium">Daily farm-fresh produce at best rates</p>
-                  </div>
+                  <h2 className="font-display font-extrabold text-xl sm:text-2xl text-slate-900">
+                    Fresh Vegetables
+                  </h2>
                 </div>
 
                 <Link
                   href="/shop?cat=vegetables"
-                  className="inline-flex items-center gap-1.5 text-xs md:text-sm font-extrabold text-[#067a46] hover:text-[#046338] transition bg-white/90 border border-emerald-200 px-4 py-2 rounded-full shadow-sm"
+                  className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-[#067a46] hover:text-[#046338] transition hover:translate-x-0.5 duration-200"
                 >
                   <span>View All</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
 
-              {/* 6 Product Cards Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-5">
-                {vegetables.map((item) => {
-                  const minPrice = item.weights[0]?.price ?? 20;
-                  const maxPrice = item.weights[1]?.price ?? Math.round(minPrice * 1.5);
+              {/* 6 Vegetable Cards Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 lg:grid-cols-6 gap-3 sm:gap-3.5">
+                {vegetableItems.map((item) => {
+                  const catProduct = products.find((p) => p.id === item.catId || p.slug.includes(item.slug));
+                  const imgSrc = catProduct?.image || item.fallbackImg;
+
                   return (
                     <Link
-                      key={item.id}
-                      href={`/product/${item.slug}`}
-                      className="group card-option12 p-3 text-center flex flex-col items-center justify-between h-full"
+                      key={item.name}
+                      href={`/product/${catProduct?.slug || item.slug}`}
+                      className="group bg-slate-50/60 hover:bg-white rounded-2xl p-2.5 sm:p-3 text-center border border-slate-100 hover:border-emerald-200 hover:shadow-md transition-all duration-200 flex flex-col items-center justify-between"
                     >
-                      <div className="relative w-full aspect-square mb-2 overflow-hidden rounded-xl">
+                      <div className="relative w-full aspect-square mb-1.5 overflow-hidden rounded-xl">
                         <Image
-                          src={item.image}
+                          src={imgSrc}
                           alt={item.name}
                           fill
-                          sizes="(max-width: 640px) 40vw, 200px"
-                          className="object-contain group-hover:scale-110 transition-transform duration-300 p-2"
+                          sizes="120px"
+                          className="object-contain group-hover:scale-105 transition-transform duration-300 p-1"
+                          unoptimized
                         />
                       </div>
-                      <div className="w-full pb-1">
-                        <h3 className="font-bold text-sm text-slate-800 group-hover:text-[#067a46] transition-colors truncate">
-                          {item.name.split("/")[0].trim()}
+                      <div className="w-full">
+                        <h3 className="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-[#067a46] transition-colors truncate">
+                          {item.name}
                         </h3>
+                        <p className="text-[10px] sm:text-[11px] font-semibold text-slate-500 mt-0.5 truncate">
+                          {item.priceRange}
+                        </p>
                       </div>
                     </Link>
                   );
@@ -77,54 +89,57 @@ export function HomepageProduceShowcase() {
           </div>
 
           {/* Right: Seasonal Fruits Panel */}
-          <div className="bg-white rounded-[28px] p-6 md:p-8 border border-slate-100 shadow-sm flex flex-col justify-between">
+          <div className="bg-white rounded-[24px] md:rounded-[28px] p-5 sm:p-6 border border-slate-100 shadow-sm flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200/60">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-100/80 text-amber-700 border border-amber-200/80 grid place-items-center text-xl font-bold">
+              {/* Header row */}
+              <div className="flex items-center justify-between mb-5 pb-3.5 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-amber-100/70 text-amber-600 border border-amber-200/60 grid place-items-center shrink-0 text-lg font-bold">
                     🍊
                   </div>
-                  <div>
-                    <h2 className="font-display font-extrabold text-2xl text-slate-900">
-                      Seasonal Fruits
-                    </h2>
-                    <p className="text-xs text-slate-500 font-medium">Naturally ripened fresh fruits</p>
-                  </div>
+                  <h2 className="font-display font-extrabold text-xl sm:text-2xl text-slate-900">
+                    Seasonal Fruits
+                  </h2>
                 </div>
 
                 <Link
                   href="/shop?cat=fruits"
-                  className="inline-flex items-center gap-1.5 text-xs md:text-sm font-extrabold text-[#067a46] hover:text-[#046338] transition bg-white/90 border border-emerald-200 px-4 py-2 rounded-full shadow-sm"
+                  className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-[#067a46] hover:text-[#046338] transition hover:translate-x-0.5 duration-200"
                 >
                   <span>View All</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
 
-              {/* 6 Product Cards Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-5">
-                {fruits.map((item) => {
-                  const minPrice = item.weights[0]?.price ?? 40;
-                  const maxPrice = item.weights[1]?.price ?? Math.round(minPrice * 1.6);
+              {/* 6 Fruit Cards Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 lg:grid-cols-6 gap-3 sm:gap-3.5">
+                {fruitItems.map((item) => {
+                  const catProduct = products.find((p) => p.id === item.catId || p.slug.includes(item.slug));
+                  const imgSrc = catProduct?.image || item.fallbackImg;
+
                   return (
                     <Link
-                      key={item.id}
-                      href={`/product/${item.slug}`}
-                      className="group card-option12 p-3 text-center flex flex-col items-center justify-between h-full"
+                      key={item.name}
+                      href={`/product/${catProduct?.slug || item.slug}`}
+                      className="group bg-slate-50/60 hover:bg-white rounded-2xl p-2.5 sm:p-3 text-center border border-slate-100 hover:border-emerald-200 hover:shadow-md transition-all duration-200 flex flex-col items-center justify-between"
                     >
-                      <div className="relative w-full aspect-square mb-2 overflow-hidden rounded-xl">
+                      <div className="relative w-full aspect-square mb-1.5 overflow-hidden rounded-xl">
                         <Image
-                          src={item.image}
+                          src={imgSrc}
                           alt={item.name}
                           fill
-                          sizes="(max-width: 640px) 40vw, 200px"
-                          className="object-contain group-hover:scale-110 transition-transform duration-300 p-2"
+                          sizes="120px"
+                          className="object-contain group-hover:scale-105 transition-transform duration-300 p-1"
+                          unoptimized
                         />
                       </div>
-                      <div className="w-full pb-1">
-                        <h3 className="font-bold text-sm text-slate-800 group-hover:text-[#067a46] transition-colors truncate">
-                          {item.name.split("/")[0].trim()}
+                      <div className="w-full">
+                        <h3 className="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-[#067a46] transition-colors truncate">
+                          {item.name}
                         </h3>
+                        <p className="text-[10px] sm:text-[11px] font-semibold text-slate-500 mt-0.5 truncate">
+                          {item.priceRange}
+                        </p>
                       </div>
                     </Link>
                   );
