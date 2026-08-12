@@ -45,6 +45,8 @@
   --color-india-white: #FFFFFF;
   --color-india-green: #138808;
   --color-india-navy: #000080;
+  --color-navy-900: #0f172a;
+  --color-navy-950: #020617;
 }
 
 @layer base {
