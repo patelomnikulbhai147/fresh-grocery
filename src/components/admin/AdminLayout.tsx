@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useState, useEffect, type ReactNode } from "react";
 import {
   LayoutDashboard,
@@ -58,13 +59,14 @@ interface NavGroup {
 }
 
 export function AdminLayout({ children, activeModule, onSelectModule }: AdminLayoutProps) {
+  const router = useRouter();
   const { user, logout, switchRole, toggle2FA } = useAdminAuth();
   const { orders, products, activityLogs } = useAdminStore();
 
   const handleSignOut = () => {
     logout();
     setIsProfileMenuOpen(false);
-    window.location.href = "/admin/login";
+    router.push("/admin/login");
   };
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);

@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { X, SlidersHorizontal, Search, ChevronDown, Grid3x3, LayoutList, ShoppingBag, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -83,7 +84,7 @@ export function ShopClient({ products, categories, initial }: Props) {
       {/* Breadcrumb / Heading */}
       <div className="mb-8">
         <div className="text-xs text-purple-600 font-bold mb-2">
-          <a href="/" className="hover:text-purple-800">Home</a> / Fresh Produce
+          <Link href="/" className="hover:text-purple-800">Home</Link> / Fresh Produce
         </div>
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div>

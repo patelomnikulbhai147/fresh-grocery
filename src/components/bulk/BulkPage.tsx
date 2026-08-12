@@ -22,7 +22,7 @@ export function BulkPage() {
     <div>
       <div className="mb-10">
         <div className="text-xs text-purple-600 font-bold mb-2">
-          <a href="/" className="hover:text-purple-800">Home</a> / Wholesale & Bulk Orders
+          <Link href="/" className="hover:text-purple-800">Home</Link> / Wholesale & Bulk Orders
         </div>
         <h1 className="font-display text-4xl md:text-6xl text-purple-950 font-black text-balance">
           Wholesale produce for <span className="italic text-amber-600">serious kitchens</span>.

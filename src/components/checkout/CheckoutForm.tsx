@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import {
@@ -88,7 +89,7 @@ export function CheckoutForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="mb-8">
-        <div className="text-xs text-purple-600 font-bold mb-2"><a href="/" className="hover:text-purple-800">Home</a> / Order Fulfillment</div>
+        <div className="text-xs text-purple-600 font-bold mb-2"><Link href="/" className="hover:text-purple-800">Home</Link> / Order Fulfillment</div>
         <h1 className="font-display text-3xl md:text-5xl font-black text-purple-950">Confirm Fresh Produce Order</h1>
       </div>
 

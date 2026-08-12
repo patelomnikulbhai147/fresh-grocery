@@ -18,7 +18,7 @@ export function SubscriptionPage() {
     <div>
       <div className="mb-10">
         <div className="text-xs text-purple-600 font-bold mb-2">
-          <a href="/" className="hover:text-purple-800">Home</a> / Regular Kitchen Produce Supply
+          <Link href="/" className="hover:text-purple-800">Home</Link> / Regular Kitchen Produce Supply
         </div>
         <h1 className="font-display text-4xl md:text-6xl text-purple-950 font-black text-balance">
           Scheduled daily produce for <span className="italic text-amber-600">hostels & kitchens</span>.

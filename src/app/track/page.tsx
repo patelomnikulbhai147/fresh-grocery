@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import {
@@ -32,7 +33,7 @@ export default function TrackPage() {
       <main className="flex-1 mx-auto max-w-6xl px-5 md:px-8 py-10 md:py-14">
         <div className="mb-8">
           <div className="text-xs text-purple-600 font-bold mb-2">
-            <a href="/" className="hover:text-purple-800">Home</a> / Track Order
+            <Link href="/" className="hover:text-purple-800">Home</Link> / Track Order
           </div>
           <h1 className="font-display text-3xl md:text-5xl font-black text-purple-950">Order #FLK-823145</h1>
           <p className="text-slate-600 mt-1 text-sm font-medium">Gandhinagar Hub Sourcing · Scheduled Morning Dispatch</p>

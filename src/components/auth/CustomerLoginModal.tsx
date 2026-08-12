@@ -48,11 +48,11 @@ function OtpInput({
   onChange: (v: string) => void;
   disabled?: boolean;
 }) {
-  const refs = Array.from({ length: 6 }, () => useRef<HTMLInputElement>(null));
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleKey = (i: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && !refs[i].current?.value && i > 0) {
-      refs[i - 1].current?.focus();
+    if (e.key === "Backspace" && !inputRefs.current[i]?.value && i > 0) {
+      inputRefs.current[i - 1]?.focus();
     }
   };
 
@@ -62,14 +62,14 @@ function OtpInput({
     chars[i] = v.slice(-1);
     const next = chars.join("");
     onChange(next.padEnd(6, " ").slice(0, 6).trimEnd());
-    if (v && i < 5) refs[i + 1].current?.focus();
+    if (v && i < 5) inputRefs.current[i + 1]?.focus();
   };
 
   const handlePaste = (e: React.ClipboardEvent) => {
     const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
     if (pasted) {
       onChange(pasted);
-      refs[Math.min(pasted.length, 5)].current?.focus();
+      inputRefs.current[Math.min(pasted.length, 5)]?.focus();
     }
   };
 
@@ -78,7 +78,7 @@ function OtpInput({
       {Array.from({ length: 6 }, (_, i) => (
         <input
           key={i}
-          ref={refs[i]}
+          ref={(el) => { inputRefs.current[i] = el; }}
           type="text"
           inputMode="numeric"
           maxLength={1}

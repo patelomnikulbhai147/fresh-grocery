@@ -7,12 +7,13 @@ import { products } from "@/data/catalog";
 import { WhatsAppSubscription } from "@/components/home/WhatsAppSubscription";
 
 function useCountdown(target: Date) {
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState<number>(0);
   useEffect(() => {
+    setNow(Date.now());
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
-  const diff = Math.max(0, target.getTime() - now);
+  const diff = now === 0 ? 0 : Math.max(0, target.getTime() - now);
   const h = Math.floor(diff / 3_600_000);
   const m = Math.floor((diff % 3_600_000) / 60_000);
   const s = Math.floor((diff % 60_000) / 1000);

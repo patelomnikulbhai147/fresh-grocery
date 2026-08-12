@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 import {
   User,
@@ -60,7 +61,7 @@ export function AccountShell() {
     <div>
       <div className="mb-8">
         <div className="text-xs text-brand-500 mb-2">
-          <a href="/" className="hover:text-brand-700">Home</a> / My Account
+          <Link href="/" className="hover:text-brand-700">Home</Link> / My Account
         </div>
         <h1 className="font-display text-4xl md:text-5xl text-brand-950">Hi, {firstName} 👋</h1>
         <p className="text-brand-700 mt-1">Welcome back. Here&apos;s what&apos;s fresh today.</p>
@@ -216,7 +217,7 @@ export function AccountShell() {
               <p className="text-sm text-brand-600 max-w-sm mx-auto">
                 Heart any product across the site to save it here. You have 0 items saved right now.
               </p>
-              <a href="/shop" className="mt-6 inline-block bg-brand-900 text-white rounded-full px-5 py-3 text-sm font-semibold">Start browsing</a>
+              <Link href="/shop" className="mt-6 inline-block bg-brand-900 text-white rounded-full px-5 py-3 text-sm font-semibold">Start browsing</Link>
             </div>
           )}
 
