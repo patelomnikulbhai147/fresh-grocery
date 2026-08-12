@@ -83,12 +83,12 @@ export function ShopClient({ products, categories, initial }: Props) {
     <>
       {/* Breadcrumb / Heading */}
       <div className="mb-8">
-        <div className="text-xs text-purple-600 font-bold mb-2">
-          <Link href="/" className="hover:text-purple-800">Home</Link> / Fresh Produce
+        <div className="text-xs text-[#067a46] font-bold mb-2">
+          <Link href="/" className="hover:text-[#046338]">Home</Link> / Fresh Produce
         </div>
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="font-display text-3xl md:text-5xl text-purple-950 text-balance font-black">
+            <h1 className="font-display text-3xl md:text-5xl text-slate-900 text-balance font-black">
               {cat === "all"
                 ? "All Fresh Produce"
                 : activeCategoryObj?.name ?? "Fresh Produce"}
@@ -100,32 +100,32 @@ export function ShopClient({ products, categories, initial }: Props) {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 bg-white border border-purple-100 rounded-full px-3 py-1.5 shadow-sm">
+            <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-full px-3 py-1.5 shadow-sm">
               <Grid3x3
                 onClick={() => setGrid(4)}
-                className={cn("w-4 h-4 cursor-pointer", grid === 4 ? "text-purple-950" : "text-purple-300")}
+                className={cn("w-4 h-4 cursor-pointer", grid === 4 ? "text-[#067a46]" : "text-slate-400")}
               />
               <LayoutList
                 onClick={() => setGrid(3)}
-                className={cn("w-4 h-4 cursor-pointer", grid === 3 ? "text-purple-950" : "text-purple-300")}
+                className={cn("w-4 h-4 cursor-pointer", grid === 3 ? "text-[#067a46]" : "text-slate-400")}
               />
             </div>
             <div className="relative">
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value as "popular" | "low" | "high" | "new")}
-                className="appearance-none bg-white border border-purple-100 rounded-full pl-4 pr-9 py-2 text-xs font-bold text-purple-950 cursor-pointer hover:border-purple-300 shadow-sm"
+                className="appearance-none bg-white border border-slate-200 rounded-full pl-4 pr-9 py-2 text-xs font-bold text-slate-800 cursor-pointer hover:border-[#067a46] shadow-sm"
               >
                 <option value="popular">Most popular</option>
                 <option value="low">Price: low to high</option>
                 <option value="high">Price: high to low</option>
                 <option value="new">Seasonal specials</option>
               </select>
-              <ChevronDown className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-purple-600" />
+              <ChevronDown className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500" />
             </div>
             <button
               onClick={() => setFiltersOpen(true)}
-              className="lg:hidden flex items-center gap-1.5 bg-purple-950 text-white rounded-full px-4 py-2 text-xs font-bold shadow-sm"
+              className="lg:hidden flex items-center gap-1.5 bg-[#067a46] text-white rounded-full px-4 py-2 text-xs font-bold shadow-sm"
             >
               <SlidersHorizontal className="w-3.5 h-3.5" /> Filters
             </button>
@@ -133,16 +133,16 @@ export function ShopClient({ products, categories, initial }: Props) {
         </div>
 
         {/* Search */}
-        <div className="mt-6 flex items-center bg-white border border-purple-100 rounded-full pl-4 pr-2 py-1.5 max-w-xl shadow-sm">
-          <Search className="w-4 h-4 text-purple-400" />
+        <div className="mt-6 flex items-center bg-white border border-slate-200 rounded-full pl-4 pr-2 py-1.5 max-w-xl shadow-sm focus-within:border-[#067a46]">
+          <Search className="w-4 h-4 text-slate-400" />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search fresh vegetables, seasonal fruits..."
-            className="flex-1 bg-transparent outline-none px-3 py-1.5 text-xs text-purple-950 placeholder:text-purple-300 font-medium"
+            className="flex-1 bg-transparent outline-none px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 font-medium"
           />
           {q && (
-            <button onClick={() => setQ("")} className="p-1.5 text-purple-400 hover:text-purple-950">
+            <button onClick={() => setQ("")} className="p-1.5 text-slate-400 hover:text-slate-900">
               <X className="w-4 h-4" />
             </button>
           )}
@@ -158,18 +158,18 @@ export function ShopClient({ products, categories, initial }: Props) {
           )}
         >
           <div className="flex items-center justify-between lg:hidden mb-4">
-            <div className="font-display text-2xl font-bold text-purple-950">Filters</div>
-            <button onClick={() => setFiltersOpen(false)} className="p-2 text-purple-950"><X className="w-5 h-5"/></button>
+            <div className="font-display text-2xl font-bold text-slate-900">Filters</div>
+            <button onClick={() => setFiltersOpen(false)} className="p-2 text-slate-900"><X className="w-5 h-5"/></button>
           </div>
-          <div className="bg-white p-5 rounded-3xl border border-purple-100 shadow-sm space-y-6">
+          <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-6">
             <div>
-              <div className="text-xs font-bold uppercase tracking-wider text-purple-950 mb-3">Categories</div>
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Categories</div>
               <div className="space-y-1">
                 <button
                   onClick={() => setCat("all")}
                   className={cn(
                     "w-full text-left px-3 py-2 rounded-xl text-xs transition font-bold",
-                    cat === "all" ? "bg-purple-950 text-white" : "hover:bg-purple-50 text-purple-900"
+                    cat === "all" ? "bg-[#067a46] text-white" : "hover:bg-slate-50 text-slate-700"
                   )}
                 >
                   All Produce
@@ -180,11 +180,11 @@ export function ShopClient({ products, categories, initial }: Props) {
                     onClick={() => setCat(c.slug)}
                     className={cn(
                       "w-full text-left px-3 py-2 rounded-xl text-xs transition flex justify-between items-center font-semibold",
-                      cat === c.slug ? "bg-purple-950 text-white font-bold" : "hover:bg-purple-50 text-purple-900"
+                      cat === c.slug ? "bg-[#067a46] text-white font-bold" : "hover:bg-slate-50 text-slate-700"
                     )}
                   >
                     <span className="truncate">{c.name}</span>
-                    <span className={cat === c.slug ? "text-amber-400 font-bold" : "text-purple-400"}>
+                    <span className={cat === c.slug ? "text-emerald-100 font-bold" : "text-slate-400"}>
                       {c.count}
                     </span>
                   </button>
@@ -193,7 +193,7 @@ export function ShopClient({ products, categories, initial }: Props) {
             </div>
 
             <div>
-              <div className="text-xs font-bold uppercase tracking-wider text-purple-950 mb-3">Max Price</div>
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Max Price</div>
               <input
                 type="range"
                 min={20}
@@ -201,21 +201,21 @@ export function ShopClient({ products, categories, initial }: Props) {
                 step={20}
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
-                className="w-full accent-amber-500"
+                className="w-full accent-[#067a46]"
               />
-              <div className="flex justify-between text-[11px] text-purple-700 mt-1 font-bold">
+              <div className="flex justify-between text-[11px] text-slate-500 mt-1 font-bold">
                 <span>₹20</span>
                 <span>Up to ₹{maxPrice}</span>
               </div>
             </div>
 
             <div>
-              <label className="flex items-center gap-2 text-xs cursor-pointer text-purple-950 font-bold">
+              <label className="flex items-center gap-2 text-xs cursor-pointer text-slate-700 font-bold">
                 <input
                   type="checkbox"
                   checked={organicOnly}
                   onChange={(e) => setOrganicOnly(e.target.checked)}
-                  className="w-4 h-4 accent-amber-500 rounded"
+                  className="w-4 h-4 accent-[#067a46] rounded"
                 />
                 <span>Organic only</span>
               </label>
@@ -225,7 +225,7 @@ export function ShopClient({ products, categories, initial }: Props) {
               onClick={() => {
                 setCat("all"); setOrganicOnly(false); setMaxPrice(1000); setQ(""); setSort("popular");
               }}
-              className="w-full text-xs text-purple-700 hover:text-purple-950 underline underline-offset-4 font-bold"
+              className="w-full text-xs text-slate-500 hover:text-[#067a46] underline underline-offset-4 font-bold"
             >
               Reset all filters
             </button>
@@ -245,11 +245,11 @@ export function ShopClient({ products, categories, initial }: Props) {
           ) : (
             <>
               {filtered.length === 0 ? (
-                <div className="bg-white rounded-3xl border border-purple-100 p-10 text-center shadow-soft">
-                  <div className="w-14 h-14 bg-purple-50 text-purple-800 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl">
+                <div className="bg-white rounded-3xl border border-slate-100 p-10 text-center shadow-soft">
+                  <div className="w-14 h-14 bg-emerald-50 text-[#067a46] rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl">
                     🌱
                   </div>
-                  <h3 className="font-display text-2xl font-bold text-purple-950 mb-2">
+                  <h3 className="font-display text-2xl font-bold text-slate-900 mb-2">
                     No matching produce found
                   </h3>
                   <p className="text-slate-500 text-xs max-w-sm mx-auto mb-6">
@@ -257,7 +257,7 @@ export function ShopClient({ products, categories, initial }: Props) {
                   </p>
                   <button
                     onClick={() => { setQ(""); setCat("all"); }}
-                    className="px-5 py-2.5 rounded-full bg-purple-950 text-white font-bold text-xs hover:bg-purple-900"
+                    className="px-5 py-2.5 rounded-full bg-[#067a46] text-white font-bold text-xs hover:bg-[#046338]"
                   >
                     View All Produce
                   </button>

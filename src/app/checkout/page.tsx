@@ -11,9 +11,9 @@ export const metadata: Metadata = {
 
 export default function CheckoutPage() {
   return (
-    <div className="min-h-screen bg-[#fafaf9] text-purple-950 flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 mx-auto max-w-7xl w-full px-5 md:px-8 py-10 md:py-14">
+      <main className="flex-1 mx-auto max-w-[1400px] w-full px-5 md:px-8 py-10 md:py-14">
         <CustomerAuthGuard>
           <CheckoutForm />
         </CustomerAuthGuard>

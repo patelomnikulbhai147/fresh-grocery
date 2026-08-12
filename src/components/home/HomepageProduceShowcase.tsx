@@ -19,8 +19,8 @@ export function HomepageProduceShowcase() {
       <div className="mx-auto max-w-[1400px] px-4 md:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           
-          {/* Left: Fresh Vegetables Glass Panel */}
-          <div className="bg-white/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-white/80 shadow-md flex flex-col justify-between">
+          {/* Left: Fresh Vegetables Panel */}
+          <div className="bg-white rounded-[28px] p-6 md:p-8 border border-slate-100 shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200/60">
                 <div className="flex items-center gap-3">
@@ -53,24 +53,21 @@ export function HomepageProduceShowcase() {
                     <Link
                       key={item.id}
                       href={`/product/${item.slug}`}
-                      className="group bg-white/90 border border-white/90 rounded-2xl p-4 shadow-sm hover:shadow-md hover:bg-white transition text-center flex flex-col items-center justify-between h-full"
+                      className="group card-option12 p-3 text-center flex flex-col items-center justify-between h-full"
                     >
-                      <div className="relative w-full aspect-square mb-3 overflow-hidden rounded-xl bg-slate-50 border border-slate-100">
+                      <div className="relative w-full aspect-square mb-2 overflow-hidden rounded-xl">
                         <Image
                           src={item.image}
                           alt={item.name}
                           fill
                           sizes="(max-width: 640px) 40vw, 200px"
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="object-contain group-hover:scale-110 transition-transform duration-300 p-2"
                         />
                       </div>
-                      <div className="w-full">
-                        <h3 className="font-display font-bold text-sm md:text-base text-slate-900 group-hover:text-[#067a46] transition-colors truncate">
+                      <div className="w-full pb-1">
+                        <h3 className="font-bold text-sm text-slate-800 group-hover:text-[#067a46] transition-colors truncate">
                           {item.name.split("/")[0].trim()}
                         </h3>
-                        <div className="text-xs font-semibold text-slate-500 mt-1">
-                          {formatINR(minPrice)} - {formatINR(maxPrice)} / kg
-                        </div>
                       </div>
                     </Link>
                   );
@@ -79,8 +76,8 @@ export function HomepageProduceShowcase() {
             </div>
           </div>
 
-          {/* Right: Seasonal Fruits Glass Panel */}
-          <div className="bg-white/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-white/80 shadow-md flex flex-col justify-between">
+          {/* Right: Seasonal Fruits Panel */}
+          <div className="bg-white rounded-[28px] p-6 md:p-8 border border-slate-100 shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200/60">
                 <div className="flex items-center gap-3">
@@ -113,24 +110,21 @@ export function HomepageProduceShowcase() {
                     <Link
                       key={item.id}
                       href={`/product/${item.slug}`}
-                      className="group bg-white/90 border border-white/90 rounded-2xl p-4 shadow-sm hover:shadow-md hover:bg-white transition text-center flex flex-col items-center justify-between h-full"
+                      className="group card-option12 p-3 text-center flex flex-col items-center justify-between h-full"
                     >
-                      <div className="relative w-full aspect-square mb-3 overflow-hidden rounded-xl bg-slate-50 border border-slate-100">
+                      <div className="relative w-full aspect-square mb-2 overflow-hidden rounded-xl">
                         <Image
                           src={item.image}
                           alt={item.name}
                           fill
                           sizes="(max-width: 640px) 40vw, 200px"
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="object-contain group-hover:scale-110 transition-transform duration-300 p-2"
                         />
                       </div>
-                      <div className="w-full">
-                        <h3 className="font-display font-bold text-sm md:text-base text-slate-900 group-hover:text-[#067a46] transition-colors truncate">
+                      <div className="w-full pb-1">
+                        <h3 className="font-bold text-sm text-slate-800 group-hover:text-[#067a46] transition-colors truncate">
                           {item.name.split("/")[0].trim()}
                         </h3>
-                        <div className="text-xs font-semibold text-slate-500 mt-1">
-                          {formatINR(minPrice)} - {formatINR(maxPrice)} / kg
-                        </div>
                       </div>
                     </Link>
                   );

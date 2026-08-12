@@ -57,18 +57,12 @@ export function Header() {
 
   return (
     <>
-      {/* Top Announcement Bar - Reference Style */}
-      <div className="w-full bg-[#063b25] text-white py-1.5 px-4 text-center text-xs font-semibold select-none flex items-center justify-center gap-2 z-50">
-        <span>🇮🇳 Happy Independence Day! Celebrate 15 August with Freshness & Quality.</span>
-      </div>
+
 
       {/* Glassmorphism Navigation Bar */}
       <header
         className={cn(
-          "sticky top-0 z-40 transition-all duration-300",
-          scrolled
-            ? "bg-white/90 backdrop-blur-lg border-b border-white/80 shadow-sm"
-            : "bg-white/80 backdrop-blur-md border-b border-white/60"
+          "sticky top-0 z-40 transition-all duration-300 bg-white border-b border-slate-100 shadow-sm"
         )}
       >
         <div className="mx-auto max-w-[1400px] px-4 md:px-8 py-3 flex items-center justify-between gap-4">

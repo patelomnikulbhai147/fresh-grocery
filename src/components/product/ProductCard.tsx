@@ -48,34 +48,34 @@ export function ProductCard({ product, priority = false }: { product: Product; p
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.15 }}
       transition={{ duration: 0.35 }}
-      className="group relative bg-white rounded-3xl border border-purple-100 hover:border-purple-300 hover:shadow-lift transition-all duration-300 overflow-hidden flex flex-col"
+      className="group relative card-option12 hover:border-[#067a46]/30 overflow-hidden flex flex-col"
     >
       {/* Image Container */}
-      <div className="relative block aspect-[5/4] overflow-hidden bg-gradient-to-br from-purple-50 to-amber-50/50">
-        <Link href={`/product/${product.slug}`} className="absolute inset-0 z-0">
+      <div className="relative block aspect-[5/4] overflow-hidden bg-gradient-to-br from-slate-50 to-emerald-50/30">
+        <Link href={`/product/${product.slug}`} className="absolute inset-0 z-0 p-4">
           <Image
             src={product.image}
             alt={product.name}
             fill
             priority={priority}
             sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 240px"
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
+            className="object-contain transition-transform duration-700 group-hover:scale-105 mix-blend-multiply"
           />
         </Link>
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5 pointer-events-none z-10">
           {off > 0 && (
-            <span className="inline-flex items-center gap-1 bg-amber-500 text-purple-950 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full shadow-sm">
+            <span className="inline-flex items-center gap-1 bg-[#ea580c] text-white text-[11px] font-extrabold px-2.5 py-0.5 rounded-full shadow-sm">
               {off}% OFF
             </span>
           )}
           {product.organic && (
-            <span className="inline-flex items-center gap-1 bg-white/95 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+            <span className="inline-flex items-center gap-1 bg-white/95 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200 shadow-sm">
               <LeafIcon className="w-3 h-3 text-emerald-600" /> Organic
             </span>
           )}
           {product.newArrival && (
-            <span className="inline-flex items-center gap-1 bg-purple-950 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+            <span className="inline-flex items-center gap-1 bg-[#067a46] text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
               Seasonal
             </span>
           )}
@@ -95,7 +95,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           aria-label="Wishlist"
           className={cn(
             "absolute top-3 right-3 w-8 h-8 grid place-items-center rounded-full backdrop-blur transition z-10 shadow-sm",
-            isWished ? "bg-rose-500 text-white" : "bg-white/80 hover:bg-white text-purple-800"
+            isWished ? "bg-rose-500 text-white" : "bg-white text-slate-400 hover:text-rose-500"
           )}
         >
           <Heart className="w-3.5 h-3.5" fill={isWished ? "currentColor" : "none"} />
@@ -115,11 +115,11 @@ export function ProductCard({ product, priority = false }: { product: Product; p
                   "text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full border flex items-center gap-1 transition",
                   m === mode
                     ? m === "instant"
-                      ? "bg-purple-900 text-white border-purple-900"
+                      ? "bg-[#067a46] text-white border-[#067a46]"
                       : m === "bulk"
-                      ? "bg-amber-500 text-purple-950 border-amber-500 font-extrabold"
+                      ? "bg-[#ea580c] text-white border-[#ea580c] font-extrabold"
                       : "bg-emerald-700 text-white border-emerald-700"
-                    : "bg-white text-purple-900 border-purple-200 hover:border-purple-400"
+                    : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
                 )}
               >
                 {m === "instant" ? "Direct" : m === "bulk" ? "Wholesale" : "Supply"}
@@ -128,17 +128,17 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           })}
         </div>
 
-        <div className="text-[10px] uppercase font-bold tracking-widest text-purple-600">{product.subcategory}</div>
-        <Link href={`/product/${product.slug}`} className="font-display text-[16px] leading-snug font-bold text-purple-950 hover:text-amber-600 line-clamp-2">
+        <div className="text-[10px] uppercase font-bold tracking-widest text-slate-400">{product.subcategory}</div>
+        <Link href={`/product/${product.slug}`} className="font-display text-[16px] leading-snug font-bold text-slate-800 hover:text-[#067a46] line-clamp-2">
           {product.name}
         </Link>
 
         <div className="flex items-center gap-2 text-xs">
           <div className="flex items-center gap-0.5 text-amber-500">
             <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-            <span className="font-bold text-purple-950">{product.rating.toFixed(1)}</span>
+            <span className="font-bold text-slate-700">{product.rating.toFixed(1)}</span>
           </div>
-          <span className="text-purple-300">·</span>
+          <span className="text-slate-300">·</span>
           <span className="text-slate-500 text-[11px]">{product.reviews} reviews</span>
         </div>
 
@@ -152,8 +152,8 @@ export function ProductCard({ product, priority = false }: { product: Product; p
                 className={cn(
                   "text-[10px] font-semibold px-2 py-0.5 rounded-full border transition",
                   i === weightIdx
-                    ? "bg-purple-950 text-white border-purple-950"
-                    : "bg-white text-purple-900 border-purple-100 hover:border-purple-300"
+                    ? "bg-slate-800 text-white border-slate-800"
+                    : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
                 )}
               >
                 {w.label}
@@ -163,17 +163,17 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         )}
 
         {/* Price + CTA */}
-        <div className="mt-auto pt-3 flex items-end justify-between gap-2 border-t border-purple-50">
+        <div className="mt-auto pt-3 flex items-end justify-between gap-2 border-t border-slate-100">
           <div>
             <div className="flex items-baseline gap-2">
-              <div className="font-display text-lg font-black text-purple-950">{formatINR(price)}</div>
+              <div className="font-display text-lg font-black text-slate-800">{formatINR(price)}</div>
               {mrp > price && (
                 <div className="text-xs text-slate-400 line-through">{formatINR(mrp)}</div>
               )}
             </div>
             <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-0.5 font-medium">
-              {mode === "instant" && <><Sparkles className="w-3 h-3 text-amber-500" /> Direct Farm Fresh</>}
-              {mode === "bulk" && <><Package className="w-3 h-3 text-purple-700" /> MOQ {weight.bulk?.moq} units</>}
+              {mode === "instant" && <><Sparkles className="w-3 h-3 text-[#ea580c]" /> Direct Farm Fresh</>}
+              {mode === "bulk" && <><Package className="w-3 h-3 text-slate-600" /> MOQ {weight.bulk?.moq} units</>}
               {mode === "subscription" && <><Building className="w-3 h-3 text-emerald-600" /> Regular Supply</>}
             </div>
           </div>
@@ -184,24 +184,24 @@ export function ProductCard({ product, priority = false }: { product: Product; p
                 add(product, weightIdx, mode);
                 push(`${product.name} added to order`);
               }}
-              className="inline-flex items-center gap-1 text-xs font-bold px-3.5 py-2 rounded-full bg-amber-500 hover:bg-amber-400 text-purple-950 transition-all shadow-sm"
+              className="inline-flex items-center gap-1 text-xs font-bold px-3.5 py-2 rounded-lg bg-[#067a46] hover:bg-[#046338] text-white transition-all shadow-sm"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add</span>
             </button>
           ) : (
-            <div className="flex items-center gap-1 bg-purple-950 text-white rounded-full p-0.5">
+            <div className="flex items-center gap-1 bg-[#067a46] text-white rounded-lg p-1">
               <button
                 onClick={() => updateQty(product.id, weight.label, mode, inCart.quantity - 1)}
-                className="w-6 h-6 grid place-items-center rounded-full hover:bg-purple-800"
+                className="w-6 h-6 grid place-items-center rounded bg-white/20 hover:bg-white/30"
                 aria-label="Decrease"
               >
                 <Minus className="w-3 h-3" />
               </button>
-              <span className="w-4 text-center text-xs font-bold">{inCart.quantity}</span>
+              <span className="w-6 text-center text-xs font-bold">{inCart.quantity}</span>
               <button
                 onClick={() => updateQty(product.id, weight.label, mode, inCart.quantity + 1)}
-                className="w-6 h-6 grid place-items-center rounded-full hover:bg-purple-800"
+                className="w-6 h-6 grid place-items-center rounded bg-white/20 hover:bg-white/30"
                 aria-label="Increase"
               >
                 <Plus className="w-3 h-3" />

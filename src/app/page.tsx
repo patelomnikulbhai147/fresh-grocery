@@ -2,8 +2,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/home/Hero";
 import { HomepageProduceShowcase } from "@/components/home/HomepageProduceShowcase";
-import { WhereWeSupplySection } from "@/components/home/WhereWeSupplySection";
-import { FranchiseSection } from "@/components/home/FranchiseSection";
+import { QuickAccessCards } from "@/components/home/QuickAccessCards";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -33,11 +32,8 @@ export default function HomePage() {
           {/* 2. Side-by-Side Glassmorphism Produce Showcase */}
           <HomepageProduceShowcase />
 
-          {/* 3. Where We Supply Section (Hostels, Hotels, Shops) */}
-          <WhereWeSupplySection />
-
-          {/* 4. FlashKart Shop Franchise Banner */}
-          <FranchiseSection />
+          {/* 3. Quick Access Cards (Option 12) */}
+          <QuickAccessCards />
         </main>
         <Footer />
       </div>

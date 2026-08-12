@@ -59,7 +59,7 @@ export default async function ProductPage({ params }: Params) {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafaf9] text-purple-950 flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <Header />
       <JsonLd data={schema} />
       <main className="flex-1 mx-auto max-w-7xl w-full px-5 md:px-8 py-10 md:py-14">
