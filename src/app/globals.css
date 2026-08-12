@@ -47,6 +47,32 @@
   --color-india-navy: #000080;
   --color-navy-900: #0f172a;
   --color-navy-950: #020617;
+
+  /* Global Overrides for Theme Consistency */
+  --color-purple-50: #f8fafc;
+  --color-purple-100: #f1f5f9;
+  --color-purple-200: #e2e8f0;
+  --color-purple-300: #cbd5e1;
+  --color-purple-400: #94a3b8;
+  --color-purple-500: #64748b;
+  --color-purple-600: #475569;
+  --color-purple-700: #334155;
+  --color-purple-800: #1e293b;
+  --color-purple-900: #0f172a;
+  --color-purple-950: #020617;
+
+  /* Force brand to use navy */
+  --color-brand-50: #f8fafc;
+  --color-brand-100: #f1f5f9;
+  --color-brand-200: #e2e8f0;
+  --color-brand-300: #cbd5e1;
+  --color-brand-400: #94a3b8;
+  --color-brand-500: #64748b;
+  --color-brand-600: #475569;
+  --color-brand-700: #334155;
+  --color-brand-800: #1e293b;
+  --color-brand-900: #0f172a;
+  --color-brand-950: #020617;
 }
 
 @layer base {

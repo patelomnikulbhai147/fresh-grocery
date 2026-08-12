@@ -25,7 +25,7 @@ export function Hero() {
       <div className="relative z-10 mx-auto max-w-7xl px-5 md:px-8 py-12 md:py-20 w-full flex-1 flex flex-col lg:flex-row items-center gap-12 lg:gap-8">
         
         {/* Left Side: Copy */}
-        <div className="w-full lg:w-[55%] xl:w-[60%] pt-8">
+        <div className="w-full lg:w-[50%] xl:w-[50%] pt-8">
           {/* Badge */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -106,15 +106,14 @@ export function Hero() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3, duration: 0.7, ease: "easeOut" }}
-          className="w-full lg:w-[45%] xl:w-[40%] flex justify-center lg:justify-end relative"
+          className="w-full lg:w-[50%] xl:w-[50%] flex justify-center lg:justify-end relative"
         >
-          <div className="relative w-full max-w-lg aspect-square lg:aspect-auto lg:h-[500px]">
-             {/* Note: The generated hero_basket image has a white background. Using mix-blend-multiply helps it blend if the background isn't purely white, but it's best left normal if we want the crispness. */}
+          <div className="relative w-full max-w-lg aspect-square lg:aspect-auto lg:h-[650px] lg:scale-110 lg:-mb-12 origin-bottom">
             <Image
-              src="/images/hero_basket.png"
+              src="/images/hero_basket_transparent.png"
               alt="Fresh Produce Basket Independence Day"
               fill
-              className="object-contain drop-shadow-2xl mix-blend-multiply"
+              className="object-contain drop-shadow-2xl"
               priority
             />
           </div>
@@ -127,30 +126,30 @@ export function Hero() {
         <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-india-saffron via-white to-india-green opacity-50" />
         
         <div className="mx-auto max-w-7xl px-4 md:px-6 py-4 md:py-5">
-          <div className="flex flex-wrap md:flex-nowrap items-center justify-center md:justify-between gap-4 md:gap-2">
+          <div className="grid grid-cols-2 md:flex md:flex-nowrap items-center justify-center md:justify-between gap-4 md:gap-2">
             
-            <div className="flex items-center gap-3 px-2 md:border-r border-slate-700/50 flex-1 justify-center md:justify-start last:border-0 min-w-[140px]">
+            <div className="flex items-center gap-3 px-2 md:border-r border-slate-700/50 flex-1 justify-start md:justify-start last:border-0 min-w-0 md:min-w-[140px]">
               <Leaf className="w-6 h-6 text-india-green" />
               <div className="text-xs font-bold leading-tight">Fresh & Healthy<br/>Everyday</div>
             </div>
 
-            <div className="flex items-center gap-3 px-2 md:border-r border-slate-700/50 flex-1 justify-center md:justify-center last:border-0 min-w-[140px]">
-              <Tractor className="w-6 h-6 text-india-saffron" />
+            <div className="flex items-center gap-3 px-2 md:border-r border-slate-700/50 flex-1 justify-start md:justify-center last:border-0 min-w-0 md:min-w-[140px]">
+              <Tractor className="w-6 h-6 text-india-saffron shrink-0" />
               <div className="text-xs font-bold leading-tight">Farm Fresh<br/>Guarantee</div>
             </div>
 
-            <div className="flex items-center gap-3 px-2 md:border-r border-slate-700/50 flex-1 justify-center md:justify-center last:border-0 min-w-[140px]">
-              <Clock className="w-6 h-6 text-india-green" />
+            <div className="flex items-center gap-3 px-2 md:border-r border-slate-700/50 flex-1 justify-start md:justify-center last:border-0 min-w-0 md:min-w-[140px]">
+              <Clock className="w-6 h-6 text-india-green shrink-0" />
               <div className="text-xs font-bold leading-tight">On-Time<br/>Delivery</div>
             </div>
 
-            <div className="flex items-center gap-3 px-2 md:border-r border-slate-700/50 flex-1 justify-center md:justify-center last:border-0 min-w-[140px]">
-              <Users className="w-6 h-6 text-india-saffron" />
+            <div className="flex items-center gap-3 px-2 md:border-r border-slate-700/50 flex-1 justify-start md:justify-center last:border-0 min-w-0 md:min-w-[140px]">
+              <Users className="w-6 h-6 text-india-saffron shrink-0" />
               <div className="text-xs font-bold leading-tight">Trusted by<br/>Hundreds</div>
             </div>
 
-            <div className="flex items-center gap-3 px-2 flex-1 justify-center md:justify-end min-w-[140px]">
-              <Sprout className="w-6 h-6 text-india-green" />
+            <div className="flex items-center gap-3 px-2 flex-1 justify-start md:justify-end min-w-0 md:min-w-[140px] col-span-2 md:col-span-1 border-t md:border-t-0 border-slate-700/50 pt-3 md:pt-0 mt-1 md:mt-0">
+              <Sprout className="w-6 h-6 text-india-green shrink-0" />
               <div className="text-xs font-bold leading-tight">Grow with<br/>FlashKart</div>
             </div>
 

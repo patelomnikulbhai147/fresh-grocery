@@ -71,7 +71,11 @@ export function Header() {
   return (
     <>
       {/* Tricolor Independence Day Header Accent */}
-      <div className="h-1.5 w-full bg-gradient-to-r from-india-saffron via-white to-india-green" />
+      <div className="w-full bg-gradient-to-r from-india-saffron/20 via-white to-india-green/20 border-b border-slate-200">
+        <div className="w-full text-center py-1 text-[10px] sm:text-xs font-black text-navy-950 tracking-widest uppercase flex items-center justify-center gap-2">
+          🇮🇳 Happy Independence Day <span className="opacity-40 hidden sm:inline">|</span> <span className="hidden sm:inline text-india-green">Proud to be Indian</span>
+        </div>
+      </div>
       
       <header
         className={cn(
