@@ -163,7 +163,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         )}
 
         {/* Price + CTA */}
-        <div className="mt-auto pt-3 flex items-end justify-between gap-2 border-t border-slate-100">
+        <div className="mt-auto pt-3 flex flex-wrap items-end justify-between gap-2 border-t border-slate-100">
           <div>
             <div className="flex items-baseline gap-2">
               <div className="font-display text-lg font-black text-slate-800">{formatINR(price)}</div>
@@ -184,7 +184,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
                 add(product, weightIdx, mode);
                 push(`${product.name} added to order`);
               }}
-              className="inline-flex items-center gap-1 text-xs font-bold px-3.5 py-2 rounded-lg bg-[#067a46] hover:bg-[#046338] text-white transition-all shadow-sm"
+              className="inline-flex items-center gap-1 text-xs font-bold px-3 sm:px-3.5 py-2 rounded-lg bg-[#067a46] hover:bg-[#046338] text-white transition-all shadow-sm"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add</span>

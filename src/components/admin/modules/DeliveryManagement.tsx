@@ -147,7 +147,7 @@ export function DeliveryManagement() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 pt-3 border-t border-brand-100 dark:border-zinc-800 text-center text-xs">
+            <div className="grid grid-cols-1 xs:grid-cols-3 gap-2 pt-3 border-t border-brand-100 dark:border-zinc-800 text-center text-xs">
               <div className="p-2 rounded-xl bg-brand-50/50 dark:bg-zinc-800/50">
                 <div className="text-[10px] text-brand-600 dark:text-zinc-400 font-bold uppercase">SLA Time</div>
                 <div className="font-bold text-sm text-brand-950 dark:text-zinc-100 mt-0.5 flex items-center justify-center gap-1">

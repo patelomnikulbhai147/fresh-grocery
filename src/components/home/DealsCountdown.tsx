@@ -68,7 +68,7 @@ export function DealsCountdown() {
                 Hand-picked daily specials on crisp vegetables and seasonal fruits — directly from farm hubs to your kitchen.
               </p>
             </div>
-            <div className="flex items-center gap-3 text-purple-950">
+            <div className="flex items-center gap-2 sm:gap-3 text-purple-950">
               <Pad value={h} label="Hours" />
               <div className="text-2xl font-bold text-amber-400 opacity-70 self-start mt-4">:</div>
               <Pad value={m} label="Mins" />

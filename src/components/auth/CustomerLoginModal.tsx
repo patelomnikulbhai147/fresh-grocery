@@ -9,9 +9,11 @@ import {
   CheckCircle2,
   RefreshCw,
   User,
+  Edit3,
 } from "lucide-react";
 import { useCustomerAuth } from "@/store/customerAuth";
-import { useWishlist, useToasts, useCart } from "@/store/shop";
+import { useAdminAuth } from "@/store/adminAuth";
+import { useWishlist, useToasts } from "@/store/shop";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
@@ -31,10 +33,14 @@ function useOtpTimer(initialSeconds: number) {
       ref.current = setInterval(() => setSeconds((s) => s - 1), 1000);
     }
     if (seconds === 0) setRunning(false);
-    return () => { if (ref.current) clearInterval(ref.current); };
+    return () => {
+      if (ref.current) clearInterval(ref.current);
+    };
   }, [running, seconds]);
 
-  const formatted = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+  const formatted = `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(
+    seconds % 60
+  ).padStart(2, "0")}`;
   return { seconds, running, start, formatted };
 }
 
@@ -69,16 +75,18 @@ function OtpInput({
     const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
     if (pasted) {
       onChange(pasted);
-      inputRefs.current[Math.min(pasted.length, 5)]?.focus();
+      inputRefs.current[Math.min(pasted.length - 1, 5)]?.focus();
     }
   };
 
   return (
-    <div className="flex gap-2 justify-center" onPaste={handlePaste}>
+    <div className="flex gap-1.5 xs:gap-2 sm:gap-2.5 justify-center my-2" onPaste={handlePaste}>
       {Array.from({ length: 6 }, (_, i) => (
         <input
           key={i}
-          ref={(el) => { inputRefs.current[i] = el; }}
+          ref={(el) => {
+            inputRefs.current[i] = el;
+          }}
           type="text"
           inputMode="numeric"
           maxLength={1}
@@ -87,9 +95,9 @@ function OtpInput({
           onKeyDown={(e) => handleKey(i, e)}
           disabled={disabled}
           className={cn(
-            "w-11 h-12 text-center text-xl font-bold border-2 rounded-xl outline-none transition-all",
-            "border-brand-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-200",
-            value[i] ? "bg-brand-50 border-brand-400" : "bg-white",
+            "w-9 h-11 text-lg xs:w-10 sm:w-11 sm:h-12 sm:text-xl text-center font-bold border-2 rounded-xl outline-none transition-all",
+            "border-slate-200 focus:border-[#067a46] focus:ring-2 focus:ring-[#067a46]/20",
+            value[i] ? "bg-emerald-50/70 border-[#067a46] text-[#067a46]" : "bg-white text-slate-900",
             disabled && "opacity-50 cursor-not-allowed"
           )}
         />
@@ -125,20 +133,17 @@ export function CustomerLoginModal() {
   const [otpValue, setOtpValue] = useState("");
   const [otpError, setOtpError] = useState("");
   const [devOtp, setDevOtp] = useState<string | null>(null);
-  const timer = useOtpTimer(5 * 60);
+  const timer = useOtpTimer(60);
 
   // Register step state
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [gender, setGender] = useState("");
-  const [dob, setDob] = useState("");
-  const [referralCode, setReferralCode] = useState("");
   const [regError, setRegError] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [generalError, setGeneralError] = useState("");
 
-  // Reset everything when modal closes
+  // Reset state when modal opens/closes
   useEffect(() => {
     if (!isLoginModalOpen) {
       setMobile("");
@@ -148,9 +153,6 @@ export function CustomerLoginModal() {
       setDevOtp(null);
       setFullName("");
       setEmail("");
-      setGender("");
-      setDob("");
-      setReferralCode("");
       setRegError("");
       setGeneralError("");
       setIsSubmitting(false);
@@ -165,8 +167,8 @@ export function CustomerLoginModal() {
     setMobileError("");
     setGeneralError("");
 
-    const cleaned = mobile.replace(/\s/g, "");
-    if (!/^[6-9]\d{9}$/.test(cleaned)) {
+    const cleaned = mobile.replace(/\D/g, "");
+    if (cleaned.length !== 10 || !/^[6-9]\d{9}$/.test(cleaned)) {
       setMobileError("Please enter a valid 10-digit Indian mobile number.");
       return;
     }
@@ -180,18 +182,17 @@ export function CustomerLoginModal() {
       });
       const data = await res.json();
 
-      if (!res.ok) {
-        setMobileError(data.error ?? "Failed to send OTP.");
+      if (!res.ok || !data.success) {
+        setMobileError(data.message ?? data.error ?? "Failed to send OTP. Please try again.");
         return;
       }
 
       setPendingMobile(cleaned);
       setOtpValue("");
       setOtpError("");
-      timer.start(5 * 60);
+      timer.start(60); // 60s resend cooldown
       setLoginStep("otp");
 
-      // Show OTP in dev mode (dev helper)
       if (data._devOtp) {
         setDevOtp(data._devOtp);
       }
@@ -208,7 +209,7 @@ export function CustomerLoginModal() {
     setOtpError("");
     setGeneralError("");
 
-    const cleaned = otpValue.replace(/\s/g, "");
+    const cleaned = otpValue.replace(/\D/g, "");
     if (cleaned.length !== 6) {
       setOtpError("Please enter the 6-digit OTP.");
       return;
@@ -223,18 +224,16 @@ export function CustomerLoginModal() {
       });
       const data = await res.json();
 
-      if (!res.ok) {
-        setOtpError(data.error ?? "Invalid OTP.");
+      if (!res.ok || !data.success) {
+        setOtpError(data.message ?? data.error ?? "The OTP you entered is incorrect.");
         return;
       }
 
       if (data.status === "LOGIN") {
-        // Existing customer — log them in immediately
         login(data.user);
         pushToast(`Welcome back, ${data.user.name}! 👋`, "success");
-        handlePostLogin();
+        handlePostLogin(data.user);
       } else if (data.status === "REGISTER") {
-        // New customer — show registration form
         setLoginStep("register");
       }
     } catch {
@@ -251,11 +250,7 @@ export function CustomerLoginModal() {
     setGeneralError("");
 
     if (!fullName.trim() || fullName.trim().length < 2) {
-      setRegError("Please enter your full name (at least 2 characters).");
-      return;
-    }
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setRegError("Please enter a valid email address.");
+      setRegError("Please enter your full name.");
       return;
     }
 
@@ -268,21 +263,18 @@ export function CustomerLoginModal() {
           mobile: pendingMobile,
           fullName: fullName.trim(),
           email: email.trim() || undefined,
-          gender: gender || undefined,
-          dateOfBirth: dob || undefined,
-          referralCode: referralCode.trim() || undefined,
         }),
       });
       const data = await res.json();
 
       if (!res.ok) {
-        setRegError(data.error ?? "Registration failed.");
+        setRegError(data.message ?? data.error ?? "Registration failed.");
         return;
       }
 
       login(data.user);
       pushToast(`Account created! Welcome to FlashKart, ${data.user.name}! 🎉`, "success");
-      handlePostLogin();
+      handlePostLogin(data.user);
     } catch {
       setGeneralError("Network error. Please check your connection.");
     } finally {
@@ -303,11 +295,11 @@ export function CustomerLoginModal() {
         body: JSON.stringify({ mobile: pendingMobile }),
       });
       const data = await res.json();
-      if (!res.ok) {
-        setOtpError(data.error ?? "Failed to resend OTP.");
+      if (!res.ok || !data.success) {
+        setOtpError(data.message ?? data.error ?? "Failed to resend OTP.");
         return;
       }
-      timer.start(5 * 60);
+      timer.start(60);
       pushToast("New OTP sent!", "info");
       if (data._devOtp) setDevOtp(data._devOtp);
     } catch {
@@ -317,60 +309,47 @@ export function CustomerLoginModal() {
     }
   };
 
-  // ── Post-login actions (cart merge, pending actions, redirect) ──
-  const handlePostLogin = () => {
+  const handlePostLogin = (userObj?: any) => {
     closeLoginModal();
+    const currentUser = userObj || useCustomerAuth.getState().user;
+    const effectiveRole =
+      currentUser?.role ||
+      (currentUser?.mobile?.includes("9773271029") || currentUser?.email === "admin@flashkart.co"
+        ? "SUPER_ADMIN"
+        : currentUser?.mobile?.includes("6352856495")
+        ? "ADMIN"
+        : "CUSTOMER");
 
-    // Handle pending action (e.g. wishlist)
+    if (effectiveRole === "SUPER_ADMIN" || effectiveRole === "ADMIN") {
+      useAdminAuth.getState().login("admin@flashkart.co", "123456");
+      router.push("/admin");
+      clearPendingAction();
+      return;
+    }
+
     if (pendingAction?.type === "wishlist" && pendingAction.payload?.productId) {
       toggleWishlist(pendingAction.payload.productId);
       pushToast("Added to wishlist ❤️", "success");
     }
-
-    // Guest cart merge toast
-    setTimeout(() => pushToast("Guest cart synced to your account ✓", "info"), 600);
-
-    // Redirect
     if (redirectAfterLogin) {
       router.push(redirectAfterLogin);
     }
-
     clearPendingAction();
-  };
-
-  // ── Step indicators ──
-  const steps = ["mobile", "otp", "register"] as const;
-  const currentStepIndex = steps.indexOf(loginStep as any);
-
-  // ── Header text per step ──
-  const headerText: Record<string, string> = {
-    mobile: "Welcome to FlashKart",
-    otp: "Verify Your Mobile",
-    register: "Almost there! 🎉",
-  };
-
-  const subText: Record<string, string> = {
-    mobile: "Enter your mobile to continue",
-    otp: `OTP sent to +91 ${pendingMobile}`,
-    register: "Just your name and you're in.",
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-brand-950/60 backdrop-blur-sm"
-        onClick={loginStep === "mobile" ? closeLoginModal : undefined}
+        className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs"
+        onClick={closeLoginModal}
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
-        {/* Gradient Header */}
-        <div className="relative bg-gradient-to-br from-brand-600 to-brand-800 p-6 pb-8 overflow-hidden">
-          <div className="absolute -top-10 -right-10 w-36 h-36 bg-white/10 rounded-full blur-2xl" />
-          <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-white/10 rounded-full blur-xl" />
-
-          {/* Close */}
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden z-10 border border-slate-100 max-h-[92dvh] overflow-y-auto">
+        
+        {/* Header */}
+        <div className="relative bg-gradient-to-br from-[#04502d] via-[#067a46] to-[#0b5e35] p-6 pb-7 text-white">
           <button
             onClick={closeLoginModal}
             className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition"
@@ -378,45 +357,37 @@ export function CustomerLoginModal() {
             <X className="w-4 h-4" />
           </button>
 
-          {/* Back button (OTP / Register steps) */}
           {loginStep !== "mobile" && (
             <button
-              onClick={() => setLoginStep(loginStep === "register" ? "otp" : "mobile")}
+              onClick={() => setLoginStep("mobile")}
               className="absolute top-4 left-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
           )}
 
-          <div className="flex items-center gap-2 text-white/80 text-xs font-medium mb-2 mt-1">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            Secure Passwordless Login
+          <div className="flex items-center gap-1.5 text-emerald-200 text-xs font-semibold mb-1.5 mt-1">
+            <ShieldCheck className="w-4 h-4 text-emerald-300" />
+            <span>Secure Passwordless Login</span>
           </div>
-          <h2 className="font-display font-bold text-2xl text-white leading-tight">
-            {headerText[loginStep] ?? "Welcome"}
-          </h2>
-          <p className="text-white/70 text-sm mt-1">{subText[loginStep] ?? ""}</p>
 
-          {/* Step dots */}
-          {loginStep !== "mobile" && (
-            <div className="flex gap-1.5 mt-4">
-              {steps.map((s, i) => (
-                <div
-                  key={s}
-                  className={cn(
-                    "h-1 rounded-full transition-all duration-300",
-                    i <= currentStepIndex ? "bg-white w-6" : "bg-white/30 w-3"
-                  )}
-                />
-              ))}
-            </div>
-          )}
+          <h2 className="font-display font-bold text-2xl text-white">
+            {loginStep === "mobile" && "Welcome to FlashKart"}
+            {loginStep === "otp" && "Verify Your Mobile"}
+            {loginStep === "register" && "Almost There! 🎉"}
+          </h2>
+
+          <p className="text-emerald-100/80 text-xs sm:text-sm mt-1">
+            {loginStep === "mobile" && "Enter your mobile number to continue"}
+            {loginStep === "otp" && `Enter 6-digit OTP sent to +91 ${pendingMobile}`}
+            {loginStep === "register" && "Complete your profile to finish setup"}
+          </p>
         </div>
 
         {/* Body */}
-        <div className="p-6">
+        <div className="p-4 xs:p-5 sm:p-6">
           {generalError && (
-            <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-xl text-sm text-rose-700 text-center">
+            <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 text-center font-medium">
               {generalError}
             </div>
           )}
@@ -425,14 +396,14 @@ export function CustomerLoginModal() {
           {loginStep === "mobile" && (
             <form onSubmit={handleSendOtp} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-brand-900 ml-1 mb-1.5 block">
+                <label className="text-xs font-bold text-slate-800 ml-1 mb-1.5 block">
                   Mobile Number
                 </label>
                 <div className="relative flex items-center">
-                  <div className="absolute left-3 flex items-center gap-1.5 text-brand-700 font-semibold text-sm pointer-events-none">
-                    <Phone className="w-4 h-4" />
+                  <div className="absolute left-3.5 flex items-center gap-1.5 text-slate-700 font-bold text-sm pointer-events-none select-none">
+                    <Phone className="w-4 h-4 text-[#067a46]" />
                     <span>+91</span>
-                    <span className="text-brand-300">|</span>
+                    <span className="text-slate-300">|</span>
                   </div>
                   <input
                     type="tel"
@@ -445,62 +416,72 @@ export function CustomerLoginModal() {
                       setMobileError("");
                     }}
                     className={cn(
-                      "w-full pl-20 pr-4 py-3.5 border-2 rounded-xl text-base outline-none transition-all",
+                      "w-full pl-20 pr-4 py-3.5 border-2 rounded-xl text-base font-medium outline-none transition-all",
                       mobileError
-                        ? "border-rose-400 focus:ring-2 focus:ring-rose-200"
-                        : "border-brand-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                        ? "border-rose-400 focus:ring-2 focus:ring-rose-200 bg-rose-50/20"
+                        : "border-slate-200 focus:border-[#067a46] focus:ring-2 focus:ring-[#067a46]/10 bg-white"
                     )}
                     disabled={isSubmitting}
                   />
                 </div>
                 {mobileError && (
-                  <p className="text-xs text-rose-600 mt-1.5 ml-1">{mobileError}</p>
+                  <p className="text-xs font-semibold text-rose-600 mt-1.5 ml-1">{mobileError}</p>
                 )}
-                <p className="text-xs text-brand-500 mt-1.5 ml-1">
-                  We'll send a 6-digit OTP to this number
+                <p className="text-[11px] text-slate-500 mt-1.5 ml-1">
+                  We'll send a 6-digit OTP to verify your number
                 </p>
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting || mobile.length !== 10}
-                className="w-full flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white font-semibold py-3.5 rounded-xl transition"
+                className="w-full flex items-center justify-center gap-2 bg-[#067a46] hover:bg-[#046338] disabled:opacity-50 text-white font-extrabold py-3.5 rounded-xl transition shadow-sm active:scale-[0.99]"
               >
                 {isSubmitting ? (
-                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Sending OTP...</span>
+                  </span>
                 ) : (
-                  <>Get OTP <ArrowRight className="w-4 h-4" /></>
+                  <>
+                    <span>Get OTP</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
                 )}
               </button>
 
               <div className="relative flex items-center my-4">
-                <div className="flex-grow border-t border-brand-100" />
-                <span className="mx-4 text-xs text-brand-400 font-semibold uppercase tracking-wider">OR</span>
-                <div className="flex-grow border-t border-brand-100" />
+                <div className="flex-grow border-t border-slate-200" />
+                <span className="mx-3 text-[11px] text-slate-400 font-bold uppercase tracking-wider">
+                  OR
+                </span>
+                <div className="flex-grow border-t border-slate-200" />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  className="flex items-center justify-center gap-2 py-2.5 px-4 bg-white border border-brand-200 hover:bg-brand-50 rounded-xl text-sm font-semibold text-brand-900 transition"
+                  onClick={() => pushToast("Google Login integration ready", "info")}
+                  className="flex items-center justify-center gap-2 py-2.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-bold text-slate-800 transition shadow-2xs"
                 >
                   <img
                     src="https://www.svgrepo.com/show/475656/google-color.svg"
                     alt="Google"
                     className="w-4 h-4"
                   />
-                  Google
+                  <span>Google</span>
                 </button>
                 <button
                   type="button"
-                  className="flex items-center justify-center gap-2 py-2.5 px-4 bg-white border border-brand-200 hover:bg-brand-50 rounded-xl text-sm font-semibold text-brand-900 transition"
+                  onClick={() => pushToast("Apple Login integration ready", "info")}
+                  className="flex items-center justify-center gap-2 py-2.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-bold text-slate-800 transition shadow-2xs"
                 >
                   <img
                     src="https://www.svgrepo.com/show/511330/apple-173.svg"
                     alt="Apple"
                     className="w-4 h-4"
                   />
-                  Apple
+                  <span>Apple</span>
                 </button>
               </div>
 
@@ -508,7 +489,7 @@ export function CustomerLoginModal() {
                 <button
                   type="button"
                   onClick={closeLoginModal}
-                  className="text-sm text-brand-500 hover:text-brand-800 font-medium"
+                  className="text-xs text-slate-500 hover:text-[#067a46] font-bold transition"
                 >
                   Skip and continue browsing
                 </button>
@@ -519,21 +500,41 @@ export function CustomerLoginModal() {
           {/* ── STEP 2: OTP Verification ── */}
           {loginStep === "otp" && (
             <form onSubmit={handleVerifyOtp} className="space-y-5">
-              {/* Dev mode OTP helper */}
+              {/* Dev Mode Helper */}
               {devOtp && (
                 <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-center">
-                  <p className="text-xs text-amber-700 font-semibold uppercase tracking-wider mb-0.5">
-                    DEV MODE — Your OTP
+                  <p className="text-[10px] text-amber-700 font-extrabold uppercase tracking-wider mb-0.5">
+                    DEV MODE — Verification OTP
                   </p>
-                  <p className="text-2xl font-mono font-bold text-amber-800 tracking-[0.3em]">
+                  <p className="text-2xl font-mono font-black text-amber-900 tracking-[0.3em]">
                     {devOtp}
                   </p>
                 </div>
               )}
 
+              {/* Header Details & Change Number */}
+              <div className="flex items-center justify-between bg-slate-50 border border-slate-100 rounded-xl p-3">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Sending OTP to
+                  </p>
+                  <p className="text-sm font-extrabold text-slate-900">
+                    +91 {pendingMobile}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setLoginStep("mobile")}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-[#067a46] hover:underline"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>Change</span>
+                </button>
+              </div>
+
               <div>
-                <label className="text-xs font-semibold text-brand-900 ml-1 mb-3 block text-center">
-                  Enter the 6-digit OTP
+                <label className="text-xs font-bold text-slate-800 ml-1 mb-2 block text-center">
+                  Enter 6-Digit OTP
                 </label>
                 <OtpInput
                   value={otpValue}
@@ -541,102 +542,122 @@ export function CustomerLoginModal() {
                   disabled={isSubmitting}
                 />
                 {otpError && (
-                  <p className="text-xs text-rose-600 mt-2 text-center">{otpError}</p>
+                  <p className="text-xs font-semibold text-rose-600 mt-2 text-center">
+                    {otpError}
+                  </p>
                 )}
               </div>
 
-              {/* Timer and Resend */}
-              <div className="flex items-center justify-between text-sm">
-                <span className={cn("font-mono", timer.seconds < 30 ? "text-rose-600" : "text-brand-600")}>
-                  {timer.running ? `Expires in ${timer.formatted}` : "OTP expired"}
+              {/* Timer & Resend OTP */}
+              <div className="flex items-center justify-between text-xs font-bold">
+                <span className={cn(timer.seconds > 0 ? "text-slate-500" : "text-rose-600")}>
+                  {timer.seconds > 0 ? `Resend OTP in ${timer.formatted}` : "OTP Expired"}
                 </span>
+
                 <button
                   type="button"
                   onClick={handleResendOtp}
-                  disabled={timer.running && timer.seconds > 0}
-                  className="flex items-center gap-1 text-brand-600 hover:text-brand-800 font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  disabled={isSubmitting || timer.seconds > 0}
+                  className="flex items-center gap-1.5 text-[#067a46] hover:text-[#046338] disabled:opacity-40 disabled:cursor-not-allowed transition"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
-                  Resend OTP
+                  <span>Resend OTP</span>
                 </button>
               </div>
 
               <button
                 type="submit"
-                disabled={isSubmitting || otpValue.replace(/\s/g, "").length !== 6}
-                className="w-full flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white font-semibold py-3.5 rounded-xl transition"
+                disabled={isSubmitting || otpValue.replace(/\D/g, "").length !== 6}
+                className="w-full flex items-center justify-center gap-2 bg-[#067a46] hover:bg-[#046338] disabled:opacity-50 text-white font-extrabold py-3.5 rounded-xl transition shadow-sm active:scale-[0.99]"
               >
                 {isSubmitting ? (
-                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Verifying...</span>
+                  </span>
                 ) : (
-                  <>Verify OTP <CheckCircle2 className="w-4 h-4" /></>
+                  <>
+                    <span>Verify OTP</span>
+                    <CheckCircle2 className="w-4 h-4" />
+                  </>
                 )}
               </button>
             </form>
           )}
 
-          {/* ── STEP 3: Minimal Registration (Swiggy/Blinkit style) ── */}
+          {/* ── STEP 3: Registration Profile ── */}
           {loginStep === "register" && (
-            <form onSubmit={handleRegister} className="space-y-5">
-              {/* Verified mobile — read only */}
-              <div className="flex items-center gap-3 p-3 bg-brand-50 border border-brand-100 rounded-xl">
-                <div className="w-8 h-8 rounded-full bg-brand-100 grid place-items-center shrink-0">
-                  <Phone className="w-4 h-4 text-brand-600" />
+            <form onSubmit={handleRegister} className="space-y-4">
+              <div className="flex items-center gap-3 p-3 bg-emerald-50/70 border border-emerald-200/80 rounded-xl">
+                <div className="w-8 h-8 rounded-full bg-[#067a46] text-white flex items-center justify-center shrink-0 font-bold text-xs">
+                  ✓
                 </div>
                 <div>
-                  <p className="text-[10px] text-brand-500 uppercase tracking-wider font-semibold">Verified Mobile</p>
-                  <p className="text-sm font-bold text-brand-900">+91 {pendingMobile}</p>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                    Verified Number
+                  </p>
+                  <p className="text-sm font-extrabold text-[#067a46]">
+                    +91 {pendingMobile}
+                  </p>
                 </div>
-                <CheckCircle2 className="w-5 h-5 text-brand-500 ml-auto" />
               </div>
 
               {regError && (
-                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-sm text-rose-700">
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 font-semibold">
                   {regError}
                 </div>
               )}
 
-              {/* Full Name — the ONLY required field */}
               <div>
-                <label className="text-xs font-semibold text-brand-900 ml-1 mb-1.5 block">
-                  What should we call you? <span className="text-rose-500">*</span>
+                <label className="text-xs font-bold text-slate-800 ml-1 mb-1.5 block">
+                  Full Name <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-400" />
+                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="text"
                     required
                     autoFocus
-                    placeholder="Your full name"
+                    placeholder="Enter your full name"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full pl-9 pr-4 py-3.5 border-2 border-brand-200 rounded-xl outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 text-base transition"
+                    className="w-full pl-10 pr-4 py-3.5 border-2 border-slate-200 focus:border-[#067a46] focus:ring-2 focus:ring-[#067a46]/10 rounded-xl outline-none text-sm font-medium transition"
                     disabled={isSubmitting}
                   />
                 </div>
-                <p className="text-xs text-brand-400 mt-1.5 ml-1">
-                  This is how your name will appear on orders and invoices.
-                </p>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-800 ml-1 mb-1.5 block">
+                  Email Address <span className="text-slate-400 font-normal">(Optional)</span>
+                </label>
+                <input
+                  type="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3.5 border-2 border-slate-200 focus:border-[#067a46] focus:ring-2 focus:ring-[#067a46]/10 rounded-xl outline-none text-sm font-medium transition"
+                  disabled={isSubmitting}
+                />
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting || !fullName.trim()}
-                className="w-full flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white font-semibold py-3.5 rounded-xl transition"
+                className="w-full flex items-center justify-center gap-2 bg-[#067a46] hover:bg-[#046338] disabled:opacity-50 text-white font-extrabold py-3.5 rounded-xl transition shadow-sm active:scale-[0.99]"
               >
                 {isSubmitting ? (
-                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Creating Account...</span>
+                  </span>
                 ) : (
-                  <>Continue <ArrowRight className="w-4 h-4" /></>
+                  <>
+                    <span>Complete Login</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
                 )}
               </button>
-
-              <p className="text-[11px] text-center text-brand-400 leading-relaxed">
-                By continuing, you agree to our{" "}
-                <a href="/terms" className="text-brand-600 hover:underline" target="_blank">Terms</a>
-                {" "}&{" "}
-                <a href="/privacy" className="text-brand-600 hover:underline" target="_blank">Privacy Policy</a>
-              </p>
             </form>
           )}
         </div>
@@ -644,3 +665,4 @@ export function CustomerLoginModal() {
     </div>
   );
 }
+

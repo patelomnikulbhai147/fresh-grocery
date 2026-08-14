@@ -34,6 +34,7 @@ import {
   MessageCircleMore,
 } from "lucide-react";
 import { useAdminAuth, type AdminRole } from "@/store/adminAuth";
+import { useCustomerAuth } from "@/store/customerAuth";
 import { useAdminStore } from "@/store/adminStore";
 import { GlobalSearchModal } from "./GlobalSearchModal";
 import { cn } from "@/lib/utils";
@@ -61,12 +62,14 @@ interface NavGroup {
 export function AdminLayout({ children, activeModule, onSelectModule }: AdminLayoutProps) {
   const router = useRouter();
   const { user, logout, switchRole, toggle2FA } = useAdminAuth();
+  const { logout: customerLogout } = useCustomerAuth();
   const { orders, products, activityLogs } = useAdminStore();
 
   const handleSignOut = () => {
-    logout();
+    logout();         // clear adminAuth session
+    customerLogout(); // clear customerAuth session
     setIsProfileMenuOpen(false);
-    router.push("/admin/login");
+    router.push("/"); // go to main homepage
   };
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -183,7 +186,7 @@ export function AdminLayout({ children, activeModule, onSelectModule }: AdminLay
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-700 to-indigo-900 flex items-center justify-center text-amber-400 font-display font-black text-lg shadow-sm">
               ⚡
             </div>
-            <div>
+            <div className="hidden xs:block">
               <span className="font-display font-extrabold text-lg md:text-xl tracking-tight text-purple-950 dark:text-zinc-100 flex items-center gap-1.5">
                 FlashKart <span className="text-[10px] font-sans font-semibold uppercase tracking-widest px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-300">Admin</span>
               </span>
@@ -192,14 +195,14 @@ export function AdminLayout({ children, activeModule, onSelectModule }: AdminLay
         </div>
 
         {/* Center: Global Search Bar Button */}
-        <div className="flex-1 max-w-md hidden sm:block">
+        <div className="flex-1 max-w-md hidden sm:block min-w-0">
           <button
             onClick={() => setIsSearchOpen(true)}
             className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-brand-50/70 dark:bg-zinc-800/70 border border-brand-200/60 dark:border-zinc-700/60 text-sm text-brand-700 dark:text-zinc-400 hover:border-brand-400 dark:hover:border-brand-500 transition shadow-sm group"
           >
-            <span className="flex items-center gap-2.5">
-              <Search className="w-4 h-4 text-brand-500 dark:text-brand-400 group-hover:scale-110 transition" />
-              <span>Search products, SKUs, orders, invoices...</span>
+            <span className="flex items-center gap-2.5 min-w-0">
+              <Search className="w-4 h-4 text-brand-500 dark:text-brand-400 group-hover:scale-110 transition shrink-0" />
+              <span className="truncate">Search products, SKUs, orders, invoices...</span>
             </span>
             <kbd className="hidden md:inline-block text-[10px] font-semibold tracking-wider px-1.5 py-0.5 rounded border border-brand-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-brand-600 dark:text-zinc-300">
               Ctrl+K
@@ -208,7 +211,7 @@ export function AdminLayout({ children, activeModule, onSelectModule }: AdminLay
         </div>
 
         {/* Right: Actions, RBAC Switcher, Theme, Profile */}
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex items-center gap-1 xs:gap-2 md:gap-3">
           {/* Mobile Search Button */}
           <button
             onClick={() => setIsSearchOpen(true)}
@@ -218,41 +221,10 @@ export function AdminLayout({ children, activeModule, onSelectModule }: AdminLay
             <Search className="w-5 h-5" />
           </button>
 
-          {/* RBAC Role Switcher Dropdown (For Instant Dev / Admin Testing) */}
-          <div className="relative">
-            <button
-              onClick={() => setIsRoleMenuOpen(!isRoleMenuOpen)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs font-semibold hover:bg-amber-100 dark:hover:bg-amber-900/50 transition"
-              title="Test Role-Based Access Control Live"
-            >
-              <ShieldAlert className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
-              <span className="hidden md:inline">Role:</span>
-              <span className="font-bold underline decoration-dotted">{user?.role || "Super Admin"}</span>
-              <ChevronDown className="w-3 h-3 ml-0.5 opacity-70" />
-            </button>
-            {isRoleMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-brand-100 dark:border-zinc-800 p-2 z-50 space-y-1 animate-in fade-in slide-in-from-top-2">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-brand-500 dark:text-zinc-400 px-2 py-1">
-                  Simulate RBAC Role Access
-                </div>
-                {rolesList.map((r) => (
-                  <button
-                    key={r}
-                    onClick={() => {
-                      switchRole(r);
-                      setIsRoleMenuOpen(false);
-                    }}
-                    className={cn(
-                      "w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs text-left transition",
-                      user?.role === r ? "bg-brand-900 dark:bg-brand-600 text-white font-bold" : "hover:bg-brand-50 dark:hover:bg-zinc-800 text-brand-800 dark:text-zinc-300"
-                    )}
-                  >
-                    <span>{r}</span>
-                    {user?.role === r && <CheckCircle2 className="w-3.5 h-3.5" />}
-                  </button>
-                ))}
-              </div>
-            )}
+          {/* Fixed Super Admin Role Badge — Non-editable / No Dropdown */}
+          <div className="hidden sm:flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/80 dark:border-emerald-800 text-[#067a46] dark:text-emerald-300 text-xs font-extrabold shadow-2xs">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#067a46] dark:text-emerald-400 shrink-0" />
+            <span className="hidden md:inline">Super Admin</span>
           </div>
 
           {/* Theme Toggle */}
@@ -277,7 +249,7 @@ export function AdminLayout({ children, activeModule, onSelectModule }: AdminLay
               )}
             </button>
             {isNotifMenuOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-brand-100 dark:border-zinc-800 p-3 z-50 space-y-2 animate-in fade-in slide-in-from-top-2">
+              <div className="fixed left-4 right-4 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-brand-100 dark:border-zinc-800 p-3 z-50 space-y-2 animate-in fade-in slide-in-from-top-2">
                 <div className="flex items-center justify-between border-b border-brand-100 dark:border-zinc-800 pb-2">
                   <span className="text-xs font-bold uppercase tracking-wider text-brand-900 dark:text-zinc-200">System Notifications</span>
                   <span className="text-[10px] bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-300 px-2 py-0.5 rounded-full font-semibold">Live</span>

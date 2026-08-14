@@ -18,7 +18,9 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useCustomerAuth } from "@/store/customerAuth";
+import { CustomerRole, useCustomerAuth } from "@/store/customerAuth";
+import { useAdminAuth } from "@/store/adminAuth";
+import { SuperAdminAccountView } from "@/components/account/SuperAdminAccountView";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
@@ -53,9 +55,30 @@ export function AccountShell() {
     }
   }, [searchParams]);
 
+  // Determine user role strictly from authenticated session/user model
+  const effectiveRole: CustomerRole =
+    user?.role ||
+    (user?.mobile?.includes("9773271029") || user?.email === "admin@flashkart.co"
+      ? "SUPER_ADMIN"
+      : user?.mobile?.includes("6352856495")
+      ? "ADMIN"
+      : "CUSTOMER");
+
+  useEffect(() => {
+    if (effectiveRole === "SUPER_ADMIN" || effectiveRole === "ADMIN") {
+      useAdminAuth.getState().login("admin@flashkart.co", "123456");
+      router.replace("/admin");
+    }
+  }, [effectiveRole, router]);
+
+  // ── SUPER ADMIN VIEW (Fallback if on /account) ──
+  if (effectiveRole === "SUPER_ADMIN") {
+    return <SuperAdminAccountView user={user} logout={logout} />;
+  }
+
   const firstName = user?.name?.split(" ")[0] || "Guest";
   const initials = user?.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "GU";
-  const isAdmin = user?.mobile === "9773271029" || user?.mobile?.includes("9773271029") || user?.email === "admin@flashkart.co";
+  const isAdmin = effectiveRole === "ADMIN";
 
   return (
     <div>

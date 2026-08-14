@@ -7,6 +7,8 @@ interface FlashKartLogoProps {
   className?: string;
   variant?: "light" | "dark" | "full" | "iconOnly";
   showTagline?: boolean;
+  /** Extra classes for the tagline row (e.g. to hide it on tiny screens) */
+  taglineClassName?: string;
   size?: "sm" | "md" | "lg" | "xl";
   href?: string;
 }
@@ -15,6 +17,7 @@ export function FlashKartLogo({
   className,
   variant = "light",
   showTagline = true,
+  taglineClassName,
   size = "md",
   href = "/",
 }: FlashKartLogoProps) {
@@ -23,21 +26,21 @@ export function FlashKartLogo({
   // Natural scaling heights for unclipped purple bag icon
   const iconHeightClasses = {
     sm: "h-8 sm:h-9",
-    md: "h-11 sm:h-12",
+    md: "h-9 xs:h-10 sm:h-12",
     lg: "h-14 sm:h-16",
     xl: "h-18 sm:h-20",
   };
 
   const textSizes = {
     sm: "text-lg sm:text-xl",
-    md: "text-2xl sm:text-[1.75rem]",
+    md: "text-xl xs:text-2xl sm:text-[1.75rem]",
     lg: "text-3xl sm:text-4xl",
     xl: "text-4xl sm:text-5xl",
   };
 
   const taglineSizes = {
     sm: "text-[7.5px] tracking-[0.14em]",
-    md: "text-[9px] tracking-[0.18em]",
+    md: "text-[8px] xs:text-[9px] tracking-[0.18em]",
     lg: "text-[11px] tracking-[0.2em]",
     xl: "text-xs tracking-[0.22em]",
   };
@@ -74,7 +77,8 @@ export function FlashKartLogo({
               className={cn(
                 "uppercase font-extrabold mt-1 flex items-center gap-1.5 whitespace-nowrap",
                 taglineSizes[size],
-                isDark ? "text-[#00e676]" : "text-slate-800"
+                isDark ? "text-[#00e676]" : "text-slate-800",
+                taglineClassName
               )}
             >
               <span className="w-2.5 h-[1.5px] bg-[#f97316] inline-block" />

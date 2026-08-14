@@ -176,7 +176,7 @@ export function ProductDetail({ product }: { product: Product }) {
           </div>
 
           {/* Value Badges */}
-          <div className="mt-8 grid grid-cols-3 gap-3 text-xs">
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
             <div className="bg-slate-50 rounded-2xl p-3 flex items-center gap-2 border border-slate-100">
               <Sparkles className="w-5 h-5 text-amber-600 shrink-0" />
               <div>
@@ -202,7 +202,7 @@ export function ProductDetail({ product }: { product: Product }) {
 
           {/* Tabs */}
           <div className="mt-8 border-b border-slate-100">
-            <div className="flex gap-6">
+            <div className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide whitespace-nowrap">
               {([
                 ["desc", "Description"],
                 ["nutrition", "Nutrition"],
@@ -213,7 +213,7 @@ export function ProductDetail({ product }: { product: Product }) {
                   key={k}
                   onClick={() => setTab(k)}
                   className={cn(
-                    "py-3 text-xs md:text-sm font-bold border-b-2 -mb-[1px] transition",
+                    "py-3 text-xs md:text-sm font-bold border-b-2 -mb-[1px] transition shrink-0",
                     tab === k ? "border-[#067a46] text-[#067a46]" : "border-transparent text-slate-500 hover:text-slate-800"
                   )}
                 >

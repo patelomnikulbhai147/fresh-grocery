@@ -46,6 +46,10 @@ function ProductCardGridItem({ item }: { item: typeof vegGridItems[0] }) {
     modes: ["instant"],
   } as Product);
 
+  // Single price sourced from the catalog entry (same one the cart charges from)
+  const unitWeight = matchedProduct.weights[0];
+  const displayPrice = `₹${unitWeight.price} / ${unitWeight.label}`;
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -59,7 +63,7 @@ function ProductCardGridItem({ item }: { item: typeof vegGridItems[0] }) {
     <div className="group bg-white rounded-[16px] border border-slate-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col justify-between h-full">
       <Link href={`/product/${matchedProduct.slug}`} className="flex flex-col w-full">
         {/* Full-Width Cover Image (No side margins/padding) */}
-        <div className="relative w-full h-[180px] sm:h-[140px] md:h-[160px] overflow-hidden bg-slate-100">
+        <div className="relative w-full h-[110px] xs:h-[130px] sm:h-[140px] md:h-[160px] overflow-hidden bg-slate-100">
           <Image
             src={item.image}
             alt={item.name}
@@ -71,20 +75,20 @@ function ProductCardGridItem({ item }: { item: typeof vegGridItems[0] }) {
         </div>
 
         {/* Product Name & Single Price */}
-        <div className="p-3 sm:p-4 text-center">
-          <h3 className="font-bold text-base sm:text-lg text-slate-900 group-hover:text-[#16a34a] transition-colors truncate">
+        <div className="p-2 xs:p-2.5 sm:p-4 text-center">
+          <h3 className="font-bold text-sm sm:text-lg text-slate-900 group-hover:text-[#16a34a] transition-colors truncate">
             {item.name}
           </h3>
-          <p className="text-sm sm:text-base font-semibold text-[#16a34a] mt-1">
-            {item.singlePrice}
+          <p className="text-xs sm:text-base font-semibold text-[#16a34a] mt-0.5 sm:mt-1">
+            {displayPrice}
           </p>
         </div>
       </Link>
 
       {/* Bottom Section (Green Glassy Footer) */}
-      <div className="mx-3 mb-3 p-2 bg-[#f0fdf4] border border-[#bbf7d0] rounded-[12px] flex items-center justify-between gap-2 h-[48px] sm:h-[52px]">
+      <div className="mx-2 mb-2 sm:mx-3 sm:mb-3 p-1.5 sm:p-2 bg-[#f0fdf4] border border-[#bbf7d0] rounded-[12px] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-1.5 sm:gap-2 sm:h-[52px]">
         {/* Quantity Selector: [- 1 kg +] */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2">
           <button
             onClick={(e) => {
               e.preventDefault();
@@ -115,7 +119,7 @@ function ProductCardGridItem({ item }: { item: typeof vegGridItems[0] }) {
         {/* Add to Cart Button */}
         <button
           onClick={handleAddToCart}
-          className="bg-[#16a34a] hover:bg-[#15803d] active:scale-95 text-white font-bold text-xs sm:text-sm px-3 py-1.5 sm:px-4 sm:py-2 rounded-[10px] flex items-center gap-1.5 transition shadow-sm shrink-0"
+          className="bg-[#16a34a] hover:bg-[#15803d] active:scale-95 text-white font-bold text-xs sm:text-sm px-3 py-2 sm:px-4 rounded-[10px] flex items-center justify-center gap-1.5 transition shadow-sm shrink-0 w-full sm:w-auto"
           title={`Add ${item.name} to Cart`}
           aria-label={`Add ${item.name} to Cart`}
         >
@@ -159,7 +163,7 @@ export function CategoryGridSection() {
           </div>
 
           {/* 3x3 Product Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-5 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5 md:gap-6">
             {vegGridItems.map((item) => (
               <ProductCardGridItem key={item.id} item={item} />
             ))}

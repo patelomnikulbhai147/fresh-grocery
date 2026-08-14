@@ -110,7 +110,7 @@ export function OrderTomorrowModal({ isOpen, onClose, productName }: Props) {
                   <label className="block text-xs font-bold uppercase tracking-wider text-brand-700 dark:text-zinc-300 mb-1.5">
                     Select or Enter Quantity <span className="text-red-500">*</span>
                   </label>
-                  <div className="grid grid-cols-4 gap-2 mb-2">
+                  <div className="grid grid-cols-2 xs:grid-cols-4 gap-2 mb-2">
                     {["500 g", "1 kg", "2 kg", "5 kg"].map((qty) => (
                       <button
                         key={qty}

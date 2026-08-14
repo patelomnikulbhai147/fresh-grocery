@@ -4,6 +4,9 @@
   --font-display: "Fraunces", "Playfair Display", Georgia, serif;
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
 
+  /* Extra-small breakpoint for compact phones (enables xs: variants) */
+  --breakpoint-xs: 30rem;
+
   /* Primary Deep Purple Palette */
   --color-brand-50: #faf5ff;
   --color-brand-100: #f3e8ff;

@@ -10,11 +10,14 @@ export type PendingAction = {
 // Login flow step (drives multi-step modal UI)
 export type LoginStep = "mobile" | "otp" | "register" | "done";
 
+export type CustomerRole = "SUPER_ADMIN" | "ADMIN" | "CUSTOMER";
+
 export type CustomerUser = {
   id: string;
   name: string;
   email: string | null;
   mobile: string;
+  role?: CustomerRole;
   points: number;
   walletBalance: number;
 };

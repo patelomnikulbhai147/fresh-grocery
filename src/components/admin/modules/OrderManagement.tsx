@@ -418,7 +418,7 @@ export function OrderManagement() {
                   <span>30-Minute Delivery SLA Tracker</span>
                   <span className="text-[11px] text-emerald-600 font-semibold">On Schedule</span>
                 </div>
-                <div className="grid grid-cols-6 gap-1 relative pt-2">
+                <div className="grid grid-cols-3 gap-y-3 sm:grid-cols-6 gap-1 relative pt-2">
                   {(["Pending", "Confirmed", "Processing", "Packed", "Out for Delivery", "Delivered"] as OrderStatus[]).map((st, idx) => {
                     const curIdx = stepIndexMap[activeOrder.status] || 0;
                     const isDone = idx + 1 <= curIdx;

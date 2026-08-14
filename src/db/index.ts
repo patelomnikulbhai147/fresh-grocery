@@ -20,12 +20,13 @@ const inMemoryStore: Record<string, any[]> = {
       id: "cust-demo-1",
       mobile: "9773271029",
       email: "admin@flashkart.co",
-      full_name: "Super Admin (Om Patel)",
+      full_name: "Om Patel",
+      role: "SUPER_ADMIN",
       gender: "male",
       date_of_birth: "1998-05-15",
       referral_code: "FLASH-SUPER",
-      points: 500,
-      wallet_balance: 420,
+      points: 0,
+      wallet_balance: 0,
       status: "active",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -35,6 +36,7 @@ const inMemoryStore: Record<string, any[]> = {
       mobile: "6352856495",
       email: "kaushik@flashkart.co",
       full_name: "Kaushik Patel",
+      role: "ADMIN",
       gender: "male",
       date_of_birth: "1997-08-20",
       referral_code: "FLASH-KAUSHIK",
@@ -91,10 +93,27 @@ export const pool = {
 function handleInMemoryQuery<T = any>(sql: string, values: any[] = []): [T, any] {
   const upper = sql.trim().toUpperCase();
 
+  const normalizeMobile = (m?: any) => {
+    if (!m) return "";
+    const str = String(m).replace(/\D/g, "");
+    return str.length === 12 && str.startsWith("91") ? str.slice(2) : str.slice(-10);
+  };
+
+  // COUNT(*) FROM OTP_REQUESTS
+  if (upper.includes("COUNT(*)") && upper.includes("FROM OTP_REQUESTS")) {
+    const mobile = normalizeMobile(values[0]);
+    const matching = inMemoryStore.otp_requests.filter(
+      (o) => normalizeMobile(o.mobile) === mobile
+    );
+    return [[{ count: matching.length }] as unknown as T, null];
+  }
+
   // SELECT customers WHERE mobile = ?
   if (upper.includes("FROM CUSTOMERS") && upper.includes("WHERE MOBILE =")) {
-    const mobile = values[0];
-    const found = inMemoryStore.customers.filter((c) => c.mobile === String(mobile));
+    const mobile = normalizeMobile(values[0]);
+    const found = inMemoryStore.customers.filter(
+      (c) => normalizeMobile(c.mobile) === mobile && c.status !== "deleted"
+    );
     return [found as unknown as T, null];
   }
 
@@ -108,9 +127,10 @@ function handleInMemoryQuery<T = any>(sql: string, values: any[] = []): [T, any]
   // INSERT INTO customers
   if (upper.startsWith("INSERT INTO CUSTOMERS")) {
     const newId = randomUUID();
+    const cleanMobile = normalizeMobile(values[0]);
     const newCust = {
       id: newId,
-      mobile: values[0],
+      mobile: cleanMobile,
       full_name: values[1] || "Customer",
       email: values[2] || null,
       referral_code: `FLASH-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -127,9 +147,10 @@ function handleInMemoryQuery<T = any>(sql: string, values: any[] = []): [T, any]
   // INSERT INTO otp_requests
   if (upper.startsWith("INSERT INTO OTP_REQUESTS")) {
     const newId = randomUUID();
+    const cleanMobile = normalizeMobile(values[0]);
     inMemoryStore.otp_requests.push({
       id: newId,
-      mobile: values[0],
+      mobile: cleanMobile,
       otp_hash: values[1],
       expires_at: values[2] || new Date(Date.now() + 5 * 60 * 1000).toISOString(),
       attempts: 0,
@@ -141,8 +162,10 @@ function handleInMemoryQuery<T = any>(sql: string, values: any[] = []): [T, any]
 
   // SELECT otp_requests
   if (upper.includes("FROM OTP_REQUESTS")) {
-    const mobile = values[0];
-    const otps = inMemoryStore.otp_requests.filter((o) => o.mobile === String(mobile));
+    const mobile = normalizeMobile(values[0]);
+    const otps = inMemoryStore.otp_requests.filter((o) => normalizeMobile(o.mobile) === mobile);
+    // Sort descending by created_at
+    otps.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     return [otps as unknown as T, null];
   }
 
@@ -152,7 +175,7 @@ function handleInMemoryQuery<T = any>(sql: string, values: any[] = []): [T, any]
   }
 
   // INSERT INTO customer_audit_logs
-  if (upper.startsWith("INSERT INTO CUSTOMER_AUDIT_LOGS")) {
+  if (upper.startsWith("INSERT INTO CUSTOMER_AUDIT_LOGS") || upper.startsWith("INSERT INTO AUTH_AUDIT_LOG")) {
     inMemoryStore.customer_audit_logs.push({
       id: randomUUID(),
       data: values,

@@ -90,7 +90,7 @@ export function Hero() {
             </div>
 
             {/* Right Content Column (Basket + Indian Badge) */}
-            <div className="lg:col-span-6 xl:col-span-6 2xl:col-span-6 relative flex flex-col items-center lg:items-end justify-center w-full min-h-[340px] sm:min-h-[400px] lg:min-h-[460px] xl:min-h-[500px] pt-4 lg:pt-0">
+            <div className="lg:col-span-6 xl:col-span-6 2xl:col-span-6 relative flex flex-col items-center lg:items-end justify-center w-full min-h-0 sm:min-h-[400px] lg:min-h-[460px] xl:min-h-[500px] pt-4 lg:pt-0">
               
               {/* Indian Badge (Positioned safely at top right, fully visible) */}
               <div className="relative lg:absolute lg:top-0 lg:right-0 z-20 bg-white/95 backdrop-blur-md shadow-xl shadow-slate-200/60 rounded-2xl p-4 sm:p-5 border border-slate-100 flex flex-col items-center gap-1 min-w-[165px] sm:min-w-[180px] mb-4 lg:mb-0 transform transition duration-300 hover:scale-[1.02]">

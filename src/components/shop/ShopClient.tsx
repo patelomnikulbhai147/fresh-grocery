@@ -99,7 +99,7 @@ export function ShopClient({ products, categories, initial }: Props) {
                 : `${filtered.length} fresh items · Hand-graded daily from partner farms`}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-full px-3 py-1.5 shadow-sm">
               <Grid3x3
                 onClick={() => setGrid(4)}

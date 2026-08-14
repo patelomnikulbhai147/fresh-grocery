@@ -163,8 +163,7 @@ export function WhatsAppSubscription() {
                         onChange={(e) => setCountryCode(e.target.value)}
                         onFocus={() => setFocused(true)}
                         onBlur={() => setFocused(false)}
-                        className="appearance-none h-16 pl-4 pr-8 bg-[#FAFAFA] text-[#111111] text-sm font-semibold focus:outline-none cursor-pointer"
-                        style={{ minWidth: "100px" }}
+                        className="appearance-none h-14 sm:h-16 pl-3 pr-7 sm:pl-4 sm:pr-8 min-w-[84px] sm:min-w-[100px] bg-[#FAFAFA] text-[#111111] text-sm font-semibold focus:outline-none cursor-pointer"
                       >
                         {COUNTRY_CODES.map((c) => (
                           <option key={c.code} value={c.code}>
@@ -189,7 +188,7 @@ export function WhatsAppSubscription() {
                       onBlur={() => setFocused(false)}
                       placeholder="Enter WhatsApp number"
                       maxLength={15}
-                      className="flex-1 h-16 px-5 bg-white text-[#111111] placeholder:text-[#9CA3AF] text-sm focus:outline-none"
+                      className="flex-1 min-w-0 h-14 sm:h-16 px-3.5 sm:px-5 bg-white text-[#111111] placeholder:text-[#9CA3AF] text-sm focus:outline-none"
                     />
                   </div>
 

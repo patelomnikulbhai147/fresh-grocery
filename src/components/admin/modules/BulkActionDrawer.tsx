@@ -160,7 +160,7 @@ export function BulkActionDrawer({
         {/* Action Type Selector */}
         <div className="p-4 border-b border-brand-100 bg-brand-50/50">
           <label className="text-xs font-bold text-brand-700 uppercase tracking-wider mb-2 block">Choose Operation</label>
-          <div className="grid grid-cols-4 gap-1.5">
+          <div className="grid grid-cols-3 xs:grid-cols-4 gap-1.5">
             {[
               { id: "price", label: "Price/MRP", icon: DollarSign },
               { id: "stock", label: "Stock Qty", icon: Boxes },
@@ -192,7 +192,7 @@ export function BulkActionDrawer({
             <div className="space-y-4 animate-fade-in">
               <div>
                 <label className="text-xs font-bold text-brand-900 mb-1.5 block">Target Field</label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 xs:grid-cols-3 gap-2">
                   {[
                     { id: "price", label: "Selling Price" },
                     { id: "mrp", label: "MRP" },
@@ -259,7 +259,7 @@ export function BulkActionDrawer({
             <div className="space-y-4 animate-fade-in">
               <div>
                 <label className="text-xs font-bold text-brand-900 mb-1.5 block">Stock Adjustment Mode</label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 xs:grid-cols-3 gap-2">
                   {[
                     { id: "add", label: "➕ Add Stock" },
                     { id: "sub", label: "➖ Subtract Stock" },

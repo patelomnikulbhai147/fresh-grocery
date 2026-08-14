@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -9,7 +9,10 @@ import {
   Menu,
   X,
   PhoneCall,
-  ShieldCheck,
+  MapPin,
+  ChevronDown,
+  MoreHorizontal,
+  Check,
 } from "lucide-react";
 import { useCart } from "@/store/shop";
 import { useCustomerAuth } from "@/store/customerAuth";
@@ -18,198 +21,331 @@ import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { FlashKartLogo } from "./FlashKartLogo";
 
-const navLinks = [
-  { label: "Home", href: "/" },
-  { label: "Vegetables", href: "/shop?cat=vegetables" },
-  { label: "Fruits", href: "/shop?cat=fruits" },
+const cities = ["Gandhinagar", "Ahmedabad", "Surat", "Vadodara", "Rajkot"];
+
+const moreLinks = [
   { label: "Who We Supply", href: "/where-we-supply" },
   { label: "Franchise", href: "/franchise" },
-  { label: "Contact Us", href: "/contact" },
+  { label: "Bulk Order", href: "/bulk" },
   { label: "About Us", href: "/about" },
+  { label: "Contact Us", href: "/contact" },
 ];
 
 export function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const { isAuthenticated, openLoginModal, user } = useCustomerAuth();
-  const isAdmin = user?.mobile === "9773271029" || user?.mobile?.includes("9773271029") || user?.email === "admin@flashkart.co";
-  const [scrolled, setScrolled] = useState(false);
+
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("Gandhinagar");
+  const [locationOpen, setLocationOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  const locationRef = useRef<HTMLDivElement>(null);
+  const moreRef = useRef<HTMLDivElement>(null);
 
   const itemCount = useCart((s) => s.itemCount());
   const openCart = useCart((s) => s.open);
 
+  // Close dropdowns on click outside
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 15);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        locationRef.current &&
+        !locationRef.current.contains(event.target as Node)
+      ) {
+        setLocationOpen(false);
+      }
+      if (moreRef.current && !moreRef.current.contains(event.target as Node)) {
+        setMoreOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const suggestions = query.trim()
     ? products
         .filter((p) =>
-          (p.name + " " + p.subcategory + " " + p.category).toLowerCase().includes(query.toLowerCase())
+          (p.name + " " + p.subcategory + " " + p.category)
+            .toLowerCase()
+            .includes(query.toLowerCase())
         )
         .slice(0, 5)
     : [];
 
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (query.trim()) {
+      router.push(`/shop?q=${encodeURIComponent(query.trim())}`);
+      setQuery("");
+    }
+  };
+
   return (
     <>
+      {/* Main Header Container */}
+      <header className="sticky top-0 z-40 bg-white border-b border-slate-100 shadow-sm">
+        
+        {/* Top Header Row: Delivery Location on Top Right */}
+        <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 py-1.5 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between text-xs">
+          <div className="hidden sm:flex items-center gap-2 text-slate-500 font-medium">
+            <span>🇮🇳</span>
+            <span>Fresh Vegetables & Seasonal Fruits Supply across Gujarat</span>
+          </div>
 
+          {/* Delivery Location Selector */}
+          <div className="ml-auto relative" ref={locationRef}>
+            <button
+              onClick={() => setLocationOpen(!locationOpen)}
+              className="flex items-center gap-1.5 text-slate-700 hover:text-[#067a46] font-medium transition py-0.5 px-2 rounded-lg hover:bg-emerald-50/60"
+            >
+              <MapPin className="w-4 h-4 text-[#067a46] shrink-0" />
+              <span>Deliver to:</span>
+              <span className="font-extrabold text-[#067a46]">
+                {selectedLocation}
+              </span>
+              <ChevronDown
+                className={cn(
+                  "w-3.5 h-3.5 text-[#067a46] transition-transform duration-200",
+                  locationOpen && "rotate-180"
+                )}
+              />
+            </button>
 
-      {/* Announcement Bar */}
-      <div className="bg-[#04502d] text-white text-[11px] md:text-xs font-bold text-center py-2 px-4 flex items-center justify-center gap-2 relative z-50">
-        <span>🇮🇳</span>
-        <span>Happy Independence Day! Celebrate 15 August with Freshness & Quality.</span>
-      </div>
+            {/* City Selection Dropdown */}
+            <AnimatePresence>
+              {locationOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  className="absolute right-0 top-full mt-1.5 w-48 bg-white border border-slate-200 rounded-xl shadow-xl p-1.5 z-50"
+                >
+                  <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Select City
+                  </div>
+                  {cities.map((city) => (
+                    <button
+                      key={city}
+                      onClick={() => {
+                        setSelectedLocation(city);
+                        setLocationOpen(false);
+                      }}
+                      className={cn(
+                        "w-full flex items-center justify-between px-3 py-2 text-xs font-semibold rounded-lg text-left transition",
+                        selectedLocation === city
+                          ? "bg-emerald-50 text-[#067a46]"
+                          : "text-slate-700 hover:bg-slate-50"
+                      )}
+                    >
+                      <span>{city}</span>
+                      {selectedLocation === city && (
+                        <Check className="w-3.5 h-3.5 text-[#067a46]" />
+                      )}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
 
-      {/* Glassmorphism Navigation Bar */}
-      <header
-        className={cn(
-          "sticky top-0 z-40 transition-all duration-300 bg-white border-b border-slate-100 shadow-sm"
-        )}
-      >
-        <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 py-3 flex items-center justify-between gap-4">
+        {/* Main Navigation Row */}
+        <div className="w-full px-3 xs:px-4 sm:px-6 md:px-8 lg:px-10 py-3 sm:py-3.5 flex items-center justify-between gap-2 sm:gap-4 lg:gap-8">
+          
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMenuOpen(true)}
             aria-label="Open menu"
-            className="lg:hidden p-2 -ml-2 text-slate-800 rounded-xl hover:bg-white/80 transition"
+            className="lg:hidden p-2 -ml-2 text-slate-800 rounded-xl hover:bg-slate-100 transition"
           >
             <Menu className="w-6 h-6" />
           </button>
 
-          {/* Logo - Existing FlashKart Logo intact */}
+          {/* Logo - Existing FlashKart Logo intact (tagline hidden on tiny screens for fit) */}
           <div className="shrink-0">
-            <FlashKartLogo size="md" showTagline={true} />
+            <FlashKartLogo size="md" showTagline={true} taglineClassName="hidden xs:flex" />
           </div>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-6 text-sm font-bold text-slate-700">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
-              return (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className={cn(
-                    "relative py-1 transition-colors hover:text-[#067a46]",
-                    isActive ? "text-[#067a46] font-extrabold" : "text-slate-700"
-                  )}
-                >
-                  {link.label}
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeNav"
-                      className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#067a46] rounded-full"
-                    />
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Right Actions & Get in Touch Button */}
-          <div className="flex items-center gap-3">
-            {/* Search Input Box */}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (query.trim()) {
-                  router.push(`/shop?q=${encodeURIComponent(query.trim())}`);
-                  setQuery("");
-                }
-              }}
-              className="relative hidden xl:block w-48"
-            >
-              <div className="flex items-center bg-white/70 border border-slate-200/80 rounded-full px-3 py-1.5 focus-within:border-[#067a46] focus-within:bg-white transition shadow-sm">
-                <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search produce..."
-                  className="flex-1 bg-transparent outline-none px-2 text-xs text-slate-900 placeholder:text-slate-400 font-medium"
-                />
-              </div>
-
+          {/* Large Responsive Search Bar (Center) */}
+          <form
+            onSubmit={handleSearchSubmit}
+            className="relative flex-1 max-w-2xl hidden md:block"
+          >
+            <div className="flex items-center bg-white border border-[#067a46] focus-within:ring-2 focus-within:ring-[#067a46]/20 rounded-xl px-3.5 py-2.5 transition shadow-2xs">
+              <Search className="w-4 h-4 text-[#067a46] shrink-0 mr-2.5" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search for vegetables, fruits, dairy products..."
+                className="w-full bg-transparent outline-none text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 font-medium"
+              />
               {query && (
-                <div className="absolute top-full right-0 mt-2 w-72 bg-white/95 backdrop-blur-md border border-slate-200 rounded-2xl shadow-xl overflow-hidden z-50">
-                  {suggestions.length === 0 ? (
-                    <div className="p-3 text-center text-xs text-slate-500">No items found</div>
-                  ) : (
-                    suggestions.map((s) => (
-                      <Link
-                        key={s.id}
-                        href={`/product/${s.slug}`}
-                        onClick={() => setQuery("")}
-                        className="flex items-center gap-3 px-3 py-2 hover:bg-slate-50 transition border-b border-slate-100 last:border-0"
-                      >
-                        <div className="w-8 h-8 rounded bg-slate-100 overflow-hidden shrink-0">
-                          <img src={s.image} alt="" className="w-full h-full object-cover" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-xs font-bold text-slate-900 truncate">{s.name}</div>
-                          <div className="text-[10px] text-slate-500">₹{s.weights[0].price}</div>
-                        </div>
-                      </Link>
-                    ))
-                  )}
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  className="text-slate-400 hover:text-slate-600 p-0.5"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
               )}
-            </form>
+            </div>
 
-            {isAuthenticated && isAdmin && (
-              <Link
-                href="/admin"
-                title="Go to FlashKart Admin Portal"
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#063b25] text-white rounded-full text-xs font-bold hover:bg-[#042a1a] transition shadow-sm"
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-                <span>Admin</span>
-              </Link>
+            {/* Live Search Suggestions */}
+            {query && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden z-50">
+                {suggestions.length === 0 ? (
+                  <div className="p-4 text-center text-xs text-slate-500">
+                    No items found matching "{query}"
+                  </div>
+                ) : (
+                  suggestions.map((s) => (
+                    <Link
+                      key={s.id}
+                      href={`/product/${s.slug}`}
+                      onClick={() => setQuery("")}
+                      className="flex items-center gap-3 px-4 py-2.5 hover:bg-emerald-50/60 transition border-b border-slate-100 last:border-0"
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-slate-50 border border-slate-100 overflow-hidden shrink-0">
+                        <img
+                          src={s.image}
+                          alt={s.name}
+                          className="w-full h-full object-contain p-0.5"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-bold text-slate-900 truncate">
+                          {s.name}
+                        </div>
+                        <div className="text-[10px] font-semibold text-[#067a46]">
+                          ₹{s.weights[0].price} / {s.weights[0].label}
+                        </div>
+                      </div>
+                    </Link>
+                  ))
+                )}
+              </div>
             )}
+          </form>
 
-            {/* Account Icon */}
+          {/* Right Action Items */}
+          <div className="flex items-center gap-1 xs:gap-2 sm:gap-4 shrink-0">
+            
+
+
+
+            {/* Login / Signup */}
             <button
               onClick={() => {
                 if (isAuthenticated) router.push("/account");
                 else openLoginModal("/account");
               }}
-              aria-label="Account"
-              className="p-2 text-slate-700 hover:text-[#067a46] rounded-full hover:bg-white/80 transition"
+              className="flex items-center gap-2 text-slate-800 hover:text-[#067a46] font-bold text-xs sm:text-sm py-1.5 px-2 rounded-xl hover:bg-slate-50 transition"
             >
-              <User className="w-5 h-5" />
+              <User className="w-5 h-5 text-slate-700" />
+              <span className="hidden sm:inline">
+                {isAuthenticated
+                  ? user?.name
+                    ? user.name.split(" ")[0]
+                    : "Account"
+                  : "Login / Signup"}
+              </span>
             </button>
 
-            {/* Cart Icon */}
+            {/* Divider */}
+            <span className="h-5 w-[1px] bg-slate-200 hidden lg:inline-block" />
+
+            {/* More Menu Dropdown */}
+            <div className="relative hidden lg:block" ref={moreRef}>
+              <button
+                onClick={() => setMoreOpen(!moreOpen)}
+                className="flex items-center gap-1.5 text-slate-800 hover:text-[#067a46] font-bold text-xs sm:text-sm py-1.5 px-2 rounded-xl hover:bg-slate-50 transition"
+              >
+                <div className="w-5 h-5 rounded-full border border-slate-300 flex items-center justify-center text-slate-600 shrink-0">
+                  <MoreHorizontal className="w-3.5 h-3.5" />
+                </div>
+                <span>More</span>
+                <ChevronDown
+                  className={cn(
+                    "w-3.5 h-3.5 text-slate-500 transition-transform duration-200",
+                    moreOpen && "rotate-180"
+                  )}
+                />
+              </button>
+
+              <AnimatePresence>
+                {moreOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 6 }}
+                    className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl p-1.5 z-50"
+                  >
+                    {moreLinks.map((link) => (
+                      <Link
+                        key={link.label}
+                        href={link.href}
+                        onClick={() => setMoreOpen(false)}
+                        className={cn(
+                          "block px-3.5 py-2 text-xs font-bold rounded-lg transition",
+                          pathname === link.href
+                            ? "bg-emerald-50 text-[#067a46]"
+                            : "text-slate-700 hover:bg-slate-50 hover:text-[#067a46]"
+                        )}
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Cart with Item Count Badge */}
             <button
               onClick={openCart}
-              aria-label="Cart"
-              className="relative p-2 text-slate-700 hover:text-[#067a46] rounded-full hover:bg-white/80 transition"
+              className="flex items-center gap-2 text-slate-800 hover:text-[#067a46] font-bold text-xs sm:text-sm py-1.5 px-2 rounded-xl hover:bg-slate-50 transition relative"
             >
-              <ShoppingBag className="w-5 h-5" />
-              {itemCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 grid place-items-center rounded-full bg-amber-500 text-slate-950 text-[10px] font-black">
+              <div className="relative">
+                <ShoppingBag className="w-5 h-5 text-slate-700" />
+                <span className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 grid place-items-center rounded-full bg-[#16a34a] text-white text-[10px] font-black shadow-xs">
                   {itemCount}
                 </span>
-              )}
+              </div>
+              <span className="hidden sm:inline">Cart</span>
             </button>
 
-            {/* Primary Get in Touch CTA - Reference Style */}
+            {/* Green "Get in Touch" Button */}
             <Link
               href="/contact"
-              className="hidden sm:inline-flex items-center gap-2 bg-[#067a46] hover:bg-[#046338] text-white font-extrabold px-5 py-2 rounded-full text-xs sm:text-sm transition shadow-sm"
+              className="bg-[#067a46] hover:bg-[#046338] text-white font-extrabold px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm hidden xs:flex items-center gap-2 transition shadow-sm hover:shadow-md active:scale-95 shrink-0"
             >
-              <PhoneCall className="w-4 h-4" />
-              <span>Get in Touch</span>
+              <PhoneCall className="w-4 h-4 text-white" />
+              <span className="hidden lg:inline">Get in Touch</span>
             </Link>
           </div>
         </div>
+
+        {/* Mobile Search Row */}
+        <div className="px-4 pb-3 md:hidden">
+          <form onSubmit={handleSearchSubmit} className="relative">
+            <div className="flex items-center bg-white border border-[#067a46] rounded-xl px-3 py-2">
+              <Search className="w-4 h-4 text-[#067a46] shrink-0 mr-2" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search vegetables, fruits, dairy..."
+                className="w-full bg-transparent outline-none text-xs text-slate-900 placeholder:text-slate-400 font-medium"
+              />
+            </div>
+          </form>
+        </div>
       </header>
 
-      {/* Mobile Drawer Menu */}
+      {/* Mobile Menu Drawer */}
       <AnimatePresence>
         {menuOpen && (
           <>
@@ -218,29 +354,71 @@ export function Header() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setMenuOpen(false)}
-              className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50"
+              className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50"
             />
             <motion.aside
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 260 }}
-              className="fixed inset-y-0 left-0 w-[85%] max-w-sm bg-white/95 backdrop-blur-lg z-50 flex flex-col shadow-2xl"
+              className="fixed inset-y-0 left-0 w-[85%] max-w-sm bg-white z-50 flex flex-col shadow-2xl"
             >
-              <div className="p-5 flex items-center justify-between border-b border-slate-100">
+              <div className="p-4 flex items-center justify-between border-b border-slate-100">
                 <FlashKartLogo size="sm" />
-                <button onClick={() => setMenuOpen(false)} className="p-2 text-slate-700">
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  className="p-2 text-slate-700 rounded-lg hover:bg-slate-100"
+                >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
+              <div className="p-4 bg-emerald-50/60 border-b border-emerald-100/60 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
+                  <MapPin className="w-4 h-4 text-[#067a46]" />
+                  <span>Deliver to:</span>
+                  <span className="text-[#067a46]">{selectedLocation}</span>
+                </div>
+              </div>
+
               <nav className="p-4 space-y-1 text-sm font-bold flex-1 overflow-y-auto">
-                {navLinks.map((n) => (
+                <Link
+                  href="/"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-800 hover:bg-emerald-50 hover:text-[#067a46] transition"
+                >
+                  Home
+                </Link>
+                <Link
+                  href="/shop?cat=vegetables"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-800 hover:bg-emerald-50 hover:text-[#067a46] transition"
+                >
+                  Vegetables
+                </Link>
+                <Link
+                  href="/shop?cat=fruits"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-800 hover:bg-emerald-50 hover:text-[#067a46] transition"
+                >
+                  Fruits
+                </Link>
+                <Link
+                  href="/shop?cat=dairy"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-800 hover:bg-emerald-50 hover:text-[#067a46] transition"
+                >
+                  Dairy Products
+                </Link>
+
+                <div className="my-3 border-t border-slate-100 pt-2" />
+
+                {moreLinks.map((n) => (
                   <Link
                     key={n.href}
                     href={n.href}
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-800 hover:bg-[#067a46]/10 hover:text-[#067a46] transition"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-700 hover:bg-emerald-50 hover:text-[#067a46] transition"
                   >
                     {n.label}
                   </Link>
@@ -251,7 +429,7 @@ export function Header() {
                 <Link
                   href="/contact"
                   onClick={() => setMenuOpen(false)}
-                  className="w-full flex items-center justify-center gap-2 bg-[#067a46] text-white py-3 rounded-full font-bold text-sm shadow-sm"
+                  className="w-full flex items-center justify-center gap-2 bg-[#067a46] text-white py-3 rounded-xl font-bold text-sm shadow-sm"
                 >
                   <PhoneCall className="w-4 h-4" /> Get in Touch
                 </Link>
@@ -263,3 +441,4 @@ export function Header() {
     </>
   );
 }
+

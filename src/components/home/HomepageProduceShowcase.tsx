@@ -5,21 +5,21 @@ import { ArrowRight, Leaf } from "lucide-react";
 import { products } from "@/data/catalog";
 
 const vegetableItems = [
-  { name: "Tomato", slug: "fresh-tomato", priceRange: "₹20 - ₹30 / kg", fallbackImg: "/images/products/tomato.png", catId: "v-tomato" },
-  { name: "Potato", slug: "potato", priceRange: "₹18 - ₹25 / kg", fallbackImg: "/images/products/potato.png", catId: "v-potato" },
-  { name: "Onion", slug: "onion", priceRange: "₹20 - ₹25 / kg", fallbackImg: "/images/products/onion.png", catId: "v-onion" },
-  { name: "Carrot", slug: "carrot", priceRange: "₹25 - ₹35 / kg", fallbackImg: "/images/products/carrot.png", catId: "v-carrot" },
-  { name: "Capsicum", slug: "capsicum", priceRange: "₹30 - ₹45 / kg", fallbackImg: "/images/products/capsicum.png", catId: "v-capsicum" },
-  { name: "Cabbage", slug: "cabbage", priceRange: "₹15 - ₹20 / kg", fallbackImg: "/images/products/cabbage.png", catId: "v-cabbage" },
+  { name: "Tomato", slug: "fresh-tomato", fallbackPrice: "₹30 / kg", fallbackImg: "/images/products/tomato.png", catId: "v-tomato" },
+  { name: "Potato", slug: "potato", fallbackPrice: "₹25 / kg", fallbackImg: "/images/products/potato.png", catId: "v-potato" },
+  { name: "Onion", slug: "onion", fallbackPrice: "₹25 / kg", fallbackImg: "/images/products/onion.png", catId: "v-onion" },
+  { name: "Carrot", slug: "carrot", fallbackPrice: "₹35 / kg", fallbackImg: "/images/products/carrot.png", catId: "v-carrot" },
+  { name: "Capsicum", slug: "capsicum", fallbackPrice: "₹45 / kg", fallbackImg: "/images/products/capsicum.png", catId: "v-capsicum" },
+  { name: "Cabbage", slug: "cabbage", fallbackPrice: "₹20 / kg", fallbackImg: "/images/products/cabbage.png", catId: "v-cabbage" },
 ];
 
 const fruitItems = [
-  { name: "Banana", slug: "banana", priceRange: "₹25 - ₹35 / kg", fallbackImg: "/images/products/banana.png", catId: "f-banana" },
-  { name: "Apple", slug: "apple", priceRange: "₹120 - ₹180 / kg", fallbackImg: "/images/products/apple.png", catId: "f-apple" },
-  { name: "Grapes", slug: "grapes", priceRange: "₹80 - ₹120 / kg", fallbackImg: "/images/products/grapes.png", catId: "f-grapes" },
-  { name: "Mango", slug: "mango", priceRange: "₹60 - ₹100 / kg", fallbackImg: "/images/products/mango.png", catId: "f-mango" },
-  { name: "Watermelon", slug: "watermelon", priceRange: "₹20 - ₹30 / kg", fallbackImg: "/images/products/watermelon.png", catId: "f-watermelon" },
-  { name: "Papaya", slug: "papaya", priceRange: "₹30 - ₹50 / kg", fallbackImg: "/images/products/papaya.png", catId: "f-papaya" },
+  { name: "Banana", slug: "banana", fallbackPrice: "₹35 / kg", fallbackImg: "/images/products/banana-robusta.png", catId: "f-banana" },
+  { name: "Apple", slug: "apple", fallbackPrice: "₹180 / kg", fallbackImg: "/images/categories/fruits.png", catId: "f-apple" },
+  { name: "Grapes", slug: "grapes", fallbackPrice: "₹120 / kg", fallbackImg: "/images/categories/fruits.png", catId: "f-grapes" },
+  { name: "Mango", slug: "mango", fallbackPrice: "₹100 / kg", fallbackImg: "/images/products/alphonso-mango.png", catId: "f-mango" },
+  { name: "Watermelon", slug: "watermelon", fallbackPrice: "₹30 / kg", fallbackImg: "/images/categories/seasonal.png", catId: "f-watermelon" },
+  { name: "Papaya", slug: "papaya", fallbackPrice: "₹50 / kg", fallbackImg: "/images/categories/fruits.png", catId: "f-papaya" },
 ];
 
 export function HomepageProduceShowcase() {
@@ -56,6 +56,9 @@ export function HomepageProduceShowcase() {
                 {vegetableItems.map((item) => {
                   const catProduct = products.find((p) => p.id === item.catId || p.slug.includes(item.slug));
                   const imgSrc = catProduct?.image || item.fallbackImg;
+                  const displayPrice = catProduct
+                    ? `₹${catProduct.weights[0].price} / ${catProduct.weights[0].label}`
+                    : item.fallbackPrice;
 
                   return (
                     <Link
@@ -78,7 +81,7 @@ export function HomepageProduceShowcase() {
                           {item.name}
                         </h3>
                         <p className="text-[10px] sm:text-[11px] font-semibold text-slate-500 mt-0.5 truncate">
-                          {item.priceRange}
+                          {displayPrice}
                         </p>
                       </div>
                     </Link>
@@ -116,6 +119,9 @@ export function HomepageProduceShowcase() {
                 {fruitItems.map((item) => {
                   const catProduct = products.find((p) => p.id === item.catId || p.slug.includes(item.slug));
                   const imgSrc = catProduct?.image || item.fallbackImg;
+                  const displayPrice = catProduct
+                    ? `₹${catProduct.weights[0].price} / ${catProduct.weights[0].label}`
+                    : item.fallbackPrice;
 
                   return (
                     <Link
@@ -138,7 +144,7 @@ export function HomepageProduceShowcase() {
                           {item.name}
                         </h3>
                         <p className="text-[10px] sm:text-[11px] font-semibold text-slate-500 mt-0.5 truncate">
-                          {item.priceRange}
+                          {displayPrice}
                         </p>
                       </div>
                     </Link>

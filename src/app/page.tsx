@@ -1,4 +1,5 @@
 import { Hero } from "@/components/home/Hero";
+import { CategoryBannerRow } from "@/components/home/CategoryBannerRow";
 import { HomepageProduceShowcase } from "@/components/home/HomepageProduceShowcase";
 import { CategoryGridSection } from "@/components/home/CategoryGridSection";
 import { InstantOrderBulkOrderCards } from "@/components/home/InstantOrderBulkOrderCards";
@@ -24,16 +25,19 @@ export default function HomePage() {
       {/* Foreground Content */}
       <div className="relative z-10 flex flex-col min-h-screen">
         <main className="flex-1">
-          {/* 1. Independence Day Hero Section */}
+          {/* 1. Category Banner Cards (Directly Below Header) */}
+          <CategoryBannerRow />
+
+          {/* 2. Independence Day Hero Section */}
           <Hero />
 
-          {/* 2. Instant Order + Bulk Order Highlight Cards (Immediately After Hero) */}
+          {/* 3. Instant Order + Bulk Order Highlight Cards */}
           <InstantOrderBulkOrderCards />
 
-          {/* 3. Category Section 1: Fresh Vegetables & Seasonal Fruits Quick Panels */}
+          {/* 4. Fresh Vegetables & Seasonal Fruits Showcase */}
           <HomepageProduceShowcase />
 
-          {/* 4. Category Section 2: 3x3 Product Grid for Fresh Vegetables */}
+          {/* 5. 3x3 Product Grid for Fresh Vegetables */}
           <CategoryGridSection />
         </main>
       </div>
@@ -41,3 +45,4 @@ export default function HomePage() {
     </div>
   );
 }
+
