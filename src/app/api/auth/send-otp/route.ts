@@ -137,11 +137,19 @@ export async function POST(req: NextRequest) {
     metadata: { remaining: rateLimit.remaining - 1, provider: sendResult.provider },
   });
 
+  // Demo OTP visibility (testing only): SHOW_DEMO_OTP=true/false in .env is the
+  // explicit switch; when unset it defaults to ON in development and OFF in
+  // production, so going live with a real SMS provider hides it automatically.
+  const showDemoOtp =
+    process.env.SHOW_DEMO_OTP !== undefined
+      ? process.env.SHOW_DEMO_OTP === "true"
+      : process.env.NODE_ENV === "development";
+
   return NextResponse.json({
     success: true,
     message: "OTP sent successfully",
     expiresInSeconds: OTP_EXPIRY_MINUTES * 60,
-    _devOtp: process.env.NODE_ENV === "development" ? otp : undefined,
+    _devOtp: showDemoOtp ? otp : undefined,
   });
 }
 

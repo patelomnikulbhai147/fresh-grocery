@@ -504,7 +504,7 @@ export function CustomerLoginModal() {
               {devOtp && (
                 <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-center">
                   <p className="text-[10px] text-amber-700 font-extrabold uppercase tracking-wider mb-0.5">
-                    DEV MODE — Verification OTP
+                    OTP sent successfully — Demo OTP (testing only)
                   </p>
                   <p className="text-2xl font-mono font-black text-amber-900 tracking-[0.3em]">
                     {devOtp}

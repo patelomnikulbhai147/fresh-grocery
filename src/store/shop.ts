@@ -63,13 +63,14 @@ export const useCart = create<CartState>()(
             (i) => i.productId === product.id && i.weight === w.label && i.mode === mode
           );
           if (existing) {
+            // Basket stays CLOSED on add — the count badge + toast confirm the
+            // add; customers open the basket manually via the header icon.
             return {
               items: s.items.map((i) =>
                 i.productId === product.id && i.weight === w.label && i.mode === mode
                   ? { ...i, quantity: i.quantity + 1 }
                   : i
               ),
-              isOpen: true,
             };
           }
           return {
@@ -88,7 +89,6 @@ export const useCart = create<CartState>()(
                 ...extra,
               },
             ],
-            isOpen: true,
           };
         });
       },
