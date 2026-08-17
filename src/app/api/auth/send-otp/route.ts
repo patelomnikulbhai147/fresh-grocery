@@ -137,13 +137,19 @@ export async function POST(req: NextRequest) {
     metadata: { remaining: rateLimit.remaining - 1, provider: sendResult.provider },
   });
 
-  // Demo OTP visibility (testing only): SHOW_DEMO_OTP=true/false in .env is the
-  // explicit switch; when unset it defaults to ON in development and OFF in
-  // production, so going live with a real SMS provider hides it automatically.
+  // Demo OTP visibility: until a real SMS provider is configured, the on-screen
+  // demo OTP is the ONLY way to log in — so it shows by default on EVERY machine
+  // and for EVERY number, no .env needed. The moment real SMS credentials are set
+  // (OTP_PROVIDER + API key — the same condition OTPService uses to send real
+  // SMS), it hides automatically. SHOW_DEMO_OTP=true/false remains the explicit
+  // override in either direction.
+  const smsProvider = process.env.OTP_PROVIDER?.toLowerCase() || "development";
+  const smsApiKey = process.env.OTP_API_KEY || process.env.MSG91_AUTH_KEY || process.env.FAST2SMS_API_KEY;
+  const realSmsActive = !!smsApiKey && smsProvider !== "development";
   const showDemoOtp =
     process.env.SHOW_DEMO_OTP !== undefined
       ? process.env.SHOW_DEMO_OTP === "true"
-      : process.env.NODE_ENV === "development";
+      : !realSmsActive;
 
   return NextResponse.json({
     success: true,
