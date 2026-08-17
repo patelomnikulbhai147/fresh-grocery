@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Package, CalendarClock, FileText, Repeat, Building, Hotel, Store, CheckCircle2, PhoneCall } from "lucide-react";
 import { bulkProducts } from "@/data/catalog";
 import { useCart, useToasts } from "@/store/shop";
+import { ProductImage } from "@/components/ui/ProductImage";
 import { formatINR } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -21,23 +22,54 @@ export function BulkPage() {
   return (
     <div>
       <div className="mb-10">
-        <div className="text-xs text-purple-600 font-bold mb-2">
-          <Link href="/" className="hover:text-purple-800">Home</Link> / Wholesale & Bulk Orders
+        <div className="text-xs text-purple-600 font-bold mb-3">
+          <Link href="/" className="hover:text-purple-800">Home</Link> / FlashKart Business
         </div>
-        <h1 className="font-display text-4xl md:text-6xl text-purple-950 font-black text-balance">
-          Wholesale produce for <span className="italic text-amber-600">serious kitchens</span>.
-        </h1>
-        <p className="mt-3 text-slate-600 max-w-2xl text-sm md:text-base leading-relaxed">
-          Direct farm wholesale pricing on fresh vegetables and seasonal fruits for hostels, PGs, hotel kitchens, and local retail stores across Gandhinagar.
-        </p>
+
+        {/* Business Hero */}
+        <div className="relative overflow-hidden bg-[#1d1237] rounded-[24px] p-6 sm:p-10 text-white shadow-lg">
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#ea580c]/15 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
+          <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
+
+          <div className="relative z-10">
+            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-emerald-200 text-[10px] sm:text-[11px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider mb-4">
+              FlashKart Business
+            </div>
+            <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-black leading-[1.12] text-balance">
+              Bulk Orders. <span className="text-[#fb923c]">Better Prices.</span>
+              <br className="hidden sm:block" /> Reliable Supply.
+            </h1>
+            <p className="mt-3 text-purple-100/80 max-w-2xl text-sm md:text-base leading-relaxed">
+              Wholesale pricing, quantity tiers and scheduled supply — for hotels, restaurants,
+              hostels, PGs, cafes, caterers, offices, schools, retailers and shops across Gandhinagar.
+            </p>
+
+            <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs sm:text-sm font-semibold text-emerald-100">
+              {["Best Prices Guaranteed", "Bulk Discounts", "Scheduled Delivery", "GST Invoice", "Dedicated Support"].map((b) => (
+                <span key={b} className="inline-flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-[#4ade80] shrink-0" /> {b}
+                </span>
+              ))}
+            </div>
+
+            <div className="mt-6">
+              <a
+                href="#bulk-catalogue"
+                className="inline-flex items-center gap-2 bg-[#ea580c] hover:bg-[#c2410c] text-white font-extrabold px-7 py-3.5 rounded-xl text-sm sm:text-base transition shadow-md active:scale-[0.98]"
+              >
+                Start Bulk Order
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Feature pills */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
         {[
           { icon: Building, label: "Hostels & PGs", sub: "Daily mess crates" },
-          { icon: Hotel, label: "Hotels & Kitchens", sub: "Chef graded quality" },
-          { icon: Store, label: "Retail Shops", sub: "Wholesale crates" },
+          { icon: Hotel, label: "Hotels & Restaurants", sub: "Chef graded quality" },
+          { icon: Store, label: "Shops & Retailers", sub: "Wholesale crates" },
           { icon: FileText, label: "GST Billing", sub: "Transparent accounts" },
         ].map((f) => (
           <div key={f.label} className="bg-white rounded-2xl border border-purple-100 p-4 flex items-start gap-3 shadow-sm">
@@ -54,7 +86,7 @@ export function BulkPage() {
 
       {/* Schedule + Products */}
       <div className="grid lg:grid-cols-[1fr_340px] gap-8">
-        <div>
+        <div id="bulk-catalogue" className="scroll-mt-24">
           <h2 className="font-display text-2xl font-bold text-purple-950 mb-5">Pick Wholesale Items</h2>
           <div className="grid md:grid-cols-2 gap-4">
             {bulkProducts.map((p) => {
@@ -145,9 +177,14 @@ function BulkCard({
   const [qty, setQty] = useState(moq);
   return (
     <div className="bg-white rounded-3xl border border-purple-100 overflow-hidden flex flex-col shadow-sm">
-      <div className="relative aspect-[4/3] overflow-hidden bg-purple-50">
-        <Image src={product.image} alt={product.name} fill className="object-cover" />
-        <div className="absolute top-3 left-3 inline-flex items-center gap-1 bg-purple-950 text-amber-400 text-[10px] font-bold px-2.5 py-1 rounded-full">
+      <div className="relative aspect-[4/3] bg-slate-50 overflow-hidden">
+        <ProductImage
+          src={product.image}
+          alt={product.name}
+          sizes="(max-width: 768px) 90vw, 400px"
+          containPadding="p-3"
+        />
+        <div className="absolute top-3 left-3 z-10 inline-flex items-center gap-1 bg-purple-950 text-amber-400 text-[10px] font-bold px-2.5 py-1 rounded-full">
           <Package className="w-3 h-3" /> WHOLESALE · {discount}% OFF
         </div>
       </div>

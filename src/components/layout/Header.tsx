@@ -46,8 +46,15 @@ export function Header() {
   const locationRef = useRef<HTMLDivElement>(null);
   const moreRef = useRef<HTMLDivElement>(null);
 
-  const itemCount = useCart((s) => s.itemCount());
+  const rawItemCount = useCart((s) => s.itemCount());
   const openCart = useCart((s) => s.open);
+
+  // Persisted stores (cart, auth) differ between server render and hydration —
+  // show their values only after mount so the first client render matches SSR.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+  const itemCount = hydrated ? rawItemCount : 0;
+  const showAuthed = hydrated && isAuthenticated;
 
   // Close dropdowns on click outside
   useEffect(() => {
@@ -243,11 +250,11 @@ export function Header() {
                 if (isAuthenticated) router.push("/account");
                 else openLoginModal("/account");
               }}
-              className="flex items-center gap-2 text-slate-800 hover:text-[#067a46] font-bold text-xs sm:text-sm py-1.5 px-2 rounded-xl hover:bg-slate-50 transition"
+              className="flex items-center gap-2 text-slate-800 hover:text-[#067a46] font-bold text-xs sm:text-sm py-1.5 px-1 xs:px-2 rounded-xl hover:bg-slate-50 transition"
             >
               <User className="w-5 h-5 text-slate-700" />
               <span className="hidden sm:inline">
-                {isAuthenticated
+                {showAuthed
                   ? user?.name
                     ? user.name.split(" ")[0]
                     : "Account"
@@ -307,7 +314,7 @@ export function Header() {
             {/* Cart with Item Count Badge */}
             <button
               onClick={openCart}
-              className="flex items-center gap-2 text-slate-800 hover:text-[#067a46] font-bold text-xs sm:text-sm py-1.5 px-2 rounded-xl hover:bg-slate-50 transition relative"
+              className="flex items-center gap-2 text-slate-800 hover:text-[#067a46] font-bold text-xs sm:text-sm py-1.5 px-1 xs:px-2 rounded-xl hover:bg-slate-50 transition relative"
             >
               <div className="relative">
                 <ShoppingBag className="w-5 h-5 text-slate-700" />
@@ -321,7 +328,7 @@ export function Header() {
             {/* Green "Get in Touch" Button */}
             <Link
               href="/contact"
-              className="bg-[#067a46] hover:bg-[#046338] text-white font-extrabold px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm hidden xs:flex items-center gap-2 transition shadow-sm hover:shadow-md active:scale-95 shrink-0"
+              className="bg-[#067a46] hover:bg-[#046338] text-white font-extrabold px-3 xs:px-4 sm:px-5 py-2 xs:py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-2 transition shadow-sm hover:shadow-md active:scale-95 shrink-0"
             >
               <PhoneCall className="w-4 h-4 text-white" />
               <span className="hidden lg:inline">Get in Touch</span>

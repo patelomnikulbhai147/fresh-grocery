@@ -1,16 +1,36 @@
 import mysql from "mysql2/promise";
 import { randomUUID } from "crypto";
 
-// MySQL Pool configuration
+// MySQL Pool configuration — DATABASE_URL (mysql://user:pass@host:port/db) wins,
+// individual DB_* variables are the fallback.
+function parseDatabaseUrl(url?: string) {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    if (!u.protocol.startsWith("mysql")) return null;
+    return {
+      host: u.hostname || "localhost",
+      port: Number(u.port) || 3306,
+      user: decodeURIComponent(u.username || "root"),
+      password: decodeURIComponent(u.password || ""),
+      database: u.pathname.replace(/^\//, "") || "flashkart_db",
+    };
+  } catch {
+    return null;
+  }
+}
+
+const fromUrl = parseDatabaseUrl(process.env.DATABASE_URL);
 const poolConfig = {
-  host: process.env.DB_HOST || "localhost",
-  port: Number(process.env.DB_PORT) || 3306,
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "flashkart_db",
+  host: fromUrl?.host ?? process.env.DB_HOST ?? "localhost",
+  port: fromUrl?.port ?? (Number(process.env.DB_PORT) || 3306),
+  user: fromUrl?.user ?? process.env.DB_USER ?? "root",
+  password: fromUrl?.password ?? process.env.DB_PASSWORD ?? "",
+  database: fromUrl?.database ?? process.env.DB_NAME ?? "flashkart_db",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  connectTimeout: 4000,
 };
 
 // In-memory tables fallback in development if MySQL is not reachable
@@ -55,7 +75,10 @@ const inMemoryStore: Record<string, any[]> = {
 };
 
 let mysqlPool: mysql.Pool | null = null;
-let isMysqlAvailable = false;
+// null = untested, true = reachable, false = down (retried after RETRY_MS)
+let mysqlHealthy: boolean | null = null;
+let lastFailedAt = 0;
+const RETRY_MS = 30_000;
 
 try {
   mysqlPool = mysql.createPool(poolConfig);
@@ -63,16 +86,32 @@ try {
   mysqlPool = null;
 }
 
+/** Connection-level failures switch us to the in-memory fallback; real SQL errors surface. */
+const isConnectionError = (err: any) =>
+  ["ECONNREFUSED", "ETIMEDOUT", "ENOTFOUND", "EHOSTUNREACH", "PROTOCOL_CONNECTION_LOST", "ER_ACCESS_DENIED_ERROR", "ER_BAD_DB_ERROR", "ETIMEOUT"].includes(err?.code) ||
+  /connect|handshake|pool is closed/i.test(err?.message || "");
+
 export const pool = {
   execute: async <T = any>(sql: string, values: any[] = []): Promise<[T, any]> => {
-    if (mysqlPool && isMysqlAvailable) {
+    const shouldTryMysql =
+      mysqlPool && (mysqlHealthy !== false || Date.now() - lastFailedAt > RETRY_MS);
+    if (shouldTryMysql) {
       try {
-        return (await mysqlPool.execute(sql, values)) as [T, any];
+        const result = (await mysqlPool!.execute(sql, values)) as [T, any];
+        if (mysqlHealthy !== true) {
+          mysqlHealthy = true;
+          console.log(`[DB] MySQL connected (${poolConfig.host}:${poolConfig.port}/${poolConfig.database})`);
+        }
+        return result;
       } catch (err: any) {
-        if (err.code === "ECONNREFUSED" || err.code === "ER_ACCESS_DENIED_ERROR") {
-          isMysqlAvailable = false;
+        if (isConnectionError(err)) {
+          if (mysqlHealthy !== false) {
+            console.warn("[DB] MySQL unreachable — using in-memory fallback:", err.message);
+          }
+          mysqlHealthy = false;
+          lastFailedAt = Date.now();
         } else {
-          throw err;
+          throw err; // genuine SQL error — never mask it with fallback data
         }
       }
     }
@@ -124,15 +163,15 @@ function handleInMemoryQuery<T = any>(sql: string, values: any[] = []): [T, any]
     return [found as unknown as T, null];
   }
 
-  // INSERT INTO customers
+  // INSERT INTO customers — column order is (mobile, email, full_name, ...)
   if (upper.startsWith("INSERT INTO CUSTOMERS")) {
     const newId = randomUUID();
     const cleanMobile = normalizeMobile(values[0]);
     const newCust = {
       id: newId,
       mobile: cleanMobile,
-      full_name: values[1] || "Customer",
-      email: values[2] || null,
+      email: values[1] || null,
+      full_name: values[2] || "Customer",
       referral_code: `FLASH-${Math.floor(1000 + Math.random() * 9000)}`,
       points: 100,
       wallet_balance: 50,

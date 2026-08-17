@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   MapPin,
   CalendarClock,
@@ -16,6 +16,14 @@ import {
 import { useCart } from "@/store/shop";
 import { formatINR } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { useAdminStore, type AdminOrder } from "@/store/adminStore";
+import { useCustomerAuth } from "@/store/customerAuth";
+import { useAddressBook } from "@/store/addresses";
+import { cities } from "@/data/catalog";
+
+/** Serviceability from the live city configuration (same source as the pincode checker). */
+const isServiceablePincode = (pin: string): boolean =>
+  cities.some((c) => c.live && (c.pincode || []).some((prefix) => pin.startsWith(prefix)));
 
 type Form = {
   name: string;
@@ -43,18 +51,131 @@ export function CheckoutForm() {
   const clear = useCart((s) => s.clear);
   const [placed, setPlaced] = useState(false);
   const [orderId, setOrderId] = useState("");
+  const [stockError, setStockError] = useState("");
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<Form>({
-    defaultValues: { payment: "upi", slot: "morning-early", fulfillmentType: "partner_counter", city: "Gandhinagar" },
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<Form>({
+    defaultValues: { payment: "cod", slot: "morning-early", fulfillmentType: "partner_counter", city: "Gandhinagar" },
   });
 
+  // ── Saved addresses (per logged-in user) ──
+  const { user, isAuthenticated } = useCustomerAuth();
+  const addressBook = useAddressBook();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const savedAddresses = mounted && isAuthenticated && user?.mobile ? addressBook.forUser(user.mobile) : [];
+  const [selectedAddrId, setSelectedAddrId] = useState<string | null>(null);
+  const [saveAddress, setSaveAddress] = useState(false);
+
+  // Default address prefills the form once on mount
+  useEffect(() => {
+    if (!mounted || !isAuthenticated || !user?.mobile) return;
+    const def = addressBook.defaultFor(user.mobile);
+    if (def && !selectedAddrId) applyAddress(def.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted]);
+
+  const pincodeValue = (watch("pincode") || "").trim();
+
+  const applyAddress = (id: string) => {
+    const a = addressBook.addresses.find((x) => x.id === id);
+    if (!a) return;
+    setSelectedAddrId(id);
+    setValue("name", a.name);
+    setValue("phone", a.phone);
+    setValue("address", `${a.addressLine}${a.area ? `, ${a.area}` : ""}${a.landmark ? ` (near ${a.landmark})` : ""}`);
+    setValue("city", a.city);
+    setValue("pincode", a.pincode);
+  };
+
+  // Coupon validation against the real admin-managed coupon system (no hardcoded codes)
+  const coupons = useAdminStore((s) => s.coupons);
+  const placeCustomerOrder = useAdminStore((s) => s.placeCustomerOrder);
   const coupon = watch("coupon");
-  const couponOk = coupon?.toUpperCase() === "FLASH20" || coupon?.toUpperCase() === "FLASHKART10";
-  const couponAmt = couponOk ? Math.round(subtotal * 0.1) : 0;
+  const code = (coupon || "").trim().toUpperCase();
+  const matchedCoupon =
+    code.length > 0
+      ? coupons.find(
+          (c) =>
+            c.code.toUpperCase() === code &&
+            c.status === "Active" &&
+            new Date(c.expiryDate) >= new Date(new Date().toDateString()) &&
+            subtotal >= (c.minCartValue || 0)
+        )
+      : undefined;
+  const couponOk = !!matchedCoupon;
+  const couponAmt = matchedCoupon
+    ? matchedCoupon.type === "Percentage Discount"
+      ? Math.min(
+          Math.round((subtotal * matchedCoupon.discountValue) / 100),
+          matchedCoupon.maxDiscountCap || Number.MAX_SAFE_INTEGER
+        )
+      : Math.min(matchedCoupon.discountValue, matchedCoupon.maxDiscountCap || matchedCoupon.discountValue)
+    : 0;
   const total = Math.max(0, subtotal - couponAmt);
 
-  const onSubmit = () => {
+  const onSubmit = (data: Form) => {
+    if (items.length === 0) return;
+    // Serviceability: pincode must be inside a live delivery area
+    if (!isServiceablePincode(data.pincode.trim())) {
+      setStockError(`We are currently not providing delivery in pincode ${data.pincode.trim()}. Serviceable areas: Gandhinagar (3820xx / 3824xx) and Ahmedabad (3800xx).`);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    // Weight-based stock validation happens atomically inside placeCustomerOrder
+    setStockError("");
     const id = `FLK-${Math.floor(Math.random() * 900000 + 100000)}`;
+    const now = new Date();
+    const order: AdminOrder = {
+      id,
+      date: `${now.toISOString().slice(0, 10)} ${now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}`,
+      createdAt: now.toISOString(),
+      // Link the order to the logged-in account (delivery contact may differ)
+      customerId: user?.id,
+      customerName: data.name,
+      customerEmail: data.email || "",
+      customerPhone: data.phone,
+      shippingAddress: `${data.address}, ${data.city} - ${data.pincode}`,
+      items: items.map((i) => ({
+        productId: i.productId,
+        name: i.name,
+        image: i.image,
+        weight: i.weight,
+        price: i.price, // purchase-time price preserved on the order
+        quantity: i.quantity,
+      })),
+      subtotal,
+      discount: couponAmt,
+      deliveryFee: 0,
+      tax: 0,
+      total,
+      status: "Pending",
+      paymentStatus: "Pending",
+      paymentMethod:
+        data.payment === "cod" ? "Cash on Delivery" : data.payment === "upi" ? "UPI" : "Wallet",
+      deliverySlot: slots.find((s) => s.value === data.slot)?.label || data.slot,
+      invoiceNo: `INV-${id}`,
+    };
+    // Atomic order placement: validates every variant's stock, only then creates the
+    // order and decrements the exact variants bought. Rejected orders change nothing.
+    const result = placeCustomerOrder(order);
+    if (!result.ok) {
+      setStockError(result.message || "Some items in your cart are no longer available.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    // Optionally save this address to the customer's address book
+    if (saveAddress && isAuthenticated && user?.mobile) {
+      addressBook.add({
+        userKey: user.mobile,
+        label: "Home",
+        name: data.name,
+        phone: data.phone,
+        addressLine: data.address,
+        city: data.city,
+        pincode: data.pincode.trim(),
+        isDefault: false,
+      });
+    }
     setOrderId(id);
     setPlaced(true);
     clear();
@@ -91,6 +212,11 @@ export function CheckoutForm() {
       <div className="mb-8">
         <div className="text-xs text-[#067a46] font-bold mb-2"><Link href="/" className="hover:text-[#046338]">Home</Link> / Order Fulfillment</div>
         <h1 className="font-display text-3xl md:text-5xl font-black text-slate-900">Confirm Fresh Produce Order</h1>
+        {stockError && (
+          <div className="mt-4 bg-rose-50 border border-rose-200 text-rose-700 text-sm font-semibold rounded-2xl px-4 py-3">
+            ✕ {stockError}
+          </div>
+        )}
       </div>
 
       <div className="grid lg:grid-cols-[1fr_380px] gap-10">
@@ -101,6 +227,34 @@ export function CheckoutForm() {
               <Building className="w-5 h-5 text-[#067a46]" />
               <h2 className="font-display text-xl font-bold text-slate-900">Fulfillment & Location Details</h2>
             </div>
+
+            {/* Saved addresses — one click fills the form */}
+            {savedAddresses.length > 0 && (
+              <div className="mb-5">
+                <div className="text-xs font-bold text-slate-700 mb-2">Deliver to a saved address</div>
+                <div className="flex flex-wrap gap-2">
+                  {savedAddresses.map((a) => (
+                    <button
+                      key={a.id}
+                      type="button"
+                      onClick={() => applyAddress(a.id)}
+                      className={cn(
+                        "text-left px-3.5 py-2.5 rounded-2xl border text-xs transition max-w-[260px]",
+                        selectedAddrId === a.id
+                          ? "border-[#067a46] bg-emerald-50 ring-2 ring-emerald-100"
+                          : "border-slate-200 bg-white hover:border-slate-300"
+                      )}
+                    >
+                      <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                        <MapPin className="w-3 h-3 text-[#067a46]" /> {a.label}
+                        {a.isDefault && <span className="text-[9px] uppercase bg-[#067a46] text-white px-1.5 py-0.5 rounded-full">Default</span>}
+                      </div>
+                      <div className="text-slate-600 truncate mt-0.5">{a.addressLine}, {a.city} — {a.pincode}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="grid md:grid-cols-2 gap-4 mb-4">
               <div>
@@ -129,10 +283,46 @@ export function CheckoutForm() {
               </div>
             </div>
 
+            <div className="grid md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">Pincode *</label>
+                <input
+                  {...register("pincode", { required: true, pattern: /^\d{6}$/ })}
+                  maxLength={6}
+                  inputMode="numeric"
+                  className="input focus:border-[#067a46] focus:ring-1 focus:ring-[#067a46] outline-none"
+                  placeholder="e.g. 382021"
+                />
+                {errors.pincode && (
+                  <div className="text-[11px] font-bold text-rose-600 mt-1">Enter a valid 6-digit pincode</div>
+                )}
+                {pincodeValue && /^\d{6}$/.test(pincodeValue) && (
+                  <div className={cn("text-[11px] font-bold mt-1", isServiceablePincode(pincodeValue) ? "text-[#067a46]" : "text-rose-600")}>
+                    {isServiceablePincode(pincodeValue)
+                      ? "✓ Delivery available in this area"
+                      : "✕ Currently not providing in this area"}
+                  </div>
+                )}
+              </div>
+              <div />
+            </div>
+
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1.5">Address / Campus / Shop Location *</label>
               <textarea {...register("address", { required: true })} rows={2} className="input focus:border-[#067a46] focus:ring-1 focus:ring-[#067a46] outline-none" placeholder="Specific sector, hostel building name, hotel or shop landmark in Gandhinagar..." />
             </div>
+
+            {mounted && isAuthenticated && (
+              <label className="mt-4 flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={saveAddress}
+                  onChange={(e) => setSaveAddress(e.target.checked)}
+                  className="accent-[#067a46] w-4 h-4"
+                />
+                Save this address to my account for next time
+              </label>
+            )}
           </section>
 
           {/* Time Slot */}
@@ -157,14 +347,13 @@ export function CheckoutForm() {
               <CreditCard className="w-5 h-5 text-[#067a46]" />
               <h2 className="font-display text-xl font-bold text-slate-900">Payment Mode</h2>
             </div>
+            {/* Cash on Delivery only for now — online payment options return when the gateway goes live */}
             <div className="grid sm:grid-cols-3 gap-3">
               {[
-                { id: "upi", label: "UPI / QR Code", desc: "Instant UPI on fulfillment" },
-                { id: "cod", label: "Cash on Pickup / Supply", desc: "Direct cash settlement" },
-                { id: "bank_transfer", label: "Institutional Invoicing", desc: "For Hostels & Hotels" },
+                { id: "cod", label: "Cash on Delivery", desc: "Pay in cash when your order arrives" },
               ].map((p) => (
-                <label key={p.id} className="p-4 rounded-2xl border border-slate-200 hover:border-[#067a46] cursor-pointer bg-slate-50 transition">
-                  <input type="radio" value={p.id} {...register("payment")} className="accent-[#067a46] mb-2" />
+                <label key={p.id} className="p-4 rounded-2xl border border-[#067a46] ring-2 ring-emerald-100 cursor-pointer bg-emerald-50/60 transition">
+                  <input type="radio" value={p.id} defaultChecked {...register("payment")} className="accent-[#067a46] mb-2" />
                   <div className="text-xs font-bold text-slate-800">{p.label}</div>
                   <div className="text-[10px] text-slate-500 mt-0.5">{p.desc}</div>
                 </label>
@@ -194,12 +383,19 @@ export function CheckoutForm() {
               <div className="flex gap-2">
                 <input
                   {...register("coupon")}
-                  placeholder="Coupon code (e.g. FLASH20)"
+                  placeholder="Coupon code (e.g. FRESH20)"
                   className="input text-xs uppercase focus:border-[#067a46] focus:ring-1 focus:ring-[#067a46] outline-none"
                 />
               </div>
-              {couponOk && (
-                <div className="text-[11px] text-[#067a46] font-bold mt-1">✓ 10% Partner Discount Applied</div>
+              {couponOk && matchedCoupon && (
+                <div className="text-[11px] text-[#067a46] font-bold mt-1">
+                  ✓ {matchedCoupon.title} applied — you save {formatINR(couponAmt)}
+                </div>
+              )}
+              {code.length > 0 && !couponOk && (
+                <div className="text-[11px] text-rose-600 font-bold mt-1">
+                  ✕ Invalid or expired code, or minimum order value not met
+                </div>
               )}
             </div>
 

@@ -1,4 +1,4 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 @theme {
   --font-display: "Fraunces", "Playfair Display", Georgia, serif;
@@ -169,5 +169,92 @@
   border-color: var(--color-brand-500);
   box-shadow: 0 0 0 4px var(--color-brand-100);
 }
+
+/* ==================================================================
+   RAKSHA BANDHAN FESTIVE THEME - seasonal decoration ONLY.
+   The festive artwork is painted on the BODY BACKGROUND itself, so by
+   definition it renders behind every element and can never cover the
+   UI. Layers: corner rakhi medallions (SVG), marigolds, paisley,
+   golden dot texture, saffron/pink glows, warm cream base.
+   TO REMOVE: delete this block + set RAKSHA_BANDHAN_THEME = false.
+   ================================================================== */
+body.rb-theme {
+  background-color: #fff7ee;
+  background-image:
+    /* rakhi medallion - top right */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 420 420'%3E%3Cg opacity='0.45'%3E%3Cpath d='M210 210 C 90 260 40 340 -30 380' stroke='%23b45309' stroke-width='3' fill='none'/%3E%3Cpath d='M210 210 C 320 270 380 330 460 370' stroke='%239d174d' stroke-width='2.5' fill='none'/%3E%3Cpath d='M210 210 C 300 120 360 80 440 40' stroke='%23b45309' stroke-width='2.5' fill='none'/%3E%3Ccircle cx='210' cy='210' r='150' stroke='%23b45309' stroke-width='2.5' stroke-dasharray='3 10' fill='none'/%3E%3Cg fill='%23f59e0b'%3E%3Ccircle cx='328' cy='210' r='10'/%3E%3Ccircle cx='293' cy='293' r='10'/%3E%3Ccircle cx='210' cy='328' r='10'/%3E%3Ccircle cx='127' cy='293' r='10'/%3E%3Ccircle cx='92' cy='210' r='10'/%3E%3Ccircle cx='127' cy='127' r='10'/%3E%3Ccircle cx='210' cy='92' r='10'/%3E%3Ccircle cx='293' cy='127' r='10'/%3E%3C/g%3E%3Cg fill='%23be185d'%3E%3Ccircle cx='319' cy='255' r='5'/%3E%3Ccircle cx='255' cy='319' r='5'/%3E%3Ccircle cx='165' cy='319' r='5'/%3E%3Ccircle cx='101' cy='255' r='5'/%3E%3Ccircle cx='101' cy='165' r='5'/%3E%3Ccircle cx='165' cy='101' r='5'/%3E%3Ccircle cx='255' cy='101' r='5'/%3E%3Ccircle cx='319' cy='165' r='5'/%3E%3C/g%3E%3Ccircle cx='210' cy='210' r='88' stroke='%239d174d' stroke-width='3' fill='none'/%3E%3Ccircle cx='210' cy='210' r='70' stroke='%23f59e0b' stroke-width='2' stroke-dasharray='2 6' fill='none'/%3E%3Cg fill='%23fbbf24'%3E%3Ccircle cx='244' cy='210' r='13'/%3E%3Ccircle cx='234' cy='234' r='13'/%3E%3Ccircle cx='210' cy='244' r='13'/%3E%3Ccircle cx='186' cy='234' r='13'/%3E%3Ccircle cx='176' cy='210' r='13'/%3E%3Ccircle cx='186' cy='186' r='13'/%3E%3Ccircle cx='210' cy='176' r='13'/%3E%3Ccircle cx='234' cy='186' r='13'/%3E%3C/g%3E%3Ccircle cx='210' cy='210' r='20' fill='%23be185d'/%3E%3Ccircle cx='210' cy='210' r='9' fill='%23fde68a'/%3E%3C/g%3E%3C/svg%3E"),
+    /* rakhi medallion - bottom left */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 420 420'%3E%3Cg opacity='0.42'%3E%3Cpath d='M210 210 C 120 280 90 360 40 450' stroke='%239d174d' stroke-width='2.5' fill='none'/%3E%3Cpath d='M210 210 C 90 150 40 110 -30 60' stroke='%23b45309' stroke-width='3' fill='none'/%3E%3Ccircle cx='210' cy='210' r='150' stroke='%23b45309' stroke-width='2.5' stroke-dasharray='3 10' fill='none'/%3E%3Cg fill='%23f59e0b'%3E%3Ccircle cx='328' cy='210' r='10'/%3E%3Ccircle cx='293' cy='293' r='10'/%3E%3Ccircle cx='210' cy='328' r='10'/%3E%3Ccircle cx='127' cy='293' r='10'/%3E%3Ccircle cx='92' cy='210' r='10'/%3E%3Ccircle cx='127' cy='127' r='10'/%3E%3Ccircle cx='210' cy='92' r='10'/%3E%3Ccircle cx='293' cy='127' r='10'/%3E%3C/g%3E%3Ccircle cx='210' cy='210' r='88' stroke='%239d174d' stroke-width='3' fill='none'/%3E%3Cg fill='%23fbbf24'%3E%3Ccircle cx='244' cy='210' r='13'/%3E%3Ccircle cx='234' cy='234' r='13'/%3E%3Ccircle cx='210' cy='244' r='13'/%3E%3Ccircle cx='186' cy='234' r='13'/%3E%3Ccircle cx='176' cy='210' r='13'/%3E%3Ccircle cx='186' cy='186' r='13'/%3E%3Ccircle cx='210' cy='176' r='13'/%3E%3Ccircle cx='234' cy='186' r='13'/%3E%3C/g%3E%3Ccircle cx='210' cy='210' r='20' fill='%23be185d'/%3E%3Ccircle cx='210' cy='210' r='9' fill='%23fde68a'/%3E%3C/g%3E%3C/svg%3E"),
+    /* marigold - left edge */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cg opacity='0.45'%3E%3Cg fill='%23f59e0b'%3E%3Ccircle cx='62' cy='40' r='9'/%3E%3Ccircle cx='58' cy='53' r='9'/%3E%3Ccircle cx='47' cy='61' r='9'/%3E%3Ccircle cx='33' cy='61' r='9'/%3E%3Ccircle cx='22' cy='53' r='9'/%3E%3Ccircle cx='18' cy='40' r='9'/%3E%3Ccircle cx='22' cy='27' r='9'/%3E%3Ccircle cx='33' cy='19' r='9'/%3E%3Ccircle cx='47' cy='19' r='9'/%3E%3Ccircle cx='58' cy='27' r='9'/%3E%3C/g%3E%3Ccircle cx='40' cy='40' r='12' fill='%23d97706'/%3E%3Ccircle cx='40' cy='40' r='5' fill='%23fde68a'/%3E%3C/g%3E%3C/svg%3E"),
+    /* marigold - right edge */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cg opacity='0.45'%3E%3Cg fill='%23f59e0b'%3E%3Ccircle cx='62' cy='40' r='9'/%3E%3Ccircle cx='58' cy='53' r='9'/%3E%3Ccircle cx='47' cy='61' r='9'/%3E%3Ccircle cx='33' cy='61' r='9'/%3E%3Ccircle cx='22' cy='53' r='9'/%3E%3Ccircle cx='18' cy='40' r='9'/%3E%3Ccircle cx='22' cy='27' r='9'/%3E%3Ccircle cx='33' cy='19' r='9'/%3E%3Ccircle cx='47' cy='19' r='9'/%3E%3Ccircle cx='58' cy='27' r='9'/%3E%3C/g%3E%3Ccircle cx='40' cy='40' r='12' fill='%23d97706'/%3E%3Ccircle cx='40' cy='40' r='5' fill='%23fde68a'/%3E%3C/g%3E%3C/svg%3E"),
+    /* paisley - right upper edge */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cg opacity='0.45'%3E%3Cpath d='M50 8 C 92 28 96 84 62 112 C 40 130 14 122 12 98 C 10 76 30 64 46 74 C 58 82 56 98 46 102' stroke='%23b45309' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='46' cy='88' r='5' fill='%23be185d'/%3E%3C/g%3E%3C/svg%3E"),
+    /* golden dot texture */
+    radial-gradient(rgba(180, 83, 9, 0.12) 1px, transparent 1.4px),
+    /* saffron / pink festive glows + warm cream base */
+    radial-gradient(1100px 560px at 108% 0%, rgba(251, 191, 36, 0.30), transparent 62%),
+    radial-gradient(950px 560px at -8% 100%, rgba(190, 24, 93, 0.14), transparent 60%),
+    linear-gradient(180deg, #fff7ea 0%, #ffefdb 45%, #ffe8d1 100%);
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat, no-repeat, no-repeat, no-repeat;
+  background-size: 420px 420px, 420px 420px, 60px 60px, 48px 48px, 46px 64px, 26px 26px, auto, auto, auto;
+  background-position: right -130px top 120px, left -140px bottom -130px, left 12px top 34%, right 14px top 64%, right 20px top 22%, 0 0, 0 0, 0 0, 0 0;
+  background-attachment: fixed;
+}
+/* gentle floating sparkle particles (fixed, tiny, pointer-events none) */
+.rb-sparkle {
+  position: fixed;
+  z-index: 0;             /* above the body background, below positioned UI */
+  pointer-events: none;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.85) 0%, rgba(251, 191, 36, 0) 72%);
+  opacity: 0;
+  animation-name: rb-twinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+@keyframes rb-twinkle {
+  0%, 100% { opacity: 0; transform: translateY(0); }
+  50% { opacity: 0.5; transform: translateY(-14px); }
+}
+/* very thin festive hairline along the top edge - gold , saffron , green */
+.rb-topline {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 60;
+  pointer-events: none;
+  background: linear-gradient(90deg, #b45309 0%, #f59e0b 22%, #be185d 50%, #f59e0b 78%, #067a46 100%);
+  opacity: 0.85;
+}
+/* accessibility: no decorative motion for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .rb-sparkle { animation: none; opacity: 0.25; }
+}
+/* festive translucency for the hero backdrop - lets the warm wash glow through
+   without changing the hero's layout, content or dimensions */
+body.rb-theme .rb-hero-glass {
+  background-color: rgba(255, 255, 255, 0.35) !important;
+}
+/* Page-canvas wrappers (neutral full-page off-white backgrounds) become
+   transparent under the theme so the festive body background shows through.
+   Fixed overlays (e.g. the mobile filter drawer) are excluded — they keep
+   their opaque background for readability. */
+body.rb-theme [class*="bg-[#fafafa]"]:not(.fixed),
+body.rb-theme [class*="bg-[#fafaf9]"]:not(.fixed) {
+  background-color: transparent;
+}
+/* mobile: smaller medallions tucked further out, never overflowing */
+@media (max-width: 640px) {
+  body.rb-theme {
+    background-size: 240px 240px, 240px 240px, 44px 44px, 38px 38px, 0 0, 26px 26px, auto, auto, auto;
+    background-position: right -90px top 100px, left -95px bottom -85px, left 6px top 36%, right 8px top 64%, 0 0, 0 0, 0 0, 0 0, 0 0;
+  }
+  .rb-sparkle { display: none; }
+}
+/* ================== END RAKSHA BANDHAN THEME ================== */
 
 

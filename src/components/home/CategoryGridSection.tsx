@@ -63,13 +63,13 @@ function ProductCardGridItem({ item }: { item: typeof vegGridItems[0] }) {
     <div className="group bg-white rounded-[16px] border border-slate-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col justify-between h-full">
       <Link href={`/product/${matchedProduct.slug}`} className="flex flex-col w-full">
         {/* Full-Width Cover Image (No side margins/padding) */}
-        <div className="relative w-full h-[110px] xs:h-[130px] sm:h-[140px] md:h-[160px] overflow-hidden bg-slate-100">
+        <div className="relative w-full aspect-[5/4] bg-slate-50">
           <Image
             src={item.image}
             alt={item.name}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
+            className="object-contain object-center p-2 group-hover:scale-105 transition-transform duration-300 mix-blend-multiply"
             unoptimized
           />
         </div>

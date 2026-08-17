@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { products as initialProducts, categories as initialCategories, type Product, type Category, type Weight, type DeliveryMode } from "@/data/catalog";
 import { type AdminRole } from "./adminAuth";
+import { formatWeight } from "@/lib/utils";
 
 export type ProductStatus = "Active" | "Draft" | "Hidden" | "Out of Stock";
 export type DeliveryTimeOption = "10 Min" | "20 Min" | "30 Min" | "45 Min" | "Same Day" | "Morning" | "Daily Morning";
@@ -12,6 +13,10 @@ export type ProductBadge = "Discount" | "Limited Stock" | "Combo Offer" | "None"
 export interface AdminProduct extends Product {
   price?: number;
   mrp?: number;
+  /** Physical inventory in integer grams — ONE shared pool for all pack sizes. */
+  stockGrams: number;
+  /** Low-stock threshold in grams (weight-based, configurable per product). */
+  minStockGrams: number;
   sku: string;
   barcode: string;
   brand: string;
@@ -112,12 +117,18 @@ export interface OrderItem {
   unit?: string;
   price: number;
   quantity: number;
+  /** Pack weight in grams at purchase time (preserved on the order). */
+  packGrams?: number;
+  /** packGrams × quantity — total physical weight this line consumed. */
+  totalGrams?: number;
 }
 
 export interface AdminOrder {
   id: string;
   date: string;
   createdAt?: string;
+  /** The logged-in account that placed the order (may differ from the delivery contact). */
+  customerId?: string;
   customerName: string;
   customerEmail: string;
   customerPhone: string;
@@ -295,14 +306,79 @@ export interface ActivityLog {
 }
 
 // Convert frontend catalog items to AdminProducts with initial rich data
+/**
+ * Give every variant its own stock number. Variants that already have one keep it;
+ * the product's pooled stock is split evenly across the rest, so the product's
+ * TOTAL stock is preserved (never inflated or zeroed).
+ */
+export function normalizeVariantStocks(weights: Weight[], totalStock: number): Weight[] {
+  const missing = weights.filter((w) => w.stock === undefined);
+  if (missing.length === 0) return weights;
+  const definedSum = weights.reduce((n, w) => n + (w.stock ?? 0), 0);
+  const pool = Math.max(0, (totalStock ?? 0) - definedSum);
+  const base = Math.floor(pool / missing.length);
+  let rem = pool - base * missing.length;
+  return weights.map((w) => {
+    if (w.stock !== undefined) return w;
+    const extra = rem > 0 ? 1 : 0;
+    rem -= extra;
+    return { ...w, stock: base + extra };
+  });
+}
+
+/** Legacy pack-count → physical grams: Σ (pack count × pack weight). Deterministic, no guessing. */
+export function packCountsToGrams(weights: Weight[]): number {
+  return weights.reduce((n, w) => n + (w.stock ?? 0) * Math.max(1, w.grams), 0);
+}
+
+/**
+ * Weight-based stock status — the single source of truth.
+ * All pack sizes share ONE physical inventory (stockGrams). The product is
+ * Out of Stock when the remaining grams can't fulfil even the smallest active
+ * pack; Low Stock when at/below the weight threshold (default 2 kg).
+ */
+export function productStockInfo(
+  p: Pick<AdminProduct, "weights"> & { stockGrams?: number; minStockGrams?: number }
+) {
+  const active = p.weights.filter((w) => w.active !== false);
+  const totalGrams = Math.max(0, Math.round(p.stockGrams ?? 0));
+  const smallestPack = active.length ? Math.min(...active.map((w) => Math.max(1, w.grams))) : 0;
+  const threshold = p.minStockGrams ?? 2000;
+  const allOut = active.length === 0 || totalGrams < smallestPack;
+  const low = !allOut && totalGrams <= threshold;
+  const status: "In Stock" | "Low Stock" | "Out of Stock" = allOut
+    ? "Out of Stock"
+    : low
+    ? "Low Stock"
+    : "In Stock";
+  return {
+    totalGrams,
+    status,
+    allOut,
+    low,
+    /** kept for call-site compatibility */
+    anyLow: low,
+    total: totalGrams,
+    packCount: p.weights.length,
+    activeCount: active.length,
+  };
+}
+
 function buildInitialAdminProducts(): AdminProduct[] {
   return initialProducts.map((p, idx) => {
     const defaultWeight = p.weights[0] ?? { price: 100, mrp: 120, label: "1 unit", grams: 500 };
     const costPrice = Math.round(defaultWeight.price * 0.75);
     const marginPercent = Math.round(((defaultWeight.price - costPrice) / defaultWeight.price) * 100);
 
+    // Seed physical stock: legacy per-pack counts (evenly split) × pack weight, summed.
+    const seededWeights = normalizeVariantStocks(p.weights, p.stock ?? 45);
+    const stockGrams = packCountsToGrams(seededWeights);
+
     return {
       ...p,
+      weights: seededWeights,
+      stockGrams,
+      minStockGrams: 2000,
       sku: `FRM-SKU-${1000 + idx}`,
       barcode: `890100${2000 + idx}`,
       brand: idx % 3 === 0 ? "FlashKart Fresh" : idx % 2 === 0 ? "Fresh Harvest" : "Green Valley",
@@ -311,9 +387,10 @@ function buildInitialAdminProducts(): AdminProduct[] {
       costPrice,
       taxPercent: 5,
       marginPercent,
-      currentStock: p.stock ?? 45,
-      reservedStock: Math.floor(Math.random() * 8),
-      availableStock: (p.stock ?? 45) - Math.floor(Math.random() * 8),
+      // Legacy mirrors kept in grams so older modules never show stale unit counts
+      currentStock: stockGrams,
+      reservedStock: 0,
+      availableStock: stockGrams,
       minStock: 15,
       maxStock: 250,
       warehouse: idx % 2 === 0 ? "Hub-A (North Gandhinagar)" : "Hub-B (Gandhinagar Central)",
@@ -620,6 +697,8 @@ interface AdminStoreState {
   restoreProduct: (id: string, user: string, role: AdminRole) => void;
   bulkUpdateProducts: (ids: string[], updates: Partial<AdminProduct>, actionName: string, user: string, role: AdminRole) => void;
   updateProductStock: (id: string, newStock: number, user: string, role: AdminRole) => void;
+  /** Set the product's shared physical stock in integer grams (weight-based inventory). */
+  updateProductStockGrams: (id: string, grams: number, user: string, role: AdminRole) => void;
   recordPriceChange: (record: Omit<PriceHistoryRecord, "id" | "date" | "time">) => void;
   recordStockChange: (record: Omit<StockHistoryRecord, "id" | "date" | "time">) => void;
   batchUpdateProductsInline: (edits: Record<string, Partial<AdminProduct>>, user: string, role: AdminRole, reason?: string) => void;
@@ -636,6 +715,11 @@ interface AdminStoreState {
   deleteCategory: (slug: string, user: string, role: AdminRole) => void;
 
   // Actions - Orders & Customers
+  /**
+   * Storefront checkout → validates stock for EVERY item first; only if all fit does it
+   * create the order and decrement the exact variant stocks (atomic: all-or-nothing).
+   */
+  placeCustomerOrder: (order: AdminOrder) => { ok: boolean; message?: string };
   updateOrderStatus: (orderId: string, status: OrderStatus, user: string, role: AdminRole) => void;
   assignDeliveryPartner: (orderId: string, partner: { name: string; phone: string; vehicleNo: string }, user: string, role: AdminRole) => void;
   assignOrderDriver: (orderId: string, driver: any, user: string, role: AdminRole) => void;
@@ -806,6 +890,39 @@ export const useAdminStore = create<AdminStoreState>()(
           products: s.products.map((p) => p.id === id ? { ...p, currentStock: newStock, availableStock: newStock - (p.reservedStock || 0), status: newStock > 0 ? "Active" : "Out of Stock" } : p)
         }));
         get().logAction(user, role, `Updated stock for product ${id} to ${newStock}`, "Inventory");
+      },
+
+      updateProductStockGrams: (id, grams, user, role) => {
+        const p = get().products.find((x) => x.id === id);
+        if (!p) return;
+        const prev = p.stockGrams ?? 0;
+        const safe = Math.max(0, Math.round(grams)); // integer grams — no float arithmetic
+        const info = productStockInfo({ weights: p.weights, stockGrams: safe, minStockGrams: p.minStockGrams });
+        set((s) => ({
+          products: s.products.map((x) =>
+            x.id === id
+              ? {
+                  ...x,
+                  stockGrams: safe,
+                  currentStock: safe,
+                  stock: safe,
+                  availableStock: safe,
+                  status: info.allOut ? (x.status === "Active" ? "Out of Stock" : x.status) : (x.status === "Out of Stock" ? "Active" : x.status),
+                }
+              : x
+          ),
+        }));
+        get().recordStockChange({
+          productId: p.id,
+          productName: p.name,
+          sku: p.sku,
+          oldStock: prev,
+          newStock: safe,
+          reason: "Manual Update",
+          user: user || "Super Admin",
+          notes: `Stock set to ${formatWeight(safe)}`,
+        });
+        get().logAction(user, role, `Stock changed: ${p.name} — ${formatWeight(prev)} → ${formatWeight(safe)}`, "Inventory");
       },
 
       recordPriceChange: (recordData) => {
@@ -1009,9 +1126,137 @@ export const useAdminStore = create<AdminStoreState>()(
       },
 
       // Orders & Customers
+      placeCustomerOrder: (order) => {
+        const before = get().products;
+        // Grams a line consumes: pack weight (from the product's live variant list,
+        // falling back to any grams stamped on the item) × quantity.
+        const packGramsOf = (i: OrderItem): number => {
+          const p = before.find((x) => x.id === i.productId);
+          const w = p?.weights.find((wt) => wt.label === i.weight);
+          return Math.max(1, Math.round(w?.grams ?? i.packGrams ?? 1));
+        };
+        // 1) VALIDATE: total ordered WEIGHT per product vs the shared gram pool.
+        // All lines of a product draw from the same physical inventory.
+        const wantedGrams = new Map<string, number>();
+        order.items.forEach((i) => {
+          wantedGrams.set(i.productId, (wantedGrams.get(i.productId) || 0) + packGramsOf(i) * i.quantity);
+        });
+        for (const [productId, grams] of wantedGrams) {
+          const p = before.find((x) => x.id === productId);
+          if (!p) continue;
+          const available = p.stockGrams ?? 0;
+          if (grams > available) {
+            return {
+              ok: false,
+              message:
+                available <= 0
+                  ? `"${p.name}" is out of stock.`
+                  : `Only ${formatWeight(available)} of "${p.name}" available.`,
+            };
+          }
+        }
+        // 2) COMMIT: stamp exact weights on the order (preserved history) and deduct
+        // integer grams from each product's shared pool — all-or-nothing.
+        const stampedOrder: AdminOrder = {
+          ...order,
+          items: order.items.map((i) => ({
+            ...i,
+            packGrams: packGramsOf(i),
+            totalGrams: packGramsOf(i) * i.quantity,
+          })),
+        };
+        wantedGrams.forEach((grams, productId) => {
+          const p = before.find((x) => x.id === productId);
+          if (!p) return;
+          const prev = p.stockGrams ?? 0;
+          get().recordStockChange({
+            productId: p.id,
+            productName: p.name,
+            sku: p.sku,
+            oldStock: prev,
+            newStock: Math.max(0, prev - grams),
+            reason: "Sale",
+            user: order.customerName || "Customer",
+            notes: `Order ${order.id} — ${formatWeight(grams)} sold`,
+          });
+        });
+        set((s) => ({
+          orders: [stampedOrder, ...s.orders],
+          products: s.products.map((p) => {
+            const grams = wantedGrams.get(p.id);
+            if (!grams) return p;
+            const next = Math.max(0, (p.stockGrams ?? 0) - grams);
+            const info = productStockInfo({ weights: p.weights, stockGrams: next, minStockGrams: p.minStockGrams });
+            return {
+              ...p,
+              stockGrams: next,
+              currentStock: next,
+              stock: next,
+              availableStock: next,
+              // Out of Stock only when the remaining grams can't fulfil any active pack
+              status: info.allOut && p.status === "Active" ? "Out of Stock" : !info.allOut && p.status === "Out of Stock" ? "Active" : p.status,
+            };
+          }),
+        }));
+        get().logAction(
+          order.customerName || "Customer",
+          "Read Only",
+          `New order ${order.id} placed — ${order.items.length} item(s), total ₹${order.total}`,
+          "Orders"
+        );
+        return { ok: true };
+      },
       updateOrderStatus: (orderId, status, user, role) => {
+        const RESTORED: OrderStatus[] = ["Cancelled", "Returned", "Refunded"];
+        const order = get().orders.find((o) => o.id === orderId);
+        // Restore stock to the EXACT variants bought when an order is cancelled/returned
+        // for the first time (guarded so a repeat status change never double-restores).
+        const shouldRestore = !!order && RESTORED.includes(status) && !RESTORED.includes(order.status);
+        if (shouldRestore && order) {
+          const before = get().products;
+          // Restore the EXACT weight each line consumed (stamped at purchase time,
+          // with the pack's live gram weight as fallback for older orders).
+          const restoreGrams = new Map<string, number>();
+          order.items.forEach((i) => {
+            const p = before.find((x) => x.id === i.productId);
+            const w = p?.weights.find((wt) => wt.label === i.weight);
+            const grams = (i.totalGrams ?? Math.max(1, Math.round(w?.grams ?? 1)) * i.quantity);
+            restoreGrams.set(i.productId, (restoreGrams.get(i.productId) || 0) + grams);
+          });
+          restoreGrams.forEach((grams, productId) => {
+            const p = before.find((x) => x.id === productId);
+            if (!p) return;
+            const prev = p.stockGrams ?? 0;
+            get().recordStockChange({
+              productId: p.id,
+              productName: p.name,
+              sku: p.sku,
+              oldStock: prev,
+              newStock: prev + grams,
+              reason: "Return",
+              user: user || "Super Admin",
+              notes: `Order ${orderId} ${status.toLowerCase()} — ${formatWeight(grams)} restored`,
+            });
+          });
+          set((s) => ({
+            products: s.products.map((p) => {
+              const grams = restoreGrams.get(p.id);
+              if (!grams) return p;
+              const next = (p.stockGrams ?? 0) + grams;
+              const info = productStockInfo({ weights: p.weights, stockGrams: next, minStockGrams: p.minStockGrams });
+              return {
+                ...p,
+                stockGrams: next,
+                currentStock: next,
+                stock: next,
+                availableStock: next,
+                status: !info.allOut && p.status === "Out of Stock" ? "Active" : p.status,
+              };
+            }),
+          }));
+        }
         set((s) => ({ orders: s.orders.map((o) => o.id === orderId ? { ...o, status } : o) }));
-        get().logAction(user, role, `Updated Order #${orderId} status to '${status}'`, "Orders");
+        get().logAction(user, role, `Updated Order #${orderId} status to '${status}'${shouldRestore ? " — item stock restored to variants" : ""}`, "Orders");
       },
       assignDeliveryPartner: (orderId, partner, user, role) => {
         set((s) => ({ orders: s.orders.map((o) => o.id === orderId ? { ...o, assignedPartner: partner, status: "Out for Delivery" } : o) }));
@@ -1121,6 +1366,38 @@ export const useAdminStore = create<AdminStoreState>()(
         get().logAction(user, role, `Updated global store settings and API keys`, "Settings");
       }
     }),
-    { name: "flashkart-admin-store-v1" }
+    {
+      name: "flashkart-admin-store-v1",
+      version: 2,
+      // v0 → v1: normalize per-variant pack counts (shared pool split, total preserved).
+      // v1 → v2: WEIGHT-BASED inventory — pack counts were counts of packs, so the
+      // physical stock is Σ (pack count × pack weight in grams). One shared gram pool
+      // per product; variants become pure pack sizes. No data deleted.
+      migrate: (persisted: any, version: number) => {
+        if (version < 1 && persisted?.products) {
+          persisted.products = persisted.products.map((p: AdminProduct) => ({
+            ...p,
+            weights: normalizeVariantStocks(p.weights || [], p.currentStock ?? 0),
+          }));
+        }
+        if (version < 2 && persisted?.products) {
+          persisted.products = persisted.products.map((p: AdminProduct) => {
+            const stockGrams = p.stockGrams ?? packCountsToGrams(p.weights || []);
+            const minStockGrams = p.minStockGrams ?? 2000;
+            const info = productStockInfo({ weights: p.weights || [], stockGrams, minStockGrams });
+            return {
+              ...p,
+              stockGrams,
+              minStockGrams,
+              currentStock: stockGrams,
+              stock: stockGrams,
+              availableStock: stockGrams,
+              status: info.allOut && p.status === "Active" ? "Out of Stock" : !info.allOut && p.status === "Out of Stock" ? "Active" : p.status,
+            };
+          });
+        }
+        return persisted;
+      },
+    }
   )
 );

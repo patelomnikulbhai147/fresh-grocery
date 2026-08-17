@@ -1,48 +1,41 @@
 import { Hero } from "@/components/home/Hero";
-import { CategoryBannerRow } from "@/components/home/CategoryBannerRow";
-import { HomepageProduceShowcase } from "@/components/home/HomepageProduceShowcase";
-import { CategoryGridSection } from "@/components/home/CategoryGridSection";
-import { InstantOrderBulkOrderCards } from "@/components/home/InstantOrderBulkOrderCards";
+import { CategoryShowcase } from "@/components/home/CategoryShowcase";
+import { BestSellers, DealsOfTheDay } from "@/components/home/BestSellers";
+import { WhyFlashKart, BusinessCta, PromoBanners } from "@/components/home/WhyFlashKartCta";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "FlashKart | Fresh Vegetables & Seasonal Fruits Direct Supply",
+  title: "FlashKart | Two Ways to Shop. One Trusted Partner.",
   description:
-    "FlashKart provides fresh vegetables and seasonal fruits with direct supply to hostels, PGs, hotels and shops across Gandhinagar and Gujarat.",
+    "FlashKart NOW delivers fresh vegetables, fruits and daily essentials to your doorstep. FlashKart BUSINESS supplies bulk groceries to hotels, restaurants, hostels, PGs and shops. Currently serving Gandhinagar.",
   alternates: { canonical: "https://flashkart.co" },
 };
 
 export default function HomePage() {
   return (
-    <div className="relative min-h-screen bg-[#faf8f5] text-slate-900 flex flex-col font-sans selection:bg-[#067a46] selection:text-white">
-      
-      {/* Global Watercolor Background Layer */}
-      <div 
-        className="fixed inset-0 pointer-events-none z-0 bg-[url('/images/hero_bg_india.png')] bg-cover bg-top bg-no-repeat opacity-75" 
-        aria-hidden="true"
-      />
+    <div className="relative min-h-screen bg-[#fafafa] text-slate-900 flex flex-col font-sans selection:bg-[#067a46] selection:text-white">
+      <main className="flex-1">
+        {/* 1. Hero: Two Ways to Shop + NOW/BUSINESS cards + trust strip + pincode check */}
+        <Hero />
 
-      {/* Foreground Content */}
-      <div className="relative z-10 flex flex-col min-h-screen">
-        <main className="flex-1">
-          {/* 1. Category Banner Cards (Directly Below Header) */}
-          <CategoryBannerRow />
+        {/* 2. Shop by Categories (Instant Delivery) */}
+        <CategoryShowcase />
 
-          {/* 2. Independence Day Hero Section */}
-          <Hero />
+        {/* 3. Deals of the Day (real configured discounts, countdown to midnight) */}
+        <DealsOfTheDay />
 
-          {/* 3. Instant Order + Bulk Order Highlight Cards */}
-          <InstantOrderBulkOrderCards />
+        {/* 4. Best Selling Products (real catalog best sellers) */}
+        <BestSellers />
 
-          {/* 4. Fresh Vegetables & Seasonal Fruits Showcase */}
-          <HomepageProduceShowcase />
+        {/* 5. Promo banners (real FRESH20 coupon + business value) */}
+        <PromoBanners />
 
-          {/* 5. 3x3 Product Grid for Fresh Vegetables */}
-          <CategoryGridSection />
-        </main>
-      </div>
+        {/* 6. Why FlashKart trust section */}
+        <WhyFlashKart />
 
+        {/* 7. Business CTA strip */}
+        <BusinessCta />
+      </main>
     </div>
   );
 }
-

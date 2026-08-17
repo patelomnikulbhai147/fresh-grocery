@@ -8,6 +8,7 @@ import { CityNotifyAuto } from "@/components/city/CityModal";
 import { CustomerLoginModal } from "@/components/auth/CustomerLoginModal";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { RakshaBandhanTheme, RAKSHA_BANDHAN_THEME } from "@/components/theme/RakshaBandhanTheme";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://flashkart.co"),
@@ -95,7 +96,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           rel="stylesheet"
         />
       </head>
-      <body className="bg-[#fafaf9] text-purple-950 antialiased font-sans">
+      <body className={`bg-[#fafaf9] text-purple-950 antialiased font-sans${RAKSHA_BANDHAN_THEME ? " rb-theme" : ""}`}>
+        {/* Seasonal decoration only — remove after Raksha Bandhan (one flag) */}
+        <RakshaBandhanTheme />
         <JsonLd data={organizationSchema} />
         <Header />
         <main className="flex-1">

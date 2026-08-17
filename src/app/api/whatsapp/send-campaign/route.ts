@@ -60,7 +60,7 @@ _Reply STOP to unsubscribe._`;
     // }
     //
     // After sending, update last_notif_sent:
-    // await pool.execute(`UPDATE whatsapp_subscribers SET last_notif_sent = datetime('now') WHERE is_subscribed = 1`);
+    // await pool.execute(`UPDATE whatsapp_subscribers SET last_notif_sent = NOW() WHERE is_subscribed = 1`);
 
     console.log(`[WhatsApp Campaign] Provider: ${provider} | Recipients: ${targetCount} | Test: ${!!testPhone}`);
 

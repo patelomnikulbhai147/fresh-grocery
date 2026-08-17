@@ -4,7 +4,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Plus, Minus, Trash2, Tag, ArrowRight, Sparkles, Package, Building } from "lucide-react";
 import { useCart } from "@/store/shop";
-import { formatINR } from "@/lib/utils";
+import { formatINR, formatWeight } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -136,7 +136,12 @@ export function CartDrawer() {
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
-                        <div className="text-[11px] text-[#067a46] font-medium">{it.weight}</div>
+                        <div className="text-[11px] text-[#067a46] font-medium">
+                          {it.weight} × {it.quantity}
+                          {it.grams && (
+                            <span className="text-slate-500"> · Total: {formatWeight(it.grams * it.quantity)}</span>
+                          )}
+                        </div>
                       </div>
 
                       <div className="flex items-center justify-between mt-2">

@@ -11,7 +11,31 @@ export type Weight = {
   bulk?: { moq: number; unit: number; discount: number };
   // recurring / supply rate
   subscription?: number;
+  // variant management (admin-managed); undefined = active for backward compatibility
+  active?: boolean;
+  /** @deprecated legacy per-variant pack count — physical stock now lives on the product as stockGrams */
+  stock?: number;
 };
+
+/** Purchase-visible variants: array order = display order; inactive variants are hidden. */
+export const activeWeights = (p: Pick<Product, "weights">): Weight[] =>
+  p.weights.filter((w) => w.active !== false);
+
+/**
+ * Weight-based availability: all pack sizes sell the SAME physical inventory
+ * (product.stockGrams). A pack is orderable while enough grams remain for it.
+ * Static catalog entries without stockGrams fall back to the legacy stock flag.
+ */
+export const variantAvailable = (p: Pick<Product, "stockGrams" | "stock">, w: Weight): boolean =>
+  p.stockGrams !== undefined ? p.stockGrams >= Math.max(1, w.grams) : p.stock > 0;
+
+/** How many packs of this size the remaining physical stock can fulfil. */
+export const maxPacksAvailable = (p: Pick<Product, "stockGrams" | "stock">, w: Weight): number =>
+  p.stockGrams !== undefined
+    ? Math.floor(p.stockGrams / Math.max(1, w.grams))
+    : p.stock > 0
+    ? 99
+    : 0;
 
 export type Product = {
   id: string;
@@ -27,6 +51,8 @@ export type Product = {
   rating: number;
   reviews: number;
   stock: number;
+  /** Physical inventory in integer grams, shared by all pack sizes (admin-managed). */
+  stockGrams?: number;
   organic?: boolean;
   newArrival?: boolean;
   bestSeller?: boolean;

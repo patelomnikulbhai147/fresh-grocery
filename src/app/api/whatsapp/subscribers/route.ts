@@ -13,29 +13,17 @@ export async function GET(req: NextRequest) {
     let conn: Awaited<ReturnType<typeof pool.getConnection>> | null = null;
     try {
       conn = await pool.getConnection();
-
-      // Ensure table exists
-      await conn.execute(`
-        CREATE TABLE IF NOT EXISTS whatsapp_subscribers (
-          id               TEXT NOT NULL PRIMARY KEY,
-          phone_number     TEXT NOT NULL,
-          country_code     TEXT NOT NULL DEFAULT '+91',
-          is_subscribed    INTEGER NOT NULL DEFAULT 1,
-          source           TEXT NOT NULL DEFAULT 'homepage_hot_deals',
-          created_at       TEXT NOT NULL DEFAULT (datetime('now')),
-          updated_at       TEXT NOT NULL DEFAULT (datetime('now')),
-          last_notif_sent  TEXT DEFAULT NULL,
-          UNIQUE(phone_number, country_code)
-        )
-      `);
+      // Table is created by initAuthTables (MySQL dialect) — no inline DDL needed.
 
       const where    = search ? `WHERE phone_number LIKE ?` : "";
-      const dataParams: any[]  = search ? [`%${search}%`, limit, offset] : [limit, offset];
+      const dataParams: any[]  = search ? [`%${search}%`] : [];
       const cntParams: any[]   = search ? [`%${search}%`] : [];
 
+      // limit/offset are sanitized integers — inlined because MySQL prepared
+      // statements reject placeholders in LIMIT/OFFSET via mysql2 execute()
       const [rows]: any = await conn.execute(
         `SELECT id, phone_number, country_code, is_subscribed, source, created_at, updated_at, last_notif_sent
-         FROM whatsapp_subscribers ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+         FROM whatsapp_subscribers ${where} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`,
         dataParams
       );
       const [cntRows]: any = await conn.execute(
@@ -76,7 +64,7 @@ export async function DELETE(req: NextRequest) {
         await conn.execute(`DELETE FROM whatsapp_subscribers WHERE id = ?`, [id]);
       } else {
         await conn.execute(
-          `UPDATE whatsapp_subscribers SET is_subscribed = 0, updated_at = datetime('now') WHERE id = ?`,
+          `UPDATE whatsapp_subscribers SET is_subscribed = 0, updated_at = NOW() WHERE id = ?`,
           [id]
         );
       }

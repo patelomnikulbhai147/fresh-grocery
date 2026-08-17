@@ -46,10 +46,10 @@ export function PincodeDeliveryCard() {
           {/* Location / Supply Status Card */}
           <LocationStatusCard />
 
-          {/* Happy Independence Day Badge */}
+          {/* Brand Tagline Badge */}
           <div className="inline-flex items-center gap-2 text-[#16a34a] font-bold text-xs tracking-widest uppercase bg-white px-3 py-1.5 rounded-full border border-emerald-300 shadow-2xs">
             <span className="w-2.5 h-[1.5px] bg-[#16a34a]"></span>
-            <span>Happy Independence Day</span>
+            <span>Fresh. Fast. Reliable.</span>
             <span className="w-2.5 h-[1.5px] bg-[#16a34a]"></span>
           </div>
         </div>

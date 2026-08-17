@@ -24,21 +24,7 @@ export async function POST(req: NextRequest) {
     let conn: Awaited<ReturnType<typeof pool.getConnection>> | null = null;
     try {
       conn = await pool.getConnection();
-
-      // Create table if missing (SQLite-compatible)
-      await conn.execute(`
-        CREATE TABLE IF NOT EXISTS whatsapp_subscribers (
-          id               TEXT NOT NULL PRIMARY KEY,
-          phone_number     TEXT NOT NULL,
-          country_code     TEXT NOT NULL DEFAULT '+91',
-          is_subscribed    INTEGER NOT NULL DEFAULT 1,
-          source           TEXT NOT NULL DEFAULT 'homepage_hot_deals',
-          created_at       TEXT NOT NULL DEFAULT (datetime('now')),
-          updated_at       TEXT NOT NULL DEFAULT (datetime('now')),
-          last_notif_sent  TEXT DEFAULT NULL,
-          UNIQUE(phone_number, country_code)
-        )
-      `);
+      // Table is created by initAuthTables (MySQL dialect) — no inline DDL needed.
 
       // Check for existing subscriber
       const [rows]: any = await conn.execute(
@@ -57,7 +43,7 @@ export async function POST(req: NextRequest) {
         }
         // Re-subscribe
         await conn.execute(
-          `UPDATE whatsapp_subscribers SET is_subscribed = 1, updated_at = datetime('now') WHERE id = ?`,
+          `UPDATE whatsapp_subscribers SET is_subscribed = 1, updated_at = NOW() WHERE id = ?`,
           [existing.id]
         );
       } else {
@@ -69,7 +55,7 @@ export async function POST(req: NextRequest) {
       }
     } catch (dbErr: any) {
       // Duplicate key on race condition
-      if (dbErr?.message?.includes("UNIQUE constraint failed")) {
+      if (dbErr?.code === "ER_DUP_ENTRY" || dbErr?.message?.includes("UNIQUE constraint failed")) {
         return NextResponse.json(
           { success: false, error: "This number is already subscribed! 🎉" },
           { status: 409 }

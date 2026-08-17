@@ -7,14 +7,25 @@ import { Heart, Plus, Minus, Star, Leaf as LeafIcon, Package, Sparkles, Building
 import type { DeliveryMode, Product } from "@/data/catalog";
 import { cn, formatINR, percentOff } from "@/lib/utils";
 import { useCart, useWishlist, useToasts } from "@/store/shop";
+import { ProductImage } from "@/components/ui/ProductImage";
 import { useCustomerAuth } from "@/store/customerAuth";
 import { useAdminStore } from "@/store/adminStore";
 import { isCategoryComingSoon } from "@/lib/categoryHelper";
+import { useLiveProduct } from "@/lib/useLiveProduct";
 
-export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
+export function ProductCard({ product: staticProduct, priority = false }: { product: Product; priority?: boolean }) {
+  // Live admin-managed price/image/stock with catalog fallback (matches detail page)
+  const product = useLiveProduct(staticProduct);
   const [weightIdx, setWeightIdx] = useState(0);
-  const [mode, setMode] = useState<DeliveryMode>(product.modes[0] ?? "instant");
-  const weight = product.weights[weightIdx];
+  // Mode selector removed from card UI — cards use the product's default mode
+  const mode: DeliveryMode = product.modes[0] ?? "instant";
+  // Only active variants, in admin-defined order; selection keeps original index
+  const purchaseOptions = product.weights
+    .map((w, i) => ({ w, i }))
+    .filter((x) => x.w.active !== false);
+  const selectedOption = purchaseOptions.find((x) => x.i === weightIdx) ?? purchaseOptions[0];
+  const selIdx = selectedOption?.i ?? 0;
+  const weight = selectedOption?.w ?? product.weights[0];
   const add = useCart((s) => s.add);
   const items = useCart((s) => s.items);
   const updateQty = useCart((s) => s.updateQty);
@@ -48,18 +59,18 @@ export function ProductCard({ product, priority = false }: { product: Product; p
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.15 }}
       transition={{ duration: 0.35 }}
-      className="group relative card-option12 hover:border-[#067a46]/30 overflow-hidden flex flex-col"
+      className="group relative card-option12 hover:border-[#067a46]/30 overflow-hidden flex flex-col h-full"
     >
       {/* Image Container */}
       <div className="relative block aspect-[5/4] overflow-hidden bg-gradient-to-br from-slate-50 to-emerald-50/30">
-        <Link href={`/product/${product.slug}`} className="absolute inset-0 z-0 p-4">
-          <Image
+        <Link href={`/product/${product.slug}`} className="absolute inset-0 z-0">
+          <ProductImage
             src={product.image}
             alt={product.name}
-            fill
             priority={priority}
             sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 240px"
-            className="object-contain transition-transform duration-700 group-hover:scale-105 mix-blend-multiply"
+            containPadding="p-3"
+            hoverZoom
           />
         </Link>
         {/* Badges */}
@@ -104,32 +115,10 @@ export function ProductCard({ product, priority = false }: { product: Product; p
 
       {/* Content */}
       <div className="p-4 flex flex-col gap-2 flex-1">
-        {/* Mode pills */}
-        <div className="flex flex-wrap gap-1">
-          {product.modes.map((m) => {
-            return (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                className={cn(
-                  "text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full border flex items-center gap-1 transition",
-                  m === mode
-                    ? m === "instant"
-                      ? "bg-[#067a46] text-white border-[#067a46]"
-                      : m === "bulk"
-                      ? "bg-[#ea580c] text-white border-[#ea580c] font-extrabold"
-                      : "bg-emerald-700 text-white border-emerald-700"
-                    : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
-                )}
-              >
-                {m === "instant" ? "Direct" : m === "bulk" ? "Wholesale" : "Supply"}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="text-[10px] uppercase font-bold tracking-widest text-slate-400">{product.subcategory}</div>
-        <Link href={`/product/${product.slug}`} className="font-display text-[16px] leading-snug font-bold text-slate-800 hover:text-[#067a46] line-clamp-2">
+        {/* Category directly below the image */}
+        <div className="text-[10px] uppercase font-bold tracking-widest text-slate-400 truncate">{product.subcategory}</div>
+        {/* Fixed two-line name area so long/short names never change card height */}
+        <Link href={`/product/${product.slug}`} className="font-display text-[16px] leading-snug font-bold text-slate-800 hover:text-[#067a46] line-clamp-2 min-h-[44px]">
           {product.name}
         </Link>
 
@@ -142,16 +131,18 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           <span className="text-slate-500 text-[11px]">{product.reviews} reviews</span>
         </div>
 
-        {/* Weight selector */}
-        {product.weights.length > 1 && (
-          <div className="flex flex-wrap gap-1.5 pt-1">
-            {product.weights.map((w, i) => (
+        {/* Weight selector — container always rendered (min-h) so cards with a
+            single weight option stay the same height as multi-weight cards */}
+        <div className="flex flex-nowrap gap-1.5 pt-1 min-h-[34px] overflow-x-auto scrollbar-hide">
+          {purchaseOptions.length > 1 &&
+            purchaseOptions.map(({ w, i }) => (
               <button
-                key={w.label}
+                key={`${w.label}-${i}`}
+                type="button"
                 onClick={() => setWeightIdx(i)}
                 className={cn(
-                  "text-[10px] font-semibold px-2 py-0.5 rounded-full border transition",
-                  i === weightIdx
+                  "text-[10px] font-semibold px-2.5 py-1 sm:px-2 sm:py-0.5 rounded-full border transition whitespace-nowrap shrink-0",
+                  i === selIdx
                     ? "bg-slate-800 text-white border-slate-800"
                     : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
                 )}
@@ -159,19 +150,18 @@ export function ProductCard({ product, priority = false }: { product: Product; p
                 {w.label}
               </button>
             ))}
-          </div>
-        )}
+        </div>
 
-        {/* Price + CTA */}
-        <div className="mt-auto pt-3 flex flex-wrap items-end justify-between gap-2 border-t border-slate-100">
-          <div>
-            <div className="flex items-baseline gap-2">
+        {/* Price + CTA — single row so the footer height is identical on every card */}
+        <div className="mt-auto pt-3 flex flex-nowrap items-end justify-between gap-2 border-t border-slate-100">
+          <div className="min-w-0">
+            <div className="flex items-baseline gap-2 whitespace-nowrap">
               <div className="font-display text-lg font-black text-slate-800">{formatINR(price)}</div>
               {mrp > price && (
                 <div className="text-xs text-slate-400 line-through">{formatINR(mrp)}</div>
               )}
             </div>
-            <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-0.5 font-medium">
+            <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-0.5 font-medium whitespace-nowrap overflow-hidden">
               {mode === "instant" && <><Sparkles className="w-3 h-3 text-[#ea580c]" /> Direct Farm Fresh</>}
               {mode === "bulk" && <><Package className="w-3 h-3 text-slate-600" /> MOQ {weight.bulk?.moq} units</>}
               {mode === "subscription" && <><Building className="w-3 h-3 text-emerald-600" /> Regular Supply</>}
@@ -181,10 +171,11 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           {!inCart ? (
             <button
               onClick={() => {
-                add(product, weightIdx, mode);
+                add(product, selIdx, mode);
                 push(`${product.name} added to order`);
               }}
-              className="inline-flex items-center gap-1 text-xs font-bold px-3 sm:px-3.5 py-2 rounded-lg bg-[#067a46] hover:bg-[#046338] text-white transition-all shadow-sm"
+              disabled={purchaseOptions.length === 0}
+              className="inline-flex items-center gap-1 text-xs font-bold px-3 sm:px-3.5 py-2 rounded-lg bg-[#067a46] hover:bg-[#046338] text-white transition-all shadow-sm shrink-0"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add</span>

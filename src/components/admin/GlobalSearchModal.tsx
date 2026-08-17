@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Search, Package, ShoppingBag, Users, Tag, FolderTree, X, ArrowRight, FileText } from "lucide-react";
 import { useAdminStore } from "@/store/adminStore";
+import { formatWeight } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface GlobalSearchModalProps {
@@ -149,7 +150,7 @@ export function GlobalSearchModal({ isOpen, onClose, onSelectModule }: GlobalSea
                                 {p.name}
                               </div>
                               <div className="text-xs text-brand-600 dark:text-zinc-400">
-                                {p.sku} · Barcode: {p.barcode} · Stock: {p.currentStock}
+                                {p.sku} · Barcode: {p.barcode} · Stock: {formatWeight(p.stockGrams ?? p.currentStock ?? 0)}
                               </div>
                             </div>
                           </div>

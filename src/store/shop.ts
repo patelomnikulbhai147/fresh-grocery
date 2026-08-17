@@ -9,6 +9,8 @@ export type CartItem = {
   name: string;
   image: string;
   weight: string;
+  /** Pack weight in grams — total line weight = grams × quantity. */
+  grams?: number;
   price: number;
   mrp: number;
   quantity: number;
@@ -78,6 +80,7 @@ export const useCart = create<CartState>()(
                 name: product.name,
                 image: product.image,
                 weight: w.label,
+                grams: w.grams,
                 price,
                 mrp,
                 quantity: 1,
@@ -122,7 +125,12 @@ export const useCart = create<CartState>()(
           .items.filter((i) => i.mode === mode)
           .reduce((s, i) => s + i.quantity, 0),
     }),
-    { name: "flashkart-cart-v1" }
+    {
+      name: "flashkart-cart-v1",
+      // Persist only the cart contents — the open/closed drawer state is
+      // session UI; persisting it made the drawer pop open on every page load.
+      partialize: (s) => ({ items: s.items }) as CartState,
+    }
   )
 );
 

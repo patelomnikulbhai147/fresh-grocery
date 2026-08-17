@@ -35,7 +35,7 @@ import {
 } from "lucide-react";
 import { useAdminAuth, type AdminRole } from "@/store/adminAuth";
 import { useCustomerAuth } from "@/store/customerAuth";
-import { useAdminStore } from "@/store/adminStore";
+import { useAdminStore, productStockInfo } from "@/store/adminStore";
 import { GlobalSearchModal } from "./GlobalSearchModal";
 import { cn } from "@/lib/utils";
 
@@ -80,8 +80,8 @@ export function AdminLayout({ children, activeModule, onSelectModule }: AdminLay
 
   // Calculate live badge numbers
   const pendingOrdersCount = orders.filter((o) => o.status === "Pending" || o.status === "Processing").length;
-  const lowStockCount = products.filter((p) => p.currentStock <= p.minStock && p.currentStock > 0).length;
-  const outOfStockCount = products.filter((p) => p.currentStock === 0).length;
+  const lowStockCount = products.filter((p) => productStockInfo(p).status === "Low Stock").length;
+  const outOfStockCount = products.filter((p) => productStockInfo(p).allOut).length;
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -100,54 +100,56 @@ export function AdminLayout({ children, activeModule, onSelectModule }: AdminLay
     }
   };
 
+  // Simplified control-center navigation: only modules that exist and work.
+  // (Reviews, Support, Banners, CMS, Delivery Zones and Notifications modules
+  // remain in the codebase but are intentionally out of the main navigation.)
   const navGroups: NavGroup[] = [
     {
       title: "Overview",
       items: [
-        { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, permission: "products.view" },
-        { id: "logs", label: "Activity Logs", icon: History, badge: activityLogs.length > 0 ? activityLogs.length : undefined, badgeTone: "emerald", permission: "logs.view" }
+        { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, permission: "products.view" }
       ]
     },
     {
-      title: "Catalog & Stock",
+      title: "Catalog",
       items: [
         { id: "products", label: "Products", icon: Package, badge: outOfStockCount > 0 ? `${outOfStockCount} OOS` : undefined, badgeTone: "red", permission: "products.view" },
-        { id: "inventory", label: "Inventory & Stock", icon: Boxes, badge: lowStockCount > 0 ? `${lowStockCount} Low` : undefined, badgeTone: "amber", permission: "inventory.view" },
         { id: "categories", label: "Categories", icon: FolderTree, permission: "categories.view" },
         { id: "brands", label: "Brands", icon: Tag, permission: "brands.view" }
       ]
     },
     {
-      title: "Orders & Customers",
+      title: "Inventory",
       items: [
-        { id: "orders", label: "Orders & Invoices", icon: ShoppingBag, badge: pendingOrdersCount > 0 ? pendingOrdersCount : undefined, badgeTone: "amber", permission: "orders.view" },
-        { id: "customers", label: "Customers CRM", icon: Users, permission: "customers.view" },
-        { id: "coupons", label: "Coupons & Offers", icon: Percent, permission: "coupons.view" },
-        { id: "reviews", label: "Reviews & Ratings", icon: Star, permission: "reviews.view" },
-        { id: "support", label: "Support Tickets", icon: MessageSquare, permission: "support.view" }
+        { id: "inventory", label: "Stock", icon: Boxes, badge: lowStockCount > 0 ? `${lowStockCount} Low` : undefined, badgeTone: "amber", permission: "inventory.view" }
       ]
     },
     {
-      title: "CMS & Logistics",
+      title: "Orders",
       items: [
-        { id: "banners", label: "Banners", icon: ImageIcon, permission: "banners.view" },
-        { id: "cms", label: "Homepage CMS", icon: LayoutTemplate, permission: "cms.view" },
-        { id: "delivery", label: "Delivery Zones", icon: Truck, permission: "delivery.view" },
-        { id: "notifications", label: "Notifications", icon: Bell, permission: "notifications.view" }
+        { id: "orders", label: "Orders", icon: ShoppingBag, badge: pendingOrdersCount > 0 ? pendingOrdersCount : undefined, badgeTone: "amber", permission: "orders.view" },
+        { id: "customers", label: "Customers", icon: Users, permission: "customers.view" }
       ]
     },
     {
       title: "Marketing",
       items: [
-        { id: "whatsapp", label: "WhatsApp Subscribers", icon: MessageCircleMore, permission: "notifications.view" },
+        { id: "whatsapp", label: "WhatsApp", icon: MessageCircleMore, permission: "notifications.view" },
+        { id: "coupons", label: "Coupons & Offers", icon: Percent, permission: "coupons.view" }
       ]
     },
     {
-      title: "System & Security",
+      title: "Reports",
       items: [
-        { id: "reports", label: "Reports & Analytics", icon: BarChart3, permission: "reports.view" },
-        { id: "roles", label: "Roles & RBAC Matrix", icon: ShieldCheck, permission: "roles.view" },
-        { id: "settings", label: "System Settings", icon: Settings, permission: "settings.view" }
+        { id: "reports", label: "Reports & Analytics", icon: BarChart3, permission: "reports.view" }
+      ]
+    },
+    {
+      title: "System",
+      items: [
+        { id: "roles", label: "Users & Roles", icon: ShieldCheck, permission: "roles.view" },
+        { id: "logs", label: "Activity Logs", icon: History, badge: activityLogs.length > 0 ? activityLogs.length : undefined, badgeTone: "emerald", permission: "logs.view" },
+        { id: "settings", label: "Settings", icon: Settings, permission: "settings.view" }
       ]
     }
   ];

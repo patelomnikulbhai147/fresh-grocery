@@ -7,6 +7,7 @@ import { subscriptionProducts, type Product } from "@/data/catalog";
 import { useCart, useToasts } from "@/store/shop";
 import { formatINR } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { ProductImage } from "@/components/ui/ProductImage";
 
 const DAY_OPTIONS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -83,9 +84,14 @@ function SubscriptionProductCard({
   return (
     <div className="bg-white rounded-3xl border border-purple-100 p-5 flex flex-col justify-between shadow-soft">
       <div>
-        <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-4 bg-purple-50">
-          <Image src={product.image} alt={product.name} fill className="object-cover" />
-          <div className="absolute top-2.5 left-2.5 bg-purple-950 text-amber-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+        <div className="relative aspect-[4/3] rounded-2xl mb-4 bg-slate-50 overflow-hidden">
+          <ProductImage
+            src={product.image}
+            alt={product.name}
+            sizes="(max-width: 768px) 90vw, 360px"
+            containPadding="p-3"
+          />
+          <div className="absolute top-2.5 left-2.5 z-10 bg-purple-950 text-amber-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
             <Building className="w-3 h-3" /> REGULAR SUPPLY
           </div>
         </div>

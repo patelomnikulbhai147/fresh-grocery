@@ -1,46 +1,54 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 import {
   User,
   Package,
   Heart,
   MapPin,
-  CreditCard,
-  Bell,
-  Wallet,
-  Gift,
   LogOut,
-  Settings,
-  Star,
   CheckCircle2,
-  Clock,
   ChevronRight,
+  Pencil,
+  Trash2,
+  X,
+  ShoppingBag,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatINR, formatWeight } from "@/lib/utils";
 import { CustomerRole, useCustomerAuth } from "@/store/customerAuth";
 import { useAdminAuth } from "@/store/adminAuth";
+import { useAdminStore, type AdminOrder } from "@/store/adminStore";
+import { useAddressBook, type SavedAddress } from "@/store/addresses";
+import { useWishlist } from "@/store/shop";
+import { products as catalogProducts } from "@/data/catalog";
 import { SuperAdminAccountView } from "@/components/account/SuperAdminAccountView";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
 
 const nav = [
   { id: "dashboard", label: "Dashboard", icon: User },
   { id: "orders", label: "My Orders", icon: Package },
   { id: "wishlist", label: "Wishlist", icon: Heart },
   { id: "addresses", label: "Addresses", icon: MapPin },
-  { id: "wallet", label: "Wallet & Rewards", icon: Wallet },
-  { id: "subscriptions", label: "Subscriptions", icon: Gift },
-  { id: "notifications", label: "Notifications", icon: Bell },
-  { id: "payments", label: "Payment Methods", icon: CreditCard },
-  { id: "settings", label: "Settings", icon: Settings },
 ];
 
-const orders = [
-  { id: "FRM-823145", date: "Yesterday", total: 1240, status: "Delivered", items: 6 },
-  { id: "FRM-821990", date: "3 days ago", total: 680, status: "Delivered", items: 4 },
-  { id: "FRM-819332", date: "1 week ago", total: 2120, status: "Delivered", items: 9 },
-];
+const STATUS_TONE: Record<string, string> = {
+  Delivered: "text-emerald-700",
+  Cancelled: "text-rose-600",
+  Returned: "text-rose-600",
+  Refunded: "text-rose-600",
+};
+
+const emptyAddressForm = {
+  label: "Home",
+  name: "",
+  phone: "",
+  addressLine: "",
+  area: "",
+  landmark: "",
+  city: "Gandhinagar",
+  pincode: "",
+};
 
 export function AccountShell() {
   const { user, logout } = useCustomerAuth();
@@ -48,12 +56,81 @@ export function AccountShell() {
   const searchParams = useSearchParams();
   const initialTab = searchParams?.get("tab") || "dashboard";
   const [active, setActive] = useState(initialTab);
+  // Persisted stores differ between server render and client — gate on mount
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (searchParams?.get("tab")) {
       setActive(searchParams.get("tab")!);
     }
   }, [searchParams]);
+
+  // ── Live data (no dummy values anywhere) ──
+  const allOrders = useAdminStore((s) => s.orders);
+  const wishlistIds = useWishlist((s) => s.ids);
+  const toggleWishlist = useWishlist((s) => s.toggle);
+  const addressBook = useAddressBook();
+  const userKey = user?.mobile || "";
+
+  const myOrders: AdminOrder[] = mounted
+    ? allOrders.filter(
+        (o) =>
+          (user?.id && o.customerId === user.id) ||
+          (userKey && o.customerPhone && o.customerPhone.replace(/\D/g, "").includes(userKey.replace(/\D/g, ""))) ||
+          (user?.email && o.customerEmail && o.customerEmail === user.email)
+      )
+    : [];
+  const myWishlist = mounted
+    ? catalogProducts.filter((p) => wishlistIds.includes(p.id))
+    : [];
+  const myAddresses = mounted ? addressBook.forUser(userKey) : [];
+
+  // ── Address form modal state ──
+  const [addrModalOpen, setAddrModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [addrForm, setAddrForm] = useState({ ...emptyAddressForm });
+  const [addrErrors, setAddrErrors] = useState<Record<string, string>>({});
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
+  const openAddAddress = () => {
+    setEditingId(null);
+    setAddrForm({ ...emptyAddressForm, name: user?.name || "", phone: user?.mobile || "" });
+    setAddrErrors({});
+    setAddrModalOpen(true);
+  };
+  const openEditAddress = (a: SavedAddress) => {
+    setEditingId(a.id);
+    setAddrForm({
+      label: a.label,
+      name: a.name,
+      phone: a.phone,
+      addressLine: a.addressLine,
+      area: a.area || "",
+      landmark: a.landmark || "",
+      city: a.city,
+      pincode: a.pincode,
+    });
+    setAddrErrors({});
+    setAddrModalOpen(true);
+  };
+  const saveAddress = () => {
+    const errs: Record<string, string> = {};
+    if (!addrForm.name.trim()) errs.name = "Name is required";
+    if (!/^\d{10}$/.test(addrForm.phone.replace(/\D/g, "").slice(-10)) || addrForm.phone.replace(/\D/g, "").length < 10)
+      errs.phone = "Enter a valid 10-digit mobile number";
+    if (!addrForm.addressLine.trim()) errs.addressLine = "House / street is required";
+    if (!addrForm.city.trim()) errs.city = "City is required";
+    if (!/^\d{6}$/.test(addrForm.pincode.trim())) errs.pincode = "Enter a valid 6-digit pincode";
+    setAddrErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+    if (editingId) {
+      addressBook.update(editingId, { ...addrForm });
+    } else {
+      addressBook.add({ ...addrForm, userKey, isDefault: false });
+    }
+    setAddrModalOpen(false);
+  };
 
   // Determine user role strictly from authenticated session/user model
   const effectiveRole: CustomerRole =
@@ -71,7 +148,6 @@ export function AccountShell() {
     }
   }, [effectiveRole, router]);
 
-  // ── SUPER ADMIN VIEW (Fallback if on /account) ──
   if (effectiveRole === "SUPER_ADMIN") {
     return <SuperAdminAccountView user={user} logout={logout} />;
   }
@@ -96,8 +172,8 @@ export function AccountShell() {
             <div className="w-11 h-11 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 grid place-items-center text-white font-semibold">
               {initials}
             </div>
-            <div>
-              <div className="text-sm font-semibold flex items-center gap-1.5">
+            <div className="min-w-0">
+              <div className="text-sm font-semibold flex items-center gap-1.5 truncate">
                 {user?.name || "Guest User"}
                 {isAdmin && (
                   <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-full border border-emerald-300">
@@ -105,7 +181,7 @@ export function AccountShell() {
                   </span>
                 )}
               </div>
-              <div className="text-xs text-brand-600">Gold Member · {user?.points || 0} pts</div>
+              <div className="text-xs text-brand-600 truncate">{user?.mobile || user?.email || ""}</div>
             </div>
           </div>
 
@@ -140,7 +216,7 @@ export function AccountShell() {
                 {active === n.id && <ChevronRight className="w-4 h-4" />}
               </button>
             ))}
-            <button 
+            <button
               onClick={() => {
                 logout();
                 router.push("/");
@@ -155,20 +231,39 @@ export function AccountShell() {
         <div>
           {active === "dashboard" && (
             <div className="space-y-6">
+              {/* Profile — real session data */}
+              <div className="bg-white rounded-3xl border border-brand-100 p-6">
+                <h3 className="font-display text-xl text-brand-950 mb-4">Profile</h3>
+                <div className="grid sm:grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <div className="text-xs uppercase tracking-widest text-brand-500 mb-1">Name</div>
+                    <div className="font-semibold text-brand-950">{user?.name || "—"}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs uppercase tracking-widest text-brand-500 mb-1">Mobile</div>
+                    <div className="font-semibold text-brand-950">{user?.mobile || "—"}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs uppercase tracking-widest text-brand-500 mb-1">Email</div>
+                    <div className="font-semibold text-brand-950 truncate">{user?.email || "—"}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Real counters */}
               <div className="grid sm:grid-cols-3 gap-4">
                 {[
-                  { label: "Total orders", value: "23", sub: "+2 this month", icon: Package },
-                  { label: "Wallet balance", value: "₹420", sub: "Earned from referrals", icon: Wallet },
-                  { label: "Reward points", value: "2,450", sub: "₹245 redeemable", icon: Star },
+                  { label: "Total orders", value: String(myOrders.length), icon: Package, tab: "orders" },
+                  { label: "Wishlist items", value: String(myWishlist.length), icon: Heart, tab: "wishlist" },
+                  { label: "Saved addresses", value: String(myAddresses.length), icon: MapPin, tab: "addresses" },
                 ].map((s) => (
-                  <div key={s.label} className="bg-white rounded-3xl border border-brand-100 p-5">
+                  <button key={s.label} onClick={() => setActive(s.tab)} className="bg-white rounded-3xl border border-brand-100 p-5 text-left hover:border-brand-300 transition">
                     <div className="w-10 h-10 rounded-2xl bg-brand-50 grid place-items-center text-brand-700 mb-3">
                       <s.icon className="w-5 h-5" />
                     </div>
                     <div className="text-xs uppercase tracking-widest text-brand-500 mb-1">{s.label}</div>
                     <div className="font-display text-3xl text-brand-950">{s.value}</div>
-                    <div className="text-xs text-brand-600 mt-1">{s.sub}</div>
-                  </div>
+                  </button>
                 ))}
               </div>
 
@@ -177,39 +272,32 @@ export function AccountShell() {
                   <h3 className="font-display text-xl text-brand-950">Recent orders</h3>
                   <button onClick={() => setActive("orders")} className="text-xs font-semibold text-brand-700">View all</button>
                 </div>
-                <div className="space-y-2">
-                  {orders.map((o) => (
-                    <div key={o.id} className="flex items-center gap-4 p-3 rounded-2xl hover:bg-brand-50 transition">
-                      <div className="w-10 h-10 rounded-xl bg-brand-50 grid place-items-center">
-                        <Package className="w-4 h-4 text-brand-700" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold">#{o.id}</div>
-                        <div className="text-xs text-brand-600">{o.date} · {o.items} items</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-semibold">₹{o.total}</div>
-                        <div className="text-xs text-brand-600 flex items-center gap-1 justify-end">
-                          <CheckCircle2 className="w-3 h-3" /> {o.status}
+                {myOrders.length === 0 ? (
+                  <div className="py-8 text-center text-sm text-brand-600">
+                    No orders yet.{" "}
+                    <Link href="/shop" className="font-semibold text-brand-800 underline">Browse fresh produce</Link>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {myOrders.slice(0, 3).map((o) => (
+                      <div key={o.id} className="flex items-center gap-4 p-3 rounded-2xl hover:bg-brand-50 transition">
+                        <div className="w-10 h-10 rounded-xl bg-brand-50 grid place-items-center">
+                          <Package className="w-4 h-4 text-brand-700" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-semibold">#{o.id}</div>
+                          <div className="text-xs text-brand-600">{o.date} · {o.items.length} item{o.items.length === 1 ? "" : "s"}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-semibold">{formatINR(o.total)}</div>
+                          <div className={cn("text-xs flex items-center gap-1 justify-end", STATUS_TONE[o.status] || "text-brand-600")}>
+                            <CheckCircle2 className="w-3 h-3" /> {o.status}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-brand-900 to-emerald-800 rounded-3xl p-8 text-white">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest mb-3 text-brand-200">
-                  <Gift className="w-4 h-4" /> Refer & Earn
-                </div>
-                <h3 className="font-display text-3xl mb-2">Give ₹200, get ₹200</h3>
-                <p className="text-white/80 max-w-md text-sm">
-                  Invite a friend to FlashKart. They get ₹200 off their first produce order, you get ₹200 credited to your wallet.
-                </p>
-                <div className="mt-5 flex items-center gap-2 max-w-sm">
-                  <div className="flex-1 bg-white/10 border border-white/15 rounded-full px-4 py-2.5 text-sm font-mono">FLASH-AARAV24</div>
-                  <button className="bg-white text-purple-950 rounded-full px-4 py-2.5 text-sm font-bold">Copy</button>
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -217,16 +305,38 @@ export function AccountShell() {
           {active === "orders" && (
             <div className="bg-white rounded-3xl border border-brand-100 p-6 space-y-3">
               <h3 className="font-display text-xl text-brand-950 mb-4">Order history</h3>
-              {orders.map((o) => (
-                <div key={o.id} className="flex items-center gap-4 p-4 border border-brand-100 rounded-2xl">
-                  <div className="w-12 h-12 rounded-2xl bg-brand-50 grid place-items-center"><Package className="w-5 h-5 text-brand-700" /></div>
-                  <div className="flex-1">
-                    <div className="font-semibold">#{o.id}</div>
-                    <div className="text-xs text-brand-600">{o.date} · {o.items} items</div>
+              {myOrders.length === 0 && (
+                <div className="py-10 text-center text-sm text-brand-600">
+                  <ShoppingBag className="w-10 h-10 mx-auto text-brand-300 mb-3" />
+                  You haven&apos;t placed any orders yet.{" "}
+                  <Link href="/shop" className="font-semibold text-brand-800 underline">Start shopping</Link>
+                </div>
+              )}
+              {myOrders.map((o) => (
+                <div key={o.id} className="p-4 border border-brand-100 rounded-2xl">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-brand-50 grid place-items-center"><Package className="w-5 h-5 text-brand-700" /></div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold">#{o.id}</div>
+                      <div className="text-xs text-brand-600">{o.date} · {o.items.length} item{o.items.length === 1 ? "" : "s"} · {o.paymentMethod}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-semibold">{formatINR(o.total)}</div>
+                      <div className={cn("text-xs inline-flex items-center gap-1", STATUS_TONE[o.status] || "text-brand-600")}>
+                        <CheckCircle2 className="w-3 h-3" />{o.status}
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-semibold">₹{o.total}</div>
-                    <div className="text-xs inline-flex items-center gap-1 text-brand-600"><CheckCircle2 className="w-3 h-3" />{o.status}</div>
+                  {/* Purchase-time item details (price & pack preserved) */}
+                  <div className="mt-3 pt-3 border-t border-brand-100/70 grid sm:grid-cols-2 gap-1.5">
+                    {o.items.map((it, idx) => (
+                      <div key={idx} className="text-xs text-brand-700 flex items-center justify-between gap-2">
+                        <span className="truncate">
+                          {it.name} <span className="text-brand-500">({it.weight} × {it.quantity}{it.totalGrams ? ` · ${formatWeight(it.totalGrams)}` : ""})</span>
+                        </span>
+                        <span className="font-semibold shrink-0">{formatINR(it.price * it.quantity)}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
@@ -234,13 +344,41 @@ export function AccountShell() {
           )}
 
           {active === "wishlist" && (
-            <div className="bg-white rounded-3xl border border-brand-100 p-10 text-center">
-              <Heart className="w-12 h-12 mx-auto text-brand-300 mb-4" />
-              <div className="font-display text-2xl text-brand-950 mb-2">Your wishlist is private</div>
-              <p className="text-sm text-brand-600 max-w-sm mx-auto">
-                Heart any product across the site to save it here. You have 0 items saved right now.
-              </p>
-              <Link href="/shop" className="mt-6 inline-block bg-brand-900 text-white rounded-full px-5 py-3 text-sm font-semibold">Start browsing</Link>
+            <div className="bg-white rounded-3xl border border-brand-100 p-6">
+              <h3 className="font-display text-xl text-brand-950 mb-4">Wishlist</h3>
+              {myWishlist.length === 0 ? (
+                <div className="py-10 text-center">
+                  <Heart className="w-12 h-12 mx-auto text-brand-300 mb-4" />
+                  <div className="font-display text-2xl text-brand-950 mb-2">Nothing saved yet</div>
+                  <p className="text-sm text-brand-600 max-w-sm mx-auto">
+                    Heart any product across the site to save it here.
+                  </p>
+                  <Link href="/shop" className="mt-6 inline-block bg-brand-900 text-white rounded-full px-5 py-3 text-sm font-semibold">Start browsing</Link>
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {myWishlist.map((p) => (
+                    <div key={p.id} className="flex items-center gap-3 p-3 border border-brand-100 rounded-2xl">
+                      <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-brand-50 border border-brand-100 shrink-0">
+                        <Image src={p.image} alt={p.name} fill sizes="56px" className="object-cover" unoptimized />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <Link href={`/product/${p.slug}`} className="text-sm font-semibold text-brand-950 hover:text-brand-700 line-clamp-2">
+                          {p.name}
+                        </Link>
+                        <div className="text-xs text-brand-600 font-semibold">{p.weights[0] ? formatINR(p.weights[0].price) : ""}</div>
+                      </div>
+                      <button
+                        onClick={() => toggleWishlist(p.id)}
+                        title="Remove from wishlist"
+                        className="p-2 rounded-xl text-rose-500 hover:bg-rose-50 shrink-0"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -248,71 +386,139 @@ export function AccountShell() {
             <div className="bg-white rounded-3xl border border-brand-100 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-display text-xl text-brand-950">Saved addresses</h3>
-                <button className="text-xs font-semibold text-brand-700 bg-brand-50 px-3 py-1.5 rounded-full">+ Add new</button>
+                <button
+                  onClick={openAddAddress}
+                  className="text-xs font-semibold text-white bg-brand-900 hover:bg-brand-800 px-3.5 py-2 rounded-full transition"
+                >
+                  + Add new
+                </button>
               </div>
-              <div className="grid md:grid-cols-2 gap-3">
-                {[
-                  { label: "Home", addr: "Flat 402, Prestige Shantiniketan, Bengaluru 560048", tag: "Default" },
-                  { label: "Office", addr: "5th Floor, Prestige Tower, MG Road, Bengaluru 560001" },
-                ].map((a) => (
-                  <div key={a.label} className="p-4 rounded-2xl border border-brand-100">
-                    <div className="flex items-center gap-2 mb-2">
-                      <MapPin className="w-4 h-4 text-brand-600" />
-                      <span className="font-semibold text-sm">{a.label}</span>
-                      {a.tag && <span className="text-[10px] uppercase bg-brand-600 text-white px-2 py-0.5 rounded-full">{a.tag}</span>}
-                    </div>
-                    <p className="text-xs text-brand-700">{a.addr}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {active === "wallet" && (
-            <div className="bg-white rounded-3xl border border-brand-100 p-6 space-y-4">
-              <div className="bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl p-6 text-white">
-                <div className="text-xs uppercase tracking-widest opacity-80 font-bold">FlashKart Wallet</div>
-                <div className="font-display text-4xl mt-1 font-black">₹420.00</div>
-                <div className="text-xs opacity-80 mt-1">Expires in 364 days</div>
-              </div>
-              <h4 className="font-semibold text-sm">Transaction history</h4>
-              {[
-                { label: "Referral bonus · Nisha P.", amt: "+₹200", date: "Yesterday", tone: "credit" },
-                { label: "Cashback on order FLK-821990", amt: "+₹70", date: "3 days ago", tone: "credit" },
-                { label: "Applied at checkout", amt: "-₹150", date: "Last week", tone: "debit" },
-              ].map((t, i) => (
-                <div key={i} className="flex items-center justify-between p-3 rounded-xl hover:bg-brand-50">
-                  <div>
-                    <div className="text-sm font-medium">{t.label}</div>
-                    <div className="text-xs text-brand-500 flex items-center gap-1"><Clock className="w-3 h-3"/>{t.date}</div>
-                  </div>
-                  <div className={cn("font-semibold text-sm", t.tone === "credit" ? "text-brand-700" : "text-berry")}>{t.amt}</div>
+              {myAddresses.length === 0 ? (
+                <div className="py-10 text-center text-sm text-brand-600">
+                  <MapPin className="w-10 h-10 mx-auto text-brand-300 mb-3" />
+                  No saved addresses yet. Add one to speed up checkout.
                 </div>
-              ))}
-            </div>
-          )}
-
-          {(active === "subscriptions" || active === "notifications" || active === "payments" || active === "settings") && (
-            <div className="bg-white rounded-3xl border border-brand-100 p-10 text-center">
-              <div className="w-16 h-16 rounded-3xl bg-brand-50 grid place-items-center mx-auto mb-4">
-                <SparkleIcon />
-              </div>
-              <div className="font-display text-2xl text-brand-950 mb-2">{nav.find(n => n.id === active)?.label}</div>
-              <p className="text-sm text-brand-600 max-w-sm mx-auto">
-                This section is ready to light up with real data once you connect your account.
-              </p>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-3">
+                  {myAddresses.map((a) => (
+                    <div key={a.id} className={cn("p-4 rounded-2xl border", a.isDefault ? "border-brand-400 bg-brand-50/40" : "border-brand-100")}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <MapPin className="w-4 h-4 text-brand-600" />
+                        <span className="font-semibold text-sm">{a.label}</span>
+                        {a.isDefault && (
+                          <span className="text-[10px] uppercase bg-brand-600 text-white px-2 py-0.5 rounded-full">Default</span>
+                        )}
+                      </div>
+                      <p className="text-xs text-brand-700">
+                        {a.name} · {a.phone}
+                        <br />
+                        {a.addressLine}
+                        {a.area ? `, ${a.area}` : ""}
+                        {a.landmark ? ` (near ${a.landmark})` : ""}
+                        <br />
+                        {a.city} — {a.pincode}
+                      </p>
+                      <div className="flex items-center gap-2 mt-3 text-xs font-semibold">
+                        <button onClick={() => openEditAddress(a)} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-brand-50 text-brand-800 hover:bg-brand-100">
+                          <Pencil className="w-3 h-3" /> Edit
+                        </button>
+                        {!a.isDefault && (
+                          <button onClick={() => addressBook.setDefault(userKey, a.id)} className="px-2.5 py-1.5 rounded-lg bg-brand-50 text-brand-800 hover:bg-brand-100">
+                            Set default
+                          </button>
+                        )}
+                        {confirmDeleteId === a.id ? (
+                          <span className="flex items-center gap-1.5">
+                            <button onClick={() => { addressBook.remove(a.id); setConfirmDeleteId(null); }} className="px-2.5 py-1.5 rounded-lg bg-rose-600 text-white">
+                              Confirm delete
+                            </button>
+                            <button onClick={() => setConfirmDeleteId(null)} className="px-2.5 py-1.5 rounded-lg bg-brand-50 text-brand-800">
+                              Keep
+                            </button>
+                          </span>
+                        ) : (
+                          <button onClick={() => setConfirmDeleteId(a.id)} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-rose-600 hover:bg-rose-50">
+                            <Trash2 className="w-3 h-3" /> Delete
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
-    </div>
-  );
-}
 
-function SparkleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="w-7 h-7 text-brand-600" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z"/>
-    </svg>
+      {/* Address add/edit modal */}
+      {addrModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-purple-950/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-brand-100 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-brand-100 pb-3">
+              <h3 className="font-display text-lg font-bold text-brand-950">{editingId ? "Edit Address" : "Add New Address"}</h3>
+              <button onClick={() => setAddrModalOpen(false)} className="p-1 text-brand-700 hover:text-brand-950">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 text-xs font-bold">
+              {["Home", "Office", "Other"].map((l) => (
+                <button
+                  key={l}
+                  onClick={() => setAddrForm({ ...addrForm, label: l })}
+                  className={cn(
+                    "py-2 rounded-xl border transition",
+                    addrForm.label === l ? "bg-brand-900 text-white border-brand-900" : "bg-white text-brand-800 border-brand-200 hover:border-brand-400"
+                  )}
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
+
+            {([
+              { key: "name", label: "Full Name *", placeholder: "Receiver's name" },
+              { key: "phone", label: "Mobile Number *", placeholder: "10-digit mobile" },
+              { key: "addressLine", label: "House / Flat, Building & Street *", placeholder: "e.g. B-14, Shalin Apartments, Road 5" },
+              { key: "area", label: "Area / Sector", placeholder: "e.g. Sector 21 / Sargasan / Kudasan" },
+              { key: "landmark", label: "Landmark", placeholder: "Optional" },
+              { key: "city", label: "City *", placeholder: "Gandhinagar" },
+              { key: "pincode", label: "Pincode *", placeholder: "e.g. 382021" },
+            ] as { key: keyof typeof emptyAddressForm; label: string; placeholder: string }[]).map((f) => (
+              <div key={f.key}>
+                <label className="block text-xs font-bold text-brand-900 mb-1">{f.label}</label>
+                <input
+                  type="text"
+                  value={addrForm[f.key]}
+                  placeholder={f.placeholder}
+                  onChange={(e) => setAddrForm({ ...addrForm, [f.key]: e.target.value })}
+                  className={cn(
+                    "w-full bg-brand-50/60 border rounded-xl px-3.5 py-2.5 text-sm text-brand-950 outline-none",
+                    addrErrors[f.key] ? "border-rose-400 ring-1 ring-rose-200" : "border-brand-200 focus:border-brand-500"
+                  )}
+                />
+                {addrErrors[f.key] && <div className="text-[11px] font-bold text-rose-600 mt-0.5">{addrErrors[f.key]}</div>}
+              </div>
+            ))}
+
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={() => setAddrModalOpen(false)}
+                className="flex-1 py-2.5 rounded-xl bg-brand-50 text-brand-800 hover:bg-brand-100 text-xs font-bold transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveAddress}
+                className="flex-1 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-800 text-white text-xs font-bold shadow-sm transition"
+              >
+                {editingId ? "Save Changes" : "Save Address"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

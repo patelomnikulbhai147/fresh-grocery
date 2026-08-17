@@ -171,6 +171,10 @@ export function SpreadsheetProductTable({
   const handleInputKeyDown = (e: React.KeyboardEvent, rowIdx: number, colField: string) => {
     if (e.key === "Enter" || e.key === "Tab") {
       e.preventDefault();
+      // Commit the current cell before navigating — React unmounts the input
+      // when the editing cell changes, so the onBlur save never fires.
+      const editor = e.target as HTMLInputElement | HTMLSelectElement;
+      saveCellChange(displayProducts[rowIdx].id, colField, editor.value);
       // On Enter, jump down to same column in next row
       // On Tab, jump to next field in same row
       if (e.key === "Enter") {

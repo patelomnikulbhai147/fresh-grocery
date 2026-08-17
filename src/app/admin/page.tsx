@@ -31,6 +31,7 @@ export default function AdminPortalPage() {
   const { isAuthenticated: isCustomerAuth, user: customerUser } = useCustomerAuth();
 
   const [activeModule, setActiveModule] = useState("dashboard");
+  const [stockFilter, setStockFilter] = useState<"all" | "in" | "low" | "out">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
@@ -107,13 +108,20 @@ export default function AdminPortalPage() {
   const renderActiveModule = () => {
     switch (activeModule) {
       case "dashboard":
-        return <AdminDashboard onNavigate={(mod) => setActiveModule(mod)} />;
+        return (
+          <AdminDashboard
+            onNavigate={(mod, opts) => {
+              setStockFilter(opts?.stockFilter ?? "all");
+              setActiveModule(mod);
+            }}
+          />
+        );
       case "logs":
         return <ActivityLogsModule />;
       case "products":
         return <ProductManagement />;
       case "inventory":
-        return <InventoryModule />;
+        return <InventoryModule key={stockFilter} initialFilter={stockFilter} />;
       case "categories":
         return <CategoryManagement />;
       case "brands":
