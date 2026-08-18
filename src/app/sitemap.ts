@@ -2,6 +2,9 @@ import type { MetadataRoute } from "next";
 import { categories } from "@/data/catalog";
 import { getCustomerProductsSafe } from "@/lib/serverCatalog";
 
+// Evaluated per-request on the worker so it reads the live product database.
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = "https://flashkart.co";
   const today = new Date().toISOString();

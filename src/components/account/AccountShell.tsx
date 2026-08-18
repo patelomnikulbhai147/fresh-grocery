@@ -62,9 +62,18 @@ export function AccountShell() {
   // product the admin removed must vanish from the wishlist view too.
   const catalogProducts = useLiveCatalog((s) => s.products);
   const fetchCatalog = useLiveCatalog((s) => s.fetchOnce);
+  // Orders placed from ANY device live in the server order database — fetch
+  // the customer's own orders and merge them with this browser's history.
+  const [serverOrders, setServerOrders] = useState<AdminOrder[]>([]);
   useEffect(() => {
     setMounted(true);
     fetchCatalog();
+    fetch("/api/orders", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.success && Array.isArray(d.orders)) setServerOrders(d.orders);
+      })
+      .catch(() => {});
   }, [fetchCatalog]);
 
   useEffect(() => {
@@ -80,13 +89,18 @@ export function AccountShell() {
   const addressBook = useAddressBook();
   const userKey = user?.mobile || "";
 
-  const myOrders: AdminOrder[] = mounted
+  const myLocalOrders: AdminOrder[] = mounted
     ? allOrders.filter(
         (o) =>
           (user?.id && o.customerId === user.id) ||
           (userKey && o.customerPhone && o.customerPhone.replace(/\D/g, "").includes(userKey.replace(/\D/g, ""))) ||
           (user?.email && o.customerEmail && o.customerEmail === user.email)
       )
+    : [];
+  // Server orders win on conflicts (their status is the authoritative one).
+  const serverOrderIds = new Set(serverOrders.map((o) => o.id));
+  const myOrders: AdminOrder[] = mounted
+    ? [...serverOrders, ...myLocalOrders.filter((o) => !serverOrderIds.has(o.id))]
     : [];
   const myWishlist = mounted
     ? (catalogProducts ?? []).filter((p) => wishlistIds.includes(p.id))

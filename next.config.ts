@@ -1,4 +1,9 @@
 import type { NextConfig } from "next";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+
+// Makes Cloudflare bindings (the D1 database) available during `next dev`
+// via a local miniflare proxy — dev runs against a local SQLite copy of D1.
+initOpenNextCloudflareForDev();
 
 const nextConfig: NextConfig = {
   images: {

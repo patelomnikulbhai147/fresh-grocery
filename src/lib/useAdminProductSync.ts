@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { useAdminStore, type AdminProduct } from "@/store/adminStore";
+import { useAdminStore, type AdminProduct, type AdminOrder } from "@/store/adminStore";
 import { useAdminAuth } from "@/store/adminAuth";
 import { useCustomerAuth } from "@/store/customerAuth";
 
@@ -146,6 +146,86 @@ export function useAdminProductSync(): AdminSyncState {
     return () => {
       unsubscribe();
       if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  // ── Orders sync (server-side order database) ──
+  const orderStatusRef = useRef<Map<string, string> | null>(null);
+  const localOnlyOrdersRef = useRef<Set<string>>(new Set());
+  const orderTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ordersStartedRef = useRef(false);
+
+  useEffect(() => {
+    if (ordersStartedRef.current) return;
+    ordersStartedRef.current = true;
+
+    const adminAuthed =
+      useAdminAuth.getState().isAuthenticated ||
+      useCustomerAuth.getState().isAuthenticated;
+    if (!adminAuthed) return;
+
+    const pushStatusChanges = async () => {
+      const base = orderStatusRef.current;
+      if (!base) return;
+      const orders = useAdminStore.getState().orders;
+      for (const o of orders) {
+        const prev = base.get(o.id);
+        if (prev !== undefined && prev !== o.status && !localOnlyOrdersRef.current.has(o.id)) {
+          base.set(o.id, o.status);
+          try {
+            const res = await fetch("/api/admin/orders", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id: o.id, status: o.status }),
+            });
+            const data = await res.json().catch(() => null);
+            if (data?.notFound) localOnlyOrdersRef.current.add(o.id);
+          } catch {
+            // retry on the next change; local state is preserved either way
+            base.set(o.id, prev);
+          }
+        }
+      }
+    };
+
+    const scheduleOrders = () => {
+      if (orderTimerRef.current) clearTimeout(orderTimerRef.current);
+      orderTimerRef.current = setTimeout(pushStatusChanges, 600);
+    };
+
+    const unsubscribe = useAdminStore.subscribe((s, prev) => {
+      if (s.orders !== prev.orders) scheduleOrders();
+    });
+
+    (async () => {
+      try {
+        const res = await fetch("/api/admin/orders", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json().catch(() => null);
+        if (!data?.success || !Array.isArray(data.orders)) return;
+        const serverOrders = data.orders as AdminOrder[];
+        const serverIds = new Set(serverOrders.map((o) => o.id));
+        // Server orders are authoritative; local-only (legacy/demo) orders stay.
+        useAdminStore.setState((s) => ({
+          orders: [
+            ...serverOrders,
+            ...s.orders.filter((o) => !serverIds.has(o.id)),
+          ],
+        }));
+        const map = new Map<string, string>();
+        for (const o of useAdminStore.getState().orders) map.set(o.id, o.status);
+        for (const o of useAdminStore.getState().orders) {
+          if (!serverIds.has(o.id)) localOnlyOrdersRef.current.add(o.id);
+        }
+        orderStatusRef.current = map;
+      } catch {
+        // orders stay local-only this session; products sync already warns
+      }
+    })();
+
+    return () => {
+      unsubscribe();
+      if (orderTimerRef.current) clearTimeout(orderTimerRef.current);
     };
   }, []);
 

@@ -15,5 +15,15 @@
       "binding": "WORKER_SELF_REFERENCE",
       "service": "fresh-grocery"
     }
+  ],
+  // Cloudflare D1 — the production database (products, orders, auth/OTP,
+  // audit, WhatsApp). Free tier. Locally `next dev` uses an automatic local
+  // SQLite copy; the real database_id must be set before deploying.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "flashkart-db",
+      "database_id": "REPLACE_WITH_REAL_D1_DATABASE_ID"
+    }
   ]
 }

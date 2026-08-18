@@ -133,48 +133,6 @@ export function CheckoutForm() {
     }
     setStockError("");
 
-    // BACKEND gate first: the server re-validates every line against the
-    // authoritative product database (product still customer-visible, enough
-    // shared weight stock) and deducts the weight atomically. An inactive
-    // product lingering in an old cart is rejected HERE, whatever the UI said.
-    let gate: any = null;
-    try {
-      const res = await fetch("/api/checkout/place", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: items.map((i) => ({
-            productId: i.productId,
-            name: i.name,
-            grams: lineGrams(i.weight, i.grams),
-            quantity: i.quantity,
-          })),
-        }),
-      });
-      gate = await res.json().catch(() => null);
-      if (!res.ok || !gate?.success) {
-        setStockError(gate?.message || "Could not verify stock right now. Please try again.");
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        return;
-      }
-    } catch {
-      setStockError("Could not verify stock right now. Please try again.");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-
-    // Align the local mirror with the server's pre-order stock so the local
-    // atomic placement below lands on exactly the server's post-order value.
-    if (Array.isArray(gate.products)) {
-      useAdminStore.setState((s) => ({
-        products: s.products.map((p) => {
-          const hit = gate.products.find((x: any) => x.id === p.id);
-          return hit
-            ? { ...p, stockGrams: hit.before, currentStock: hit.before, availableStock: hit.before, stock: hit.before }
-            : p;
-        }),
-      }));
-    }
     const id = `FLK-${Math.floor(Math.random() * 900000 + 100000)}`;
     const now = new Date();
     const order: AdminOrder = {
@@ -207,8 +165,53 @@ export function CheckoutForm() {
       deliverySlot: slots.find((s) => s.value === data.slot)?.label || data.slot,
       invoiceNo: `INV-${id}`,
     };
-    // Atomic order placement: validates every variant's stock, only then creates the
-    // order and decrements the exact variants bought. Rejected orders change nothing.
+
+    // BACKEND gate first: the server re-validates every line against the
+    // authoritative product database (product still customer-visible, enough
+    // shared weight stock), deducts the weight atomically, and stores the
+    // order server-side so the admin panel sees it from any device. An
+    // inactive product lingering in an old cart is rejected HERE.
+    let gate: any = null;
+    try {
+      const res = await fetch("/api/checkout/place", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: items.map((i) => ({
+            productId: i.productId,
+            name: i.name,
+            grams: lineGrams(i.weight, i.grams),
+            quantity: i.quantity,
+          })),
+          order,
+        }),
+      });
+      gate = await res.json().catch(() => null);
+      if (!res.ok || !gate?.success) {
+        setStockError(gate?.message || "Could not verify stock right now. Please try again.");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+    } catch {
+      setStockError("Could not verify stock right now. Please try again.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    // Align the local mirror with the server's pre-order stock so the local
+    // placement below lands on exactly the server's post-order value.
+    if (Array.isArray(gate.products)) {
+      useAdminStore.setState((s) => ({
+        products: s.products.map((p) => {
+          const hit = gate.products.find((x: any) => x.id === p.id);
+          return hit
+            ? { ...p, stockGrams: hit.before, currentStock: hit.before, availableStock: hit.before, stock: hit.before }
+            : p;
+        }),
+      }));
+    }
+
+    // Local mirror of the same placement (order history + stock in this browser).
     const result = placeCustomerOrder(order);
     if (!result.ok) {
       setStockError(result.message || "Some items in your cart are no longer available.");

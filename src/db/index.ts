@@ -1,5 +1,71 @@
 import mysql from "mysql2/promise";
 import { randomUUID } from "crypto";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+
+// ──────────────────────── Cloudflare D1 (primary database) ────────────────────────
+// In production (Cloudflare Workers) and in `next dev` (local miniflare proxy,
+// see next.config.ts) the D1 binding "DB" is the database. MySQL remains a
+// local fallback for environments without the proxy; the in-memory store is
+// the last-resort dev fallback.
+type D1Like = {
+  prepare(sql: string): {
+    bind(...values: any[]): {
+      all(): Promise<{ results?: any[]; meta?: any }>;
+      run(): Promise<{ meta?: { changes?: number; last_row_id?: number } }>;
+    };
+  };
+  batch(stmts: any[]): Promise<{ meta?: { changes?: number } }[]>;
+};
+
+export function getD1(): D1Like | null {
+  try {
+    const { env } = getCloudflareContext();
+    return ((env as any)?.DB as D1Like) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Which SQL dialect the active database speaks. */
+export function dbDialect(): "sqlite" | "mysql" {
+  return getD1() ? "sqlite" : "mysql";
+}
+
+/** Translate the MySQL-isms used in this codebase to SQLite for D1. */
+function toSqlite(sql: string): string {
+  return sql
+    .replace(/UTC_TIMESTAMP\(\)\s*-\s*INTERVAL\s+(\d+)\s+MINUTE/gi, "datetime('now', '-$1 minutes')")
+    .replace(/UTC_TIMESTAMP\(\)/gi, "datetime('now')")
+    .replace(/NOW\(\)/gi, "datetime('now')")
+    .replace(/UUID\(\)/gi, "lower(hex(randomblob(16)))");
+}
+
+function normalizeD1Error(err: any): any {
+  if (/UNIQUE constraint failed|Duplicate entry/i.test(err?.message || "")) {
+    err.code = "ER_DUP_ENTRY";
+  }
+  return err;
+}
+
+const isWriteSql = (sql: string) => !/^\s*(SELECT|WITH|PRAGMA)/i.test(sql);
+
+async function d1Execute<T = any>(d1: D1Like, sql: string, values: any[]): Promise<[T, any]> {
+  const translated = toSqlite(sql);
+  const bound = d1.prepare(translated).bind(...values.map((v) => (v === undefined ? null : v)));
+  try {
+    if (isWriteSql(translated)) {
+      const res = await bound.run();
+      return [
+        { affectedRows: res.meta?.changes ?? 0, insertId: res.meta?.last_row_id } as unknown as T,
+        null,
+      ];
+    }
+    const res = await bound.all();
+    return [(res.results ?? []) as unknown as T, null];
+  } catch (err: any) {
+    throw normalizeD1Error(err);
+  }
+}
 
 // MySQL Pool configuration — DATABASE_URL (mysql://user:pass@host:port/db) wins,
 // individual DB_* variables are the fallback.
@@ -93,6 +159,13 @@ const isConnectionError = (err: any) =>
 
 export const pool = {
   execute: async <T = any>(sql: string, values: any[] = []): Promise<[T, any]> => {
+    // 1st choice: Cloudflare D1 — the production database (and local dev
+    // database via the miniflare proxy). SQL errors surface, never masked.
+    const d1 = getD1();
+    if (d1) {
+      return d1Execute<T>(d1, sql, values);
+    }
+
     const shouldTryMysql =
       mysqlPool && (mysqlHealthy !== false || Date.now() - lastFailedAt > RETRY_MS);
     if (shouldTryMysql) {
@@ -258,4 +331,76 @@ export async function getConnection() {
 export function getMysqlPool(): mysql.Pool {
   if (!mysqlPool) throw new Error("MySQL pool not initialised");
   return mysqlPool;
+}
+
+// ──────────────────── Catalog/orders database (STRICT — no memory fallback) ────────────────────
+// Product and order data must come from a REAL database: Cloudflare D1 in
+// production/dev-proxy, raw MySQL otherwise. If neither is reachable the
+// caller gets an error to surface as an error state — never fake data.
+
+export type BatchStatement = { sql: string; params?: any[] };
+
+export async function catalogAll<T = any>(sql: string, params: any[] = []): Promise<T[]> {
+  const d1 = getD1();
+  if (d1) {
+    const [rows] = await d1Execute<T[]>(d1, sql, params);
+    return Array.isArray(rows) ? rows : [];
+  }
+  const conn = await getMysqlPool().getConnection();
+  try {
+    const [rows] = await conn.execute<any>(sql, params);
+    return Array.isArray(rows) ? (rows as T[]) : [];
+  } finally {
+    conn.release();
+  }
+}
+
+export async function catalogRun(
+  sql: string,
+  params: any[] = []
+): Promise<{ changes: number }> {
+  const d1 = getD1();
+  if (d1) {
+    const [res] = await d1Execute<any>(d1, sql, params);
+    return { changes: Number(res?.affectedRows ?? 0) };
+  }
+  const conn = await getMysqlPool().getConnection();
+  try {
+    const [res]: any = await conn.execute(sql, params);
+    return { changes: Number(res?.affectedRows ?? 0) };
+  } finally {
+    conn.release();
+  }
+}
+
+/** Run several write statements atomically (D1 batch / MySQL transaction). */
+export async function catalogBatch(stmts: BatchStatement[]): Promise<void> {
+  if (stmts.length === 0) return;
+  const d1 = getD1();
+  if (d1) {
+    const prepared = stmts.map((s) =>
+      d1.prepare(toSqlite(s.sql)).bind(...(s.params ?? []).map((v: any) => (v === undefined ? null : v)))
+    );
+    try {
+      await d1.batch(prepared);
+    } catch (err: any) {
+      throw normalizeD1Error(err);
+    }
+    return;
+  }
+  const conn = (await getMysqlPool().getConnection()) as mysql.PoolConnection;
+  try {
+    await conn.beginTransaction();
+    for (const s of stmts) {
+      await conn.execute(s.sql, s.params ?? []);
+    }
+    await conn.commit();
+  } catch (err) {
+    try {
+      await conn.rollback();
+    } catch {}
+    throw err;
+  } finally {
+    conn.release();
+  }
 }

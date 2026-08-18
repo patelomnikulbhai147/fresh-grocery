@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
  * frontend claimed.
  */
 export async function POST(req: NextRequest) {
-  let body: { items?: PlaceOrderItem[] };
+  let body: { items?: PlaceOrderItem[]; order?: any };
   try {
     body = await req.json();
   } catch {
@@ -41,7 +41,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const result = await placeOrderStock(items);
+    // The full order (when provided) is stored server-side after the stock
+    // deduction succeeds — the admin panel and My Orders read it from there.
+    const order = body.order && typeof body.order === "object" ? body.order : null;
+    const result = await placeOrderStock(items, order);
     return NextResponse.json(result, { status: result.success ? 200 : 409 });
   } catch (err: any) {
     console.error("[Checkout API] stock placement failed:", err?.message);
