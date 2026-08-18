@@ -119,6 +119,24 @@ export interface Supplier {
 
 export type OrderStatus = "Pending" | "Confirmed" | "Processing" | "Packed" | "Out for Delivery" | "Delivered" | "Cancelled" | "Refunded" | "Returned";
 
+/** Structured delivery-address snapshot stored on an order (§25). */
+export interface OrderAddressSnapshot {
+  fullName?: string;
+  mobile?: string;
+  houseNumber?: string;
+  buildingName?: string;
+  floor?: string;
+  street?: string;
+  area?: string;
+  landmark?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  addressType?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
 export interface OrderItem {
   productId: string;
   name: string;
@@ -160,6 +178,16 @@ export interface AdminOrder {
   paymentStatus: "Paid" | "Pending" | "Refunded" | "Failed";
   paymentMethod: "Credit Card" | "UPI" | "Wallet" | "Cash on Delivery";
   deliverySlot: string;
+  /** Delivery address/location type — Home / Office / Other. Optional for legacy orders. */
+  deliveryAddressType?: string;
+  /** Delivery speed/type — Instant / Scheduled. Optional for legacy orders. */
+  deliveryType?: string;
+  /** Structured delivery-address SNAPSHOT taken when the order was placed —
+   *  never mutated if the customer later edits their saved address (§11). */
+  deliveryAddressDetails?: OrderAddressSnapshot;
+  /** Exact delivery coordinates saved with the address (§3, §11). */
+  deliveryLat?: number;
+  deliveryLng?: number;
   assignedPartner?: any;
   assignedDriver?: any;
   customerNotes?: string;

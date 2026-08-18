@@ -6,16 +6,38 @@ export type SavedAddress = {
   id: string;
   /** Owner key — the logged-in user's mobile number. */
   userKey: string;
-  label: string; // Home / Office / Other
+  label: string; // Home / Work / Other  (address type)
   name: string;
   phone: string;
-  addressLine: string;
+  /** Detailed structured fields (§1, §23). */
+  houseNumber?: string;
+  buildingName?: string;
+  floor?: string;
+  street?: string;
   area?: string;
   landmark?: string;
   city: string;
+  state?: string;
   pincode: string;
+  /** Exact map location (§5) — present when picked/geocoded. */
+  latitude?: number;
+  longitude?: number;
+  /** Legacy single-line address — kept for older saved addresses. */
+  addressLine: string;
   isDefault: boolean;
 };
+
+/** Compose the structured fields into the stored single-line address. */
+export function composeAddressLine(a: Partial<SavedAddress>): string {
+  const parts = [
+    [a.houseNumber, a.buildingName].filter(Boolean).join(", "),
+    a.floor ? `${a.floor} Floor` : "",
+    a.street,
+    a.area,
+    a.landmark ? `Near ${a.landmark}` : "",
+  ].filter(Boolean);
+  return parts.join(", ") || a.addressLine || "";
+}
 
 type AddressBookState = {
   addresses: SavedAddress[];

@@ -494,6 +494,14 @@ export function OrderManagement() {
                   <div className="font-bold text-sm text-brand-950 dark:text-zinc-100 flex items-center gap-1.5">
                     <MapPin className="w-4 h-4 text-brand-600" /> Delivery Address
                   </div>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-brand-700 dark:text-zinc-300 bg-white dark:bg-zinc-900 border border-brand-100 dark:border-zinc-700 rounded-full px-2.5 py-1">
+                      🏠 Address: {activeOrder.deliveryAddressType || "Home"}
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-brand-700 dark:text-zinc-300 bg-white dark:bg-zinc-900 border border-brand-100 dark:border-zinc-700 rounded-full px-2.5 py-1">
+                      ⚡ Delivery: {activeOrder.deliveryType || "Instant"}
+                    </span>
+                  </div>
                   <p className="text-brand-700 dark:text-zinc-400 leading-relaxed">
                     {activeOrder.deliveryAddress}
                   </p>

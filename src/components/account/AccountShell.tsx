@@ -19,7 +19,9 @@ import { cn, formatINR, formatWeight } from "@/lib/utils";
 import { CustomerRole, useCustomerAuth } from "@/store/customerAuth";
 import { useAdminAuth } from "@/store/adminAuth";
 import { useAdminStore, type AdminOrder } from "@/store/adminStore";
-import { useAddressBook, type SavedAddress } from "@/store/addresses";
+import { useAddressBook, composeAddressLine, type SavedAddress } from "@/store/addresses";
+import { AddressForm, type AddressDraft } from "@/components/address/AddressForm";
+import { AddressCard } from "@/components/address/AddressCard";
 import { useWishlist } from "@/store/shop";
 import { useLiveCatalog } from "@/store/liveCatalog";
 import { SuperAdminAccountView } from "@/components/account/SuperAdminAccountView";
@@ -37,17 +39,6 @@ const STATUS_TONE: Record<string, string> = {
   Cancelled: "text-rose-600",
   Returned: "text-rose-600",
   Refunded: "text-rose-600",
-};
-
-const emptyAddressForm = {
-  label: "Home",
-  name: "",
-  phone: "",
-  addressLine: "",
-  area: "",
-  landmark: "",
-  city: "Gandhinagar",
-  pincode: "",
 };
 
 export function AccountShell() {
@@ -110,45 +101,27 @@ export function AccountShell() {
   // ── Address form modal state ──
   const [addrModalOpen, setAddrModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [addrForm, setAddrForm] = useState({ ...emptyAddressForm });
-  const [addrErrors, setAddrErrors] = useState<Record<string, string>>({});
+  const [editingAddress, setEditingAddress] = useState<SavedAddress | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const openAddAddress = () => {
     setEditingId(null);
-    setAddrForm({ ...emptyAddressForm, name: user?.name || "", phone: user?.mobile || "" });
-    setAddrErrors({});
+    setEditingAddress(null);
     setAddrModalOpen(true);
   };
   const openEditAddress = (a: SavedAddress) => {
     setEditingId(a.id);
-    setAddrForm({
-      label: a.label,
-      name: a.name,
-      phone: a.phone,
-      addressLine: a.addressLine,
-      area: a.area || "",
-      landmark: a.landmark || "",
-      city: a.city,
-      pincode: a.pincode,
-    });
-    setAddrErrors({});
+    setEditingAddress(a);
     setAddrModalOpen(true);
   };
-  const saveAddress = () => {
-    const errs: Record<string, string> = {};
-    if (!addrForm.name.trim()) errs.name = "Name is required";
-    if (!/^\d{10}$/.test(addrForm.phone.replace(/\D/g, "").slice(-10)) || addrForm.phone.replace(/\D/g, "").length < 10)
-      errs.phone = "Enter a valid 10-digit mobile number";
-    if (!addrForm.addressLine.trim()) errs.addressLine = "House / street is required";
-    if (!addrForm.city.trim()) errs.city = "City is required";
-    if (!/^\d{6}$/.test(addrForm.pincode.trim())) errs.pincode = "Enter a valid 6-digit pincode";
-    setAddrErrors(errs);
-    if (Object.keys(errs).length > 0) return;
+  const saveAddress = (draft: AddressDraft) => {
+    const payload = { ...draft, addressLine: composeAddressLine(draft) };
     if (editingId) {
-      addressBook.update(editingId, { ...addrForm });
+      addressBook.update(editingId, payload);
+      if (payload.isDefault) addressBook.setDefault(userKey, editingId);
     } else {
-      addressBook.add({ ...addrForm, userKey, isDefault: false });
+      const created = addressBook.add({ ...payload, userKey });
+      if (payload.isDefault) addressBook.setDefault(userKey, created.id);
     }
     setAddrModalOpen(false);
   };
@@ -422,47 +395,19 @@ export function AccountShell() {
               ) : (
                 <div className="grid md:grid-cols-2 gap-3">
                   {myAddresses.map((a) => (
-                    <div key={a.id} className={cn("p-4 rounded-2xl border", a.isDefault ? "border-brand-400 bg-brand-50/40" : "border-brand-100")}>
-                      <div className="flex items-center gap-2 mb-2">
-                        <MapPin className="w-4 h-4 text-brand-600" />
-                        <span className="font-semibold text-sm">{a.label}</span>
-                        {a.isDefault && (
-                          <span className="text-[10px] uppercase bg-brand-600 text-white px-2 py-0.5 rounded-full">Default</span>
-                        )}
-                      </div>
-                      <p className="text-xs text-brand-700">
-                        {a.name} · {a.phone}
-                        <br />
-                        {a.addressLine}
-                        {a.area ? `, ${a.area}` : ""}
-                        {a.landmark ? ` (near ${a.landmark})` : ""}
-                        <br />
-                        {a.city} — {a.pincode}
-                      </p>
-                      <div className="flex items-center gap-2 mt-3 text-xs font-semibold">
-                        <button onClick={() => openEditAddress(a)} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-brand-50 text-brand-800 hover:bg-brand-100">
-                          <Pencil className="w-3 h-3" /> Edit
-                        </button>
-                        {!a.isDefault && (
-                          <button onClick={() => addressBook.setDefault(userKey, a.id)} className="px-2.5 py-1.5 rounded-lg bg-brand-50 text-brand-800 hover:bg-brand-100">
-                            Set default
-                          </button>
-                        )}
-                        {confirmDeleteId === a.id ? (
-                          <span className="flex items-center gap-1.5">
-                            <button onClick={() => { addressBook.remove(a.id); setConfirmDeleteId(null); }} className="px-2.5 py-1.5 rounded-lg bg-rose-600 text-white">
-                              Confirm delete
-                            </button>
-                            <button onClick={() => setConfirmDeleteId(null)} className="px-2.5 py-1.5 rounded-lg bg-brand-50 text-brand-800">
-                              Keep
-                            </button>
-                          </span>
-                        ) : (
-                          <button onClick={() => setConfirmDeleteId(a.id)} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-rose-600 hover:bg-rose-50">
-                            <Trash2 className="w-3 h-3" /> Delete
-                          </button>
-                        )}
-                      </div>
+                    <div key={a.id}>
+                      <AddressCard
+                        address={a}
+                        onEdit={() => openEditAddress(a)}
+                        onMakeDefault={() => addressBook.setDefault(userKey, a.id)}
+                        onDelete={confirmDeleteId === a.id ? undefined : () => setConfirmDeleteId(a.id)}
+                      />
+                      {confirmDeleteId === a.id && (
+                        <div className="flex items-center gap-2 mt-1.5 text-xs font-semibold">
+                          <button onClick={() => { addressBook.remove(a.id); setConfirmDeleteId(null); }} className="px-2.5 py-1.5 rounded-lg bg-rose-600 text-white">Confirm delete</button>
+                          <button onClick={() => setConfirmDeleteId(null)} className="px-2.5 py-1.5 rounded-lg bg-brand-50 text-brand-800">Keep</button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -472,71 +417,23 @@ export function AccountShell() {
         </div>
       </div>
 
-      {/* Address add/edit modal */}
+      {/* Address add/edit modal — detailed form + map picker */}
       {addrModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-purple-950/60 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-brand-100 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-brand-100 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-purple-950/60 backdrop-blur-sm" onClick={() => setAddrModalOpen(false)}>
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 border border-brand-100 shadow-2xl max-h-[92vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-brand-100 pb-3 mb-4">
               <h3 className="font-display text-lg font-bold text-brand-950">{editingId ? "Edit Address" : "Add New Address"}</h3>
               <button onClick={() => setAddrModalOpen(false)} className="p-1 text-brand-700 hover:text-brand-950">
                 <X className="w-5 h-5" />
               </button>
             </div>
-
-            <div className="grid grid-cols-3 gap-2 text-xs font-bold">
-              {["Home", "Office", "Other"].map((l) => (
-                <button
-                  key={l}
-                  onClick={() => setAddrForm({ ...addrForm, label: l })}
-                  className={cn(
-                    "py-2 rounded-xl border transition",
-                    addrForm.label === l ? "bg-brand-900 text-white border-brand-900" : "bg-white text-brand-800 border-brand-200 hover:border-brand-400"
-                  )}
-                >
-                  {l}
-                </button>
-              ))}
-            </div>
-
-            {([
-              { key: "name", label: "Full Name *", placeholder: "Receiver's name" },
-              { key: "phone", label: "Mobile Number *", placeholder: "10-digit mobile" },
-              { key: "addressLine", label: "House / Flat, Building & Street *", placeholder: "e.g. B-14, Shalin Apartments, Road 5" },
-              { key: "area", label: "Area / Sector", placeholder: "e.g. Sector 21 / Sargasan / Kudasan" },
-              { key: "landmark", label: "Landmark", placeholder: "Optional" },
-              { key: "city", label: "City *", placeholder: "Gandhinagar" },
-              { key: "pincode", label: "Pincode *", placeholder: "e.g. 382021" },
-            ] as { key: keyof typeof emptyAddressForm; label: string; placeholder: string }[]).map((f) => (
-              <div key={f.key}>
-                <label className="block text-xs font-bold text-brand-900 mb-1">{f.label}</label>
-                <input
-                  type="text"
-                  value={addrForm[f.key]}
-                  placeholder={f.placeholder}
-                  onChange={(e) => setAddrForm({ ...addrForm, [f.key]: e.target.value })}
-                  className={cn(
-                    "w-full bg-brand-50/60 border rounded-xl px-3.5 py-2.5 text-sm text-brand-950 outline-none",
-                    addrErrors[f.key] ? "border-rose-400 ring-1 ring-rose-200" : "border-brand-200 focus:border-brand-500"
-                  )}
-                />
-                {addrErrors[f.key] && <div className="text-[11px] font-bold text-rose-600 mt-0.5">{addrErrors[f.key]}</div>}
-              </div>
-            ))}
-
-            <div className="flex gap-2 pt-1">
-              <button
-                onClick={() => setAddrModalOpen(false)}
-                className="flex-1 py-2.5 rounded-xl bg-brand-50 text-brand-800 hover:bg-brand-100 text-xs font-bold transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={saveAddress}
-                className="flex-1 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-800 text-white text-xs font-bold shadow-sm transition"
-              >
-                {editingId ? "Save Changes" : "Save Address"}
-              </button>
-            </div>
+            <AddressForm
+              initial={editingAddress}
+              defaultName={user?.name || ""}
+              defaultPhone={user?.mobile || ""}
+              onSave={saveAddress}
+              onCancel={() => setAddrModalOpen(false)}
+            />
           </div>
         </div>
       )}

@@ -12,19 +12,23 @@ import {
   Tag,
   CheckCircle2,
   Sparkles,
+  Truck,
+  Home,
+  Briefcase,
+  Zap,
+  Clock,
+  X,
 } from "lucide-react";
 import { useCart } from "@/store/shop";
 import { formatINR } from "@/lib/utils";
 import { cn } from "@/lib/utils";
-import { useAdminStore, type AdminOrder } from "@/store/adminStore";
+import { useAdminStore, type AdminOrder, type OrderAddressSnapshot } from "@/store/adminStore";
 import { useCustomerAuth } from "@/store/customerAuth";
-import { useAddressBook } from "@/store/addresses";
-import { cities } from "@/data/catalog";
+import { useAddressBook, composeAddressLine, type SavedAddress } from "@/store/addresses";
 import { computeOrderCharges, freeDeliveryHint } from "@/lib/fees";
-
-/** Serviceability from the live city configuration (same source as the pincode checker). */
-const isServiceablePincode = (pin: string): boolean =>
-  cities.some((c) => c.live && (c.pincode || []).some((prefix) => pin.startsWith(prefix)));
+import { isServiceablePincode } from "@/lib/serviceability";
+import { AddressCard } from "@/components/address/AddressCard";
+import { AddressForm, type AddressDraft } from "@/components/address/AddressForm";
 
 /** Pack weight in grams for a cart line — falls back to parsing the label
  *  ("500 g", "1 kg") for carts persisted before grams were stored. */
@@ -36,6 +40,9 @@ const lineGrams = (weight: string, grams?: number): number => {
   return Math.round(m[2].toLowerCase() === "kg" ? n * 1000 : n);
 };
 
+type AddressType = "Home" | "Office" | "Other";
+type DeliveryType = "Instant" | "Scheduled";
+
 type Form = {
   name: string;
   phone: string;
@@ -45,9 +52,26 @@ type Form = {
   city: string;
   pincode: string;
   slot: string;
+  /** Where the order goes — Home / Office / Other. Distinct from deliveryType. */
+  deliveryAddressType: AddressType;
+  /** How fast — Instant (fast) / Scheduled (pick a time slot). */
+  deliveryType: DeliveryType;
   payment: "upi" | "cod" | "bank_transfer";
   coupon: string;
 };
+
+/** Delivery ADDRESS/location type — where the order is delivered. */
+const addressTypeOptions: { value: AddressType; label: string; desc: string; icon: typeof Home }[] = [
+  { value: "Home", label: "Home", desc: "Doorstep delivery", icon: Home },
+  { value: "Office", label: "Office", desc: "Workplace delivery", icon: Briefcase },
+  { value: "Other", label: "Other", desc: "Any saved location", icon: MapPin },
+];
+
+/** Delivery SPEED/type — how the order is fulfilled. Distinct from address type. */
+const deliveryTypeOptions: { value: DeliveryType; label: string; desc: string; icon: typeof Zap }[] = [
+  { value: "Instant", label: "Instant", desc: "Fast delivery", icon: Zap },
+  { value: "Scheduled", label: "Scheduled", desc: "Pick a time slot", icon: Clock },
+];
 
 const slots = [
   { label: "Morning · 6:30 – 8:30 AM (Early Mess/Kitchen)", value: "morning-early" },
@@ -65,7 +89,15 @@ export function CheckoutForm() {
   const [stockError, setStockError] = useState("");
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<Form>({
-    defaultValues: { payment: "cod", slot: "morning-early", fulfillmentType: "partner_counter", city: "Gandhinagar" },
+    defaultValues: {
+      payment: "cod",
+      slot: "morning-early",
+      fulfillmentType: "partner_counter",
+      city: "Gandhinagar",
+      // Default delivery state: Home address + Instant delivery (never blank).
+      deliveryAddressType: "Home",
+      deliveryType: "Instant",
+    },
   });
 
   // ── Saved addresses (per logged-in user) ──
@@ -76,6 +108,9 @@ export function CheckoutForm() {
   const savedAddresses = mounted && isAuthenticated && user?.mobile ? addressBook.forUser(user.mobile) : [];
   const [selectedAddrId, setSelectedAddrId] = useState<string | null>(null);
   const [saveAddress, setSaveAddress] = useState(false);
+  const [addrPickerOpen, setAddrPickerOpen] = useState(false);
+  const [addrFormOpen, setAddrFormOpen] = useState(false);
+  const selectedAddress = savedAddresses.find((a) => a.id === selectedAddrId) || null;
 
   // Default address prefills the form once on mount
   useEffect(() => {
@@ -86,6 +121,9 @@ export function CheckoutForm() {
   }, [mounted]);
 
   const pincodeValue = (watch("pincode") || "").trim();
+  // Delivery selections (default Home + Instant) — drive the selected-card UI.
+  const addressType = watch("deliveryAddressType");
+  const deliveryType = watch("deliveryType");
 
   const applyAddress = (id: string) => {
     const a = addressBook.addresses.find((x) => x.id === id);
@@ -93,9 +131,44 @@ export function CheckoutForm() {
     setSelectedAddrId(id);
     setValue("name", a.name);
     setValue("phone", a.phone);
-    setValue("address", `${a.addressLine}${a.area ? `, ${a.area}` : ""}${a.landmark ? ` (near ${a.landmark})` : ""}`);
+    setValue("address", composeAddressLine(a));
     setValue("city", a.city);
     setValue("pincode", a.pincode);
+    // Sync the delivery ADDRESS type card to the saved address's label.
+    const t = /home/i.test(a.label) ? "Home" : /work|office/i.test(a.label) ? "Office" : "Other";
+    setValue("deliveryAddressType", t as any);
+  };
+
+  /** Snapshot the delivery address that will be frozen onto the order (§25). */
+  const buildAddressSnapshot = (data: Form): { snapshot: OrderAddressSnapshot; lat?: number; lng?: number } => {
+    if (selectedAddress) {
+      const a = selectedAddress;
+      return {
+        snapshot: {
+          fullName: a.name, mobile: a.phone, houseNumber: a.houseNumber, buildingName: a.buildingName,
+          floor: a.floor, street: a.street, area: a.area, landmark: a.landmark, city: a.city,
+          state: a.state, pincode: a.pincode, addressType: a.label, latitude: a.latitude, longitude: a.longitude,
+        },
+        lat: a.latitude, lng: a.longitude,
+      };
+    }
+    // Guest / manually-typed address — no map coordinates.
+    return {
+      snapshot: {
+        fullName: data.name, mobile: data.phone, area: data.address, city: data.city,
+        state: "Gujarat", pincode: data.pincode, addressType: data.deliveryAddressType,
+      },
+    };
+  };
+
+  /** Save a newly-added address to the book and select it for this order. */
+  const handleSaveNewAddress = (draft: AddressDraft) => {
+    if (!user?.mobile) return;
+    const created = addressBook.add({ ...draft, addressLine: composeAddressLine(draft), userKey: user.mobile });
+    if (draft.isDefault) addressBook.setDefault(user.mobile, created.id);
+    applyAddress(created.id);
+    setAddrFormOpen(false);
+    setAddrPickerOpen(false);
   };
 
   // Coupon validation against the real admin-managed coupon system (no hardcoded codes)
@@ -139,6 +212,7 @@ export function CheckoutForm() {
     }
     setStockError("");
 
+    const addr = buildAddressSnapshot(data);
     const id = `FLK-${Math.floor(Math.random() * 900000 + 100000)}`;
     const now = new Date();
     const order: AdminOrder = {
@@ -151,6 +225,13 @@ export function CheckoutForm() {
       customerEmail: data.email || "",
       customerPhone: data.phone,
       shippingAddress: `${data.address}, ${data.city} - ${data.pincode}`,
+      // Delivery selections — two distinct concepts, never blank (default Home + Instant).
+      deliveryAddressType: data.deliveryAddressType || "Home",
+      deliveryType: data.deliveryType || "Instant",
+      // Structured address SNAPSHOT + exact coordinates, frozen onto the order (§11).
+      deliveryAddressDetails: addr.snapshot,
+      deliveryLat: addr.lat,
+      deliveryLng: addr.lng,
       items: items.map((i) => ({
         productId: i.productId,
         name: i.name,
@@ -304,31 +385,26 @@ export function CheckoutForm() {
               <h2 className="font-display text-xl font-bold text-slate-900">Fulfillment & Location Details</h2>
             </div>
 
-            {/* Saved addresses — one click fills the form */}
-            {savedAddresses.length > 0 && (
+            {/* Delivering to — the selected saved address, with Change / Add (§24) */}
+            {mounted && isAuthenticated && (
               <div className="mb-5">
-                <div className="text-xs font-bold text-slate-700 mb-2">Deliver to a saved address</div>
-                <div className="flex flex-wrap gap-2">
-                  {savedAddresses.map((a) => (
-                    <button
-                      key={a.id}
-                      type="button"
-                      onClick={() => applyAddress(a.id)}
-                      className={cn(
-                        "text-left px-3.5 py-2.5 rounded-2xl border text-xs transition max-w-[260px]",
-                        selectedAddrId === a.id
-                          ? "border-[#067a46] bg-emerald-50 ring-2 ring-emerald-100"
-                          : "border-slate-200 bg-white hover:border-slate-300"
-                      )}
-                    >
-                      <div className="font-bold text-slate-900 flex items-center gap-1.5">
-                        <MapPin className="w-3 h-3 text-[#067a46]" /> {a.label}
-                        {a.isDefault && <span className="text-[9px] uppercase bg-[#067a46] text-white px-1.5 py-0.5 rounded-full">Default</span>}
-                      </div>
-                      <div className="text-slate-600 truncate mt-0.5">{a.addressLine}, {a.city} — {a.pincode}</div>
-                    </button>
-                  ))}
-                </div>
+                {selectedAddress ? (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-xs font-bold text-slate-700">Delivering to</div>
+                      <button type="button" onClick={() => setAddrPickerOpen(true)} className="text-xs font-bold text-[#067a46] hover:text-[#046338]">Change Address</button>
+                    </div>
+                    <AddressCard address={selectedAddress} compact />
+                  </div>
+                ) : savedAddresses.length > 0 ? (
+                  <button type="button" onClick={() => setAddrPickerOpen(true)} className="w-full text-left px-4 py-3 rounded-2xl border border-slate-200 hover:border-[#067a46] text-sm font-bold text-slate-700 flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-[#067a46]" /> Choose a delivery address
+                  </button>
+                ) : (
+                  <button type="button" onClick={() => { setAddrFormOpen(true); }} className="w-full text-left px-4 py-3 rounded-2xl border-2 border-dashed border-[#067a46]/40 bg-emerald-50/40 hover:bg-emerald-50 text-sm font-bold text-[#067a46] flex items-center gap-2">
+                    <MapPin className="w-4 h-4" /> + Add Delivery Address
+                  </button>
+                )}
               </div>
             )}
 
@@ -399,6 +475,76 @@ export function CheckoutForm() {
                 Save this address to my account for next time
               </label>
             )}
+          </section>
+
+          {/* Delivery — address type (Home) + delivery type (Instant) */}
+          <section className="card-option12 p-6 md:p-8">
+            <div className="flex items-center gap-2 mb-5">
+              <Truck className="w-5 h-5 text-[#067a46]" />
+              <h2 className="font-display text-xl font-bold text-slate-900">Delivery</h2>
+            </div>
+
+            {/* Delivery Address Type — where the order goes (default: Home) */}
+            <div className="mb-6">
+              <div className="text-xs font-bold text-slate-700 mb-2.5">Delivery Address</div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {addressTypeOptions.map((o) => {
+                  const active = addressType === o.value;
+                  const Icon = o.icon;
+                  return (
+                    <label
+                      key={o.value}
+                      className={cn(
+                        "flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition",
+                        active
+                          ? "border-[#067a46] bg-emerald-50 ring-2 ring-emerald-100"
+                          : "border-slate-200 bg-slate-50 hover:border-[#067a46]"
+                      )}
+                    >
+                      <input type="radio" value={o.value} {...register("deliveryAddressType")} className="accent-[#067a46]" />
+                      <span className={cn("grid place-items-center w-9 h-9 rounded-xl shrink-0", active ? "bg-[#067a46] text-white" : "bg-white text-[#067a46] border border-slate-200")}>
+                        <Icon className="w-4 h-4" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-xs font-bold text-slate-800">{o.label}</span>
+                        <span className="block text-[10px] text-slate-500">{o.desc}</span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Delivery Type — how fast (default: Instant) */}
+            <div>
+              <div className="text-xs font-bold text-slate-700 mb-2.5">Delivery Type</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {deliveryTypeOptions.map((o) => {
+                  const active = deliveryType === o.value;
+                  const Icon = o.icon;
+                  return (
+                    <label
+                      key={o.value}
+                      className={cn(
+                        "flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition",
+                        active
+                          ? "border-[#067a46] bg-emerald-50 ring-2 ring-emerald-100"
+                          : "border-slate-200 bg-slate-50 hover:border-[#067a46]"
+                      )}
+                    >
+                      <input type="radio" value={o.value} {...register("deliveryType")} className="accent-[#067a46]" />
+                      <span className={cn("grid place-items-center w-9 h-9 rounded-xl shrink-0", active ? "bg-[#067a46] text-white" : "bg-white text-[#067a46] border border-slate-200")}>
+                        <Icon className="w-4 h-4" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-xs font-bold text-slate-800">{o.label}</span>
+                        <span className="block text-[10px] text-slate-500">{o.desc}</span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
           </section>
 
           {/* Time Slot */}
@@ -527,6 +673,50 @@ export function CheckoutForm() {
           </div>
         </div>
       </div>
+
+      {/* Address picker — choose a saved address or add a new one (§24) */}
+      {addrPickerOpen && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/50" onClick={() => setAddrPickerOpen(false)}>
+          <div className="bg-white rounded-3xl max-w-lg w-full p-5 max-h-[88vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display text-lg font-bold text-slate-900">Select Delivery Address</h3>
+              <button type="button" onClick={() => setAddrPickerOpen(false)} className="p-1.5 rounded-full hover:bg-slate-100"><X className="w-5 h-5 text-slate-500" /></button>
+            </div>
+            <div className="space-y-2.5">
+              {savedAddresses.map((a) => (
+                <AddressCard
+                  key={a.id}
+                  address={a}
+                  compact
+                  selected={selectedAddrId === a.id}
+                  onSelect={() => { applyAddress(a.id); setAddrPickerOpen(false); }}
+                />
+              ))}
+            </div>
+            <button type="button" onClick={() => { setAddrPickerOpen(false); setAddrFormOpen(true); }} className="mt-4 w-full py-3 rounded-2xl border-2 border-dashed border-[#067a46]/40 bg-emerald-50/40 hover:bg-emerald-50 text-sm font-bold text-[#067a46] flex items-center justify-center gap-2">
+              <MapPin className="w-4 h-4" /> + Add New Address
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Add-new address form (with map picker) */}
+      {addrFormOpen && (
+        <div className="fixed inset-0 z-[95] flex items-center justify-center p-4 bg-black/50" onClick={() => setAddrFormOpen(false)}>
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 max-h-[92vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display text-lg font-bold text-slate-900">Add New Address</h3>
+              <button type="button" onClick={() => setAddrFormOpen(false)} className="p-1.5 rounded-full hover:bg-slate-100"><X className="w-5 h-5 text-slate-500" /></button>
+            </div>
+            <AddressForm
+              defaultName={user?.name || ""}
+              defaultPhone={user?.mobile || ""}
+              onSave={handleSaveNewAddress}
+              onCancel={() => setAddrFormOpen(false)}
+            />
+          </div>
+        </div>
+      )}
     </form>
   );
 }

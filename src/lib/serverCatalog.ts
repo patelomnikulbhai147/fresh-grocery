@@ -1,6 +1,7 @@
 import { catalogAll, catalogRun, catalogBatch, dbDialect } from "@/db/index";
 import { formatWeight } from "@/lib/utils";
 import { computeOrderCharges } from "@/lib/fees";
+import { isServiceablePincode, serviceableAreasLabel } from "@/lib/serviceability";
 import {
   buildInitialAdminProducts,
   isCustomerVisibleStatus,
@@ -371,6 +372,15 @@ export async function placeOrderStock(
 ): Promise<PlaceOrderResult> {
   await ensureReady();
 
+  // ── Backend serviceability gate (§9): the pincode must be in a live area.
+  // This is the FINAL authority — never trust only the frontend check.
+  const pincode =
+    (order?.deliveryAddressDetails?.pincode ?? "").toString() ||
+    (order?.shippingAddress ?? "").toString().replace(/\D/g, "").slice(-6);
+  if (order && pincode && !isServiceablePincode(pincode)) {
+    return { success: false, message: `We are currently not providing delivery in pincode ${pincode}. Serviceable areas: ${serviceableAreasLabel()}.` };
+  }
+
   // Total wanted grams per product (variants share ONE physical stock).
   const wanted = new Map<string, { grams: number; name?: string }>();
   for (const it of items) {
@@ -623,3 +633,4 @@ export async function updateOrderStatusInDb(
   }
   return { success: true };
 }
+
