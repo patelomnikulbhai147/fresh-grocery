@@ -454,9 +454,18 @@ export function AdminLayout({ children, activeModule, onSelectModule }: AdminLay
 
             {/* Product-sync status: edits must reach the live customer site */}
             {productSync === "unauthorized" && (
-              <div className="mb-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-bold rounded-xl px-4 py-3">
-                Product changes are NOT publishing to the live website — please log in with your
-                admin mobile number (OTP) so changes can sync to the store database.
+              <div className="mb-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-bold rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+                <span>
+                  Your changes are NOT publishing to the live website — your admin session has
+                  expired. Please sign out and sign in again to reconnect.
+                </span>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="shrink-0 px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold"
+                >
+                  Sign out
+                </button>
               </div>
             )}
             {productSync === "error" && (

@@ -21,6 +21,20 @@ export default function AdminLoginPage() {
   const [isForgotOpen, setIsForgotOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
 
+  // Establish a REAL server session (httpOnly cookie) so the admin panel's
+  // product/order changes actually publish to the live customer website.
+  const establishServerSession = async () => {
+    try {
+      await fetch("/api/admin/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier: email, password }),
+      });
+    } catch {
+      // Non-fatal: the panel shows a "not publishing" warning if this failed.
+    }
+  };
+
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (lockoutUntil && Date.now() < lockoutUntil) {
@@ -30,18 +44,21 @@ export default function AdminLoginPage() {
     }
 
     setIsSubmitting(true);
-    setTimeout(() => {
+    setTimeout(async () => {
       const res = login(email, password, rememberMe);
-      setIsSubmitting(false);
 
       if (res.success) {
         if (res.require2FA) {
+          setIsSubmitting(false);
           pushToast("Credentials verified. Please enter your 2FA TOTP code.", "info");
         } else {
+          await establishServerSession();
+          setIsSubmitting(false);
           pushToast("Welcome back, Super Admin!", "success");
           router.push("/admin");
         }
       } else {
+        setIsSubmitting(false);
         pushToast(res.message, "error");
       }
     }, 600);
@@ -55,14 +72,16 @@ export default function AdminLoginPage() {
     }
 
     setIsSubmitting(true);
-    setTimeout(() => {
+    setTimeout(async () => {
       const res = verify2FA(otpPin);
-      setIsSubmitting(false);
 
       if (res.success) {
+        await establishServerSession();
+        setIsSubmitting(false);
         pushToast("2FA verified! Access granted to Enterprise Portal.", "success");
         router.push("/admin");
       } else {
+        setIsSubmitting(false);
         pushToast(res.message, "error");
       }
     }, 500);

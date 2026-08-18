@@ -38,9 +38,6 @@ export function useAdminProductSync(): AdminSyncState {
   const pushingRef = useRef(false);
 
   useEffect(() => {
-    if (startedRef.current) return;
-    startedRef.current = true;
-
     // No admin login in this browser at all → don't even call the API
     // (it would 401 anyway); the layout shows the sign-in warning.
     const adminAuthed =
@@ -97,9 +94,21 @@ export function useAdminProductSync(): AdminSyncState {
       timerRef.current = setTimeout(pushDiff, 800);
     };
 
+    // The subscription is registered on EVERY mount and torn down on unmount —
+    // never guarded — so admin edits keep publishing (a StrictMode remount, or
+    // any remount, must not silently drop the diff-push subscription).
     const unsubscribe = useAdminStore.subscribe((s, prev) => {
       if (s.products !== prev.products) schedule();
     });
+
+    // The initial load/adoption runs at most once per browser session.
+    if (startedRef.current) {
+      return () => {
+        unsubscribe();
+        if (timerRef.current) clearTimeout(timerRef.current);
+      };
+    }
+    startedRef.current = true;
 
     (async () => {
       setState("syncing");
@@ -156,9 +165,6 @@ export function useAdminProductSync(): AdminSyncState {
   const ordersStartedRef = useRef(false);
 
   useEffect(() => {
-    if (ordersStartedRef.current) return;
-    ordersStartedRef.current = true;
-
     const adminAuthed =
       useAdminAuth.getState().isAuthenticated ||
       useCustomerAuth.getState().isAuthenticated;
@@ -196,6 +202,14 @@ export function useAdminProductSync(): AdminSyncState {
     const unsubscribe = useAdminStore.subscribe((s, prev) => {
       if (s.orders !== prev.orders) scheduleOrders();
     });
+
+    if (ordersStartedRef.current) {
+      return () => {
+        unsubscribe();
+        if (orderTimerRef.current) clearTimeout(orderTimerRef.current);
+      };
+    }
+    ordersStartedRef.current = true;
 
     (async () => {
       try {
