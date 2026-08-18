@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { ShopClient } from "@/components/shop/ShopClient";
-import { categories, products } from "@/data/catalog";
+import { categories } from "@/data/catalog";
+import { getCustomerProductsSafe } from "@/lib/serverCatalog";
+
+// Product data must always be read live from the production database —
+// never baked in at build time.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   searchParams,
@@ -35,14 +40,21 @@ export default async function ShopPage({
   searchParams: Promise<{ cat?: string; q?: string; deals?: string; filter?: string; sort?: string }>;
 }) {
   const sp = await searchParams;
+  const live = await getCustomerProductsSafe();
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 mx-auto max-w-[1400px] w-full px-5 md:px-8 py-10 md:py-14">
-        <ShopClient
-          products={products}
-          categories={categories}
-          initial={sp}
-        />
+        {live.ok ? (
+          <ShopClient
+            products={live.products}
+            categories={categories}
+            initial={sp}
+          />
+        ) : (
+          <div className="bg-rose-50 border border-rose-200 text-rose-700 text-sm font-semibold rounded-2xl px-5 py-6 text-center">
+            Unable to load products. Please try again.
+          </div>
+        )}
       </main>
     </div>
   );

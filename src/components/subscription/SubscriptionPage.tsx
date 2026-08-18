@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { Plus, Minus, Calendar, CheckCircle2, Sparkles, Building } from "lucide-react";
-import { subscriptionProducts, type Product } from "@/data/catalog";
+import { type Product } from "@/data/catalog";
 import { useCart, useToasts } from "@/store/shop";
 import { formatINR } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -11,9 +11,12 @@ import { ProductImage } from "@/components/ui/ProductImage";
 
 const DAY_OPTIONS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-export function SubscriptionPage() {
+export function SubscriptionPage({ products }: { products: Product[] | null }) {
   const add = useCart((s) => s.add);
   const push = useToasts((s) => s.push);
+  // Live customer-visible subscription products (server-provided); null = data
+  // source failure → show an error state, never demo products.
+  const subscriptionProducts = products ?? [];
 
   return (
     <div>
@@ -48,6 +51,11 @@ export function SubscriptionPage() {
 
       {/* Products */}
       <h2 className="font-display text-2xl md:text-3xl font-bold text-purple-950 mb-5">Select Regular Produce Items</h2>
+      {products === null && (
+        <div className="bg-rose-50 border border-rose-200 text-rose-700 text-sm font-semibold rounded-2xl px-5 py-6 text-center mb-5">
+          Unable to load products. Please try again.
+        </div>
+      )}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
         {subscriptionProducts.map((p: Product) => (
           <SubscriptionProductCard

@@ -1,16 +1,29 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getProductBySlug, products } from "@/data/catalog";
+import { getCustomerProductBySlugFromDb, getCustomerProductsSafe } from "@/lib/serverCatalog";
 import { ProductDetail } from "@/components/product/ProductDetail";
 import { ProductSection } from "@/components/home/ProductSection";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { formatINR } from "@/lib/utils";
 
+// Every product view is checked live against the production database —
+// a product the Super Admin has deactivated/hidden/deleted returns 404
+// even on an old bookmarked URL.
+export const dynamic = "force-dynamic";
+
 type Params = { params: Promise<{ slug: string }> };
+
+async function loadProduct(slug: string) {
+  try {
+    return await getCustomerProductBySlugFromDb(slug);
+  } catch {
+    return null;
+  }
+}
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const p = getProductBySlug(slug);
+  const p = await loadProduct(slug);
   if (!p) return { title: "Product not found · FlashKart" };
   return {
     title: `${p.name} — ${formatINR(p.weights[0].price)} · FlashKart`,
@@ -23,16 +36,32 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   };
 }
 
-export async function generateStaticParams() {
-  return products.map((p) => ({ slug: p.slug }));
-}
-
 export default async function ProductPage({ params }: Params) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  let product = null;
+  let dbOk = true;
+  try {
+    product = await getCustomerProductBySlugFromDb(slug);
+  } catch {
+    dbOk = false;
+  }
+  if (!dbOk) {
+    // Database briefly unreachable → proper error state, never a 404 and
+    // never fallback/demo product data.
+    return (
+      <div className="min-h-screen flex flex-col">
+        <main className="flex-1 mx-auto max-w-7xl w-full px-5 md:px-8 py-10 md:py-14">
+          <div className="bg-rose-50 border border-rose-200 text-rose-700 text-sm font-semibold rounded-2xl px-5 py-6 text-center">
+            Unable to load this product. Please try again.
+          </div>
+        </main>
+      </div>
+    );
+  }
   if (!product) notFound();
 
-  const related = products
+  const all = await getCustomerProductsSafe();
+  const related = all.products
     .filter((p) => p.category === product.category && p.id !== product.id)
     .slice(0, 4);
 
@@ -47,7 +76,10 @@ export default async function ProductPage({ params }: Params) {
       "@type": "Offer",
       priceCurrency: "INR",
       price: product.weights[0].price,
-      availability: "https://schema.org/InStock",
+      availability:
+        (product.stockGrams ?? product.stock ?? 0) > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
     },
     aggregateRating: {
       "@type": "AggregateRating",
