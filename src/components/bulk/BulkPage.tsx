@@ -2,16 +2,19 @@
 import Image from "next/image";
 import { useState } from "react";
 import { Package, CalendarClock, FileText, Repeat, Building, Hotel, Store, CheckCircle2, PhoneCall } from "lucide-react";
-import { bulkProducts } from "@/data/catalog";
+import { type Product } from "@/data/catalog";
 import { useCart, useToasts } from "@/store/shop";
 import { ProductImage } from "@/components/ui/ProductImage";
 import { formatINR } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-export function BulkPage() {
+export function BulkPage({ products }: { products: Product[] | null }) {
   const add = useCart((s) => s.add);
   const push = useToasts((s) => s.push);
+  // Live customer-visible bulk products (server-provided); null = data source
+  // failure → show an error state, never demo products.
+  const bulkProducts = products ?? [];
   const [date, setDate] = useState(() => {
     const d = new Date(); d.setDate(d.getDate() + 1);
     return d.toISOString().slice(0, 10);
@@ -88,6 +91,11 @@ export function BulkPage() {
       <div className="grid lg:grid-cols-[1fr_340px] gap-8">
         <div id="bulk-catalogue" className="scroll-mt-24">
           <h2 className="font-display text-2xl font-bold text-purple-950 mb-5">Pick Wholesale Items</h2>
+          {products === null && (
+            <div className="bg-rose-50 border border-rose-200 text-rose-700 text-sm font-semibold rounded-2xl px-5 py-6 text-center mb-5">
+              Unable to load products. Please try again.
+            </div>
+          )}
           <div className="grid md:grid-cols-2 gap-4">
             {bulkProducts.map((p) => {
               const w = p.weights.find((w) => w.bulk) ?? p.weights[0];
@@ -168,7 +176,7 @@ function BulkCard({
   unitPrice,
   discount,
 }: {
-  product: (typeof bulkProducts)[number];
+  product: Product;
   onAdd: (qty: number) => void;
   moq: number;
   unitPrice: number;
