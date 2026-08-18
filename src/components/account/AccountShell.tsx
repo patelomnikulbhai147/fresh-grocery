@@ -21,7 +21,7 @@ import { useAdminAuth } from "@/store/adminAuth";
 import { useAdminStore, type AdminOrder } from "@/store/adminStore";
 import { useAddressBook, type SavedAddress } from "@/store/addresses";
 import { useWishlist } from "@/store/shop";
-import { useLiveCatalog } from "@/store/liveCatalog";
+import { products as catalogProducts } from "@/data/catalog";
 import { SuperAdminAccountView } from "@/components/account/SuperAdminAccountView";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -58,14 +58,7 @@ export function AccountShell() {
   const [active, setActive] = useState(initialTab);
   // Persisted stores differ between server render and client — gate on mount
   const [mounted, setMounted] = useState(false);
-  // Wishlist products come from the authoritative customer product API — a
-  // product the admin removed must vanish from the wishlist view too.
-  const catalogProducts = useLiveCatalog((s) => s.products);
-  const fetchCatalog = useLiveCatalog((s) => s.fetchOnce);
-  useEffect(() => {
-    setMounted(true);
-    fetchCatalog();
-  }, [fetchCatalog]);
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (searchParams?.get("tab")) {
@@ -89,7 +82,7 @@ export function AccountShell() {
       )
     : [];
   const myWishlist = mounted
-    ? (catalogProducts ?? []).filter((p) => wishlistIds.includes(p.id))
+    ? catalogProducts.filter((p) => wishlistIds.includes(p.id))
     : [];
   const myAddresses = mounted ? addressBook.forUser(userKey) : [];
 

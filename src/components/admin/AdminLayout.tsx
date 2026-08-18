@@ -36,7 +36,6 @@ import {
 import { useAdminAuth, type AdminRole } from "@/store/adminAuth";
 import { useCustomerAuth } from "@/store/customerAuth";
 import { useAdminStore, productStockInfo } from "@/store/adminStore";
-import { useAdminProductSync } from "@/lib/useAdminProductSync";
 import { GlobalSearchModal } from "./GlobalSearchModal";
 import { cn } from "@/lib/utils";
 
@@ -65,9 +64,6 @@ export function AdminLayout({ children, activeModule, onSelectModule }: AdminLay
   const { user, logout, switchRole, toggle2FA } = useAdminAuth();
   const { logout: customerLogout } = useCustomerAuth();
   const { orders, products, activityLogs } = useAdminStore();
-  // Two-way sync with the server product database — the same data the
-  // customer website reads. Edits here publish automatically.
-  const productSync = useAdminProductSync();
 
   const handleSignOut = () => {
     logout();         // clear adminAuth session
@@ -451,20 +447,6 @@ export function AdminLayout({ children, activeModule, onSelectModule }: AdminLay
                 </span>
               </div>
             </div>
-
-            {/* Product-sync status: edits must reach the live customer site */}
-            {productSync === "unauthorized" && (
-              <div className="mb-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-bold rounded-xl px-4 py-3">
-                Product changes are NOT publishing to the live website — please log in with your
-                admin mobile number (OTP) so changes can sync to the store database.
-              </div>
-            )}
-            {productSync === "error" && (
-              <div className="mb-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-bold rounded-xl px-4 py-3">
-                Could not reach the product database — recent product changes may not be visible
-                to customers yet. Retrying automatically.
-              </div>
-            )}
 
             {/* Dynamic Module Content */}
             <div className="min-h-[70vh]">

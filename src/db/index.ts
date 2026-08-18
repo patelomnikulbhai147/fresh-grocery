@@ -249,13 +249,3 @@ export async function query<T = any>(sql: string, values?: any[]): Promise<T[]> 
 export async function getConnection() {
   return pool.getConnection();
 }
-
-/**
- * The RAW MySQL pool — no in-memory fallback. Product data must never be
- * answered from the dev fallback store (customers would see wrong products);
- * callers get real rows or a real error to surface as an error state.
- */
-export function getMysqlPool(): mysql.Pool {
-  if (!mysqlPool) throw new Error("MySQL pool not initialised");
-  return mysqlPool;
-}

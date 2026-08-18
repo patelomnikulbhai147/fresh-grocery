@@ -1,13 +1,9 @@
 import type { MetadataRoute } from "next";
-import { categories } from "@/data/catalog";
-import { getCustomerProductsSafe } from "@/lib/serverCatalog";
+import { products, categories } from "@/data/catalog";
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://flashkart.co";
   const today = new Date().toISOString();
-  // Only customer-visible products belong in the sitemap — hidden/deleted
-  // products must not be discoverable. DB unavailable → omit product URLs.
-  const live = await getCustomerProductsSafe();
   return [
     { url: base, lastModified: today, changeFrequency: "daily", priority: 1 },
     { url: `${base}/shop`, lastModified: today, changeFrequency: "daily", priority: 0.9 },
@@ -21,7 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily" as const,
       priority: 0.8,
     })),
-    ...live.products.map((p) => ({
+    ...products.map((p) => ({
       url: `${base}/product/${p.slug}`,
       lastModified: today,
       changeFrequency: "weekly" as const,

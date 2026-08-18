@@ -25,16 +25,6 @@ import { cities } from "@/data/catalog";
 const isServiceablePincode = (pin: string): boolean =>
   cities.some((c) => c.live && (c.pincode || []).some((prefix) => pin.startsWith(prefix)));
 
-/** Pack weight in grams for a cart line — falls back to parsing the label
- *  ("500 g", "1 kg") for carts persisted before grams were stored. */
-const lineGrams = (weight: string, grams?: number): number => {
-  if (grams && grams > 0) return Math.round(grams);
-  const m = /([\d.]+)\s*(kg|g)/i.exec(weight || "");
-  if (!m) return 0;
-  const n = parseFloat(m[1]);
-  return Math.round(m[2].toLowerCase() === "kg" ? n * 1000 : n);
-};
-
 type Form = {
   name: string;
   phone: string;
@@ -123,7 +113,7 @@ export function CheckoutForm() {
     : 0;
   const total = Math.max(0, subtotal - couponAmt);
 
-  const onSubmit = async (data: Form) => {
+  const onSubmit = (data: Form) => {
     if (items.length === 0) return;
     // Serviceability: pincode must be inside a live delivery area
     if (!isServiceablePincode(data.pincode.trim())) {
@@ -131,50 +121,8 @@ export function CheckoutForm() {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
+    // Weight-based stock validation happens atomically inside placeCustomerOrder
     setStockError("");
-
-    // BACKEND gate first: the server re-validates every line against the
-    // authoritative product database (product still customer-visible, enough
-    // shared weight stock) and deducts the weight atomically. An inactive
-    // product lingering in an old cart is rejected HERE, whatever the UI said.
-    let gate: any = null;
-    try {
-      const res = await fetch("/api/checkout/place", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: items.map((i) => ({
-            productId: i.productId,
-            name: i.name,
-            grams: lineGrams(i.weight, i.grams),
-            quantity: i.quantity,
-          })),
-        }),
-      });
-      gate = await res.json().catch(() => null);
-      if (!res.ok || !gate?.success) {
-        setStockError(gate?.message || "Could not verify stock right now. Please try again.");
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        return;
-      }
-    } catch {
-      setStockError("Could not verify stock right now. Please try again.");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-
-    // Align the local mirror with the server's pre-order stock so the local
-    // atomic placement below lands on exactly the server's post-order value.
-    if (Array.isArray(gate.products)) {
-      useAdminStore.setState((s) => ({
-        products: s.products.map((p) => {
-          const hit = gate.products.find((x: any) => x.id === p.id);
-          return hit
-            ? { ...p, stockGrams: hit.before, currentStock: hit.before, availableStock: hit.before, stock: hit.before }
-            : p;
-        }),
-      }));
-    }
     const id = `FLK-${Math.floor(Math.random() * 900000 + 100000)}`;
     const now = new Date();
     const order: AdminOrder = {

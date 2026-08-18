@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Flame, Minus, Plus, ShoppingCart } from "lucide-react";
-import { variantAvailable, type Product } from "@/data/catalog";
+import { products, variantAvailable, type Product } from "@/data/catalog";
 import { useCart, useToasts } from "@/store/shop";
 import { ProductImage } from "@/components/ui/ProductImage";
 import { useLiveProduct } from "@/lib/useLiveProduct";
@@ -126,13 +126,12 @@ function useMidnightCountdown() {
   return remaining;
 }
 
-export function DealsOfTheDay({ products }: { products: Product[] | null }) {
+export function DealsOfTheDay() {
   const remaining = useMidnightCountdown();
 
-  // Live customer-visible products only (server-provided). null = API/database
-  // failure → render nothing rather than demo data.
-  const deals = (products ?? [])
-    .filter((p) => p.weights[0] && p.weights[0].mrp > p.weights[0].price && (p.stockGrams ?? p.stock ?? 0) > 0)
+  // Real discounts only: products whose configured MRP is above selling price
+  const deals = products
+    .filter((p) => p.weights[0] && p.weights[0].mrp > p.weights[0].price && p.stock > 0)
     .sort((a, b) => {
       const da = (a.weights[0].mrp - a.weights[0].price) / a.weights[0].mrp;
       const db = (b.weights[0].mrp - b.weights[0].price) / b.weights[0].mrp;
@@ -194,8 +193,8 @@ export function DealsOfTheDay({ products }: { products: Product[] | null }) {
   );
 }
 
-export function BestSellers({ products }: { products: Product[] | null }) {
-  const bestSellers = (products ?? []).filter((p) => p.bestSeller).slice(0, 6);
+export function BestSellers() {
+  const bestSellers = products.filter((p) => p.bestSeller).slice(0, 6);
   if (bestSellers.length === 0) return null;
 
   return (

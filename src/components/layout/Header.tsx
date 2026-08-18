@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { useCart } from "@/store/shop";
 import { useCustomerAuth } from "@/store/customerAuth";
-import { useLiveCatalog } from "@/store/liveCatalog";
+import { products } from "@/data/catalog";
 import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { FlashKartLogo } from "./FlashKartLogo";
@@ -49,18 +49,10 @@ export function Header() {
   const rawItemCount = useCart((s) => s.itemCount());
   const openCart = useCart((s) => s.open);
 
-  // Live customer-visible products from the authoritative product API — search
-  // must never suggest products the Super Admin has deactivated.
-  const liveProducts = useLiveCatalog((s) => s.products);
-  const fetchCatalog = useLiveCatalog((s) => s.fetchOnce);
-
   // Persisted stores (cart, auth) differ between server render and hydration —
   // show their values only after mount so the first client render matches SSR.
   const [hydrated, setHydrated] = useState(false);
-  useEffect(() => {
-    setHydrated(true);
-    fetchCatalog();
-  }, [fetchCatalog]);
+  useEffect(() => setHydrated(true), []);
   const itemCount = hydrated ? rawItemCount : 0;
   const showAuthed = hydrated && isAuthenticated;
 
@@ -82,7 +74,7 @@ export function Header() {
   }, []);
 
   const suggestions = query.trim()
-    ? (liveProducts ?? [])
+    ? products
         .filter((p) =>
           (p.name + " " + p.subcategory + " " + p.category)
             .toLowerCase()

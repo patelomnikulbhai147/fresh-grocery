@@ -2,11 +2,7 @@ import { Hero } from "@/components/home/Hero";
 import { CategoryShowcase } from "@/components/home/CategoryShowcase";
 import { BestSellers, DealsOfTheDay } from "@/components/home/BestSellers";
 import { WhyFlashKart, BusinessCta, PromoBanners } from "@/components/home/WhyFlashKartCta";
-import { getCustomerProductsSafe } from "@/lib/serverCatalog";
 import type { Metadata } from "next";
-
-// Homepage product sections read live from the production database.
-export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "FlashKart | Two Ways to Shop. One Trusted Partner.",
@@ -15,9 +11,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://flashkart.co" },
 };
 
-export default async function HomePage() {
-  const live = await getCustomerProductsSafe();
-  const products = live.ok ? live.products : null;
+export default function HomePage() {
   return (
     <div className="relative min-h-screen bg-[#fafafa] text-slate-900 flex flex-col font-sans selection:bg-[#067a46] selection:text-white">
       <main className="flex-1">
@@ -28,10 +22,10 @@ export default async function HomePage() {
         <CategoryShowcase />
 
         {/* 3. Deals of the Day (real configured discounts, countdown to midnight) */}
-        <DealsOfTheDay products={products} />
+        <DealsOfTheDay />
 
-        {/* 4. Best Selling Products (live admin-managed catalog) */}
-        <BestSellers products={products} />
+        {/* 4. Best Selling Products (real catalog best sellers) */}
+        <BestSellers />
 
         {/* 5. Promo banners (real FRESH20 coupon + business value) */}
         <PromoBanners />
