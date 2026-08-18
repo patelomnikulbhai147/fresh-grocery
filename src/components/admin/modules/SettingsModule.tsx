@@ -4,6 +4,7 @@ import { Settings, Save, ShieldCheck, Mail, Phone, Globe, DollarSign, Bell, Aler
 import { useAdminAuth } from "@/store/adminAuth";
 import { useToasts } from "@/store/shop";
 import { cn } from "@/lib/utils";
+import { FEE_CONFIG } from "@/lib/fees";
 
 export function SettingsModule() {
   const { hasPermission } = useAdminAuth();
@@ -61,6 +62,34 @@ export function SettingsModule() {
           {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           <span>Save Settings</span>
         </button>
+      </div>
+
+      {/* Checkout Fee Structure — the single source of truth (lib/fees.ts).
+          The customer cart/checkout and the backend order calculation all read
+          these exact values. Read-only for now. */}
+      <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-brand-100 dark:border-zinc-800 shadow-soft space-y-4">
+        <h3 className="font-display font-bold text-base text-brand-950 dark:text-zinc-100 flex items-center gap-2 border-b border-brand-100 dark:border-zinc-800 pb-3">
+          <DollarSign className="w-4 h-4 text-brand-600" /> Checkout Fee Structure
+        </h3>
+        <p className="text-[11px] text-brand-600 dark:text-zinc-400 -mt-1">
+          Applied to every customer order. The backend recalculates each order using these exact values.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          {[
+            { label: "Delivery Fee", value: `₹${FEE_CONFIG.deliveryFee}` },
+            { label: "Free Delivery Above", value: `₹${FEE_CONFIG.freeDeliveryThreshold}` },
+            { label: "Handling Fee", value: `₹${FEE_CONFIG.handlingFee}` },
+            { label: "Convenience Fee", value: `₹${FEE_CONFIG.convenienceFee}` },
+          ].map((f) => (
+            <div key={f.label} className="bg-brand-50/70 dark:bg-zinc-800 border border-brand-100 dark:border-zinc-700 rounded-2xl p-4">
+              <div className="text-[11px] font-semibold text-brand-600 dark:text-zinc-400">{f.label}</div>
+              <div className="font-display font-black text-xl text-brand-950 dark:text-zinc-100 mt-1">{f.value}</div>
+            </div>
+          ))}
+        </div>
+        <div className="text-[11px] text-brand-500 dark:text-zinc-500">
+          Delivery is free when the items total is above ₹{FEE_CONFIG.freeDeliveryThreshold} (₹{FEE_CONFIG.freeDeliveryThreshold} exactly still pays ₹{FEE_CONFIG.deliveryFee}).
+        </div>
       </div>
 
       <form onSubmit={handleSave} className="space-y-6 text-xs">

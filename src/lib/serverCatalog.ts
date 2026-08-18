@@ -1,5 +1,6 @@
 import { catalogAll, catalogRun, catalogBatch, dbDialect } from "@/db/index";
 import { formatWeight } from "@/lib/utils";
+import { computeOrderCharges } from "@/lib/fees";
 import {
   buildInitialAdminProducts,
   isCustomerVisibleStatus,
@@ -301,13 +302,29 @@ export async function syncAdminProducts(
 export type PlaceOrderItem = {
   productId: string;
   name?: string;
-  /** pack weight in grams */
+  /** pack weight in grams (identifies the variant) */
   grams: number;
   quantity: number;
+  /** variant label ("500 g") — helps match the variant when grams collide */
+  label?: string;
 };
 
 export type PlaceOrderResult =
-  | { success: true; products: { id: string; before: number; after: number }[] }
+  | {
+      success: true;
+      products: { id: string; before: number; after: number }[];
+      /** Server-authoritative money breakdown (the payable amount). */
+      charges: {
+        subtotal: number;
+        deliveryFee: number;
+        handlingFee: number;
+        convenienceFee: number;
+        couponDiscount: number;
+        mrpSavings: number;
+        total: number;
+        freeDelivery: boolean;
+      };
+    }
   | { success: false; message: string };
 
 /** Recompute a product's Active/Out-of-Stock status after its stock changed. */
@@ -365,6 +382,8 @@ export async function placeOrderStock(
 
   const deducted: { id: string; grams: number }[] = [];
   const results: { id: string; before: number; after: number }[] = [];
+  // Server-side product data (name + weights) for authoritative pricing.
+  const productData = new Map<string, { name: string; weights: any[] }>();
 
   const compensate = async () => {
     for (const d of deducted) {
@@ -378,7 +397,7 @@ export async function placeOrderStock(
 
   for (const [productId, want] of wanted) {
     const rows = await catalogAll(
-      `SELECT id, name, status, deleted, stock_grams FROM store_products WHERE id = ?`,
+      `SELECT id, name, status, deleted, stock_grams, data FROM store_products WHERE id = ?`,
       [productId]
     );
     const row = rows[0];
@@ -386,6 +405,12 @@ export async function placeOrderStock(
     if (!row || row.deleted || !isCustomerVisibleStatus(row.status)) {
       await compensate();
       return { success: false, message: `${label} is no longer available. Please remove it from your basket.` };
+    }
+    try {
+      const parsed = JSON.parse(row.data);
+      productData.set(productId, { name: row.name, weights: Array.isArray(parsed?.weights) ? parsed.weights : [] });
+    } catch {
+      productData.set(productId, { name: row.name, weights: [] });
     }
     const available = Math.max(0, Number(row.stock_grams) || 0);
     if (row.status === "Out of Stock" || available < want.grams) {
@@ -420,10 +445,53 @@ export async function placeOrderStock(
     await fixProductStatus(r.id);
   }
 
-  // Store the order server-side (authoritative order record).
+  // ── SERVER-AUTHORITATIVE PRICING ──
+  // Price every line from the DB variant (selling price + MRP), never from the
+  // browser. Subtotal drives the fee structure; the server computes the total.
+  let subtotal = 0;
+  let mrpTotal = 0;
+  const pricedItems = items.map((it) => {
+    const pd = productData.get(it.productId);
+    const grams = Math.max(1, Math.round(Number(it.grams) || 0));
+    const qty = Math.max(1, Math.round(Number(it.quantity) || 0));
+    const variant = pickVariant(pd?.weights ?? [], grams, it.label);
+    const price = Math.max(0, Math.round(Number(variant?.price) || 0));
+    const mrp = Math.max(price, Math.round(Number(variant?.mrp) || price));
+    subtotal += price * qty;
+    mrpTotal += mrp * qty;
+    return {
+      productId: it.productId,
+      name: it.name ?? pd?.name ?? "Product",
+      weight: it.label ?? variant?.label ?? `${grams} g`,
+      price,
+      mrp,
+      quantity: qty,
+      packGrams: grams,
+      totalGrams: grams * qty,
+    };
+  });
+
+  // Coupon discount is taken from the (browser-validated) order but capped to
+  // subtotal; fees are 100% server-computed.
+  const couponDiscount = Math.max(0, Math.round(Number(order?.discount) || 0));
+  const charges = computeOrderCharges(subtotal, couponDiscount);
+  const mrpSavings = Math.max(0, mrpTotal - subtotal);
+
+  // Store the order server-side with the AUTHORITATIVE breakdown.
   if (order && typeof order.id === "string" && order.id) {
     try {
-      const stamped = stampOrderItems(order, items);
+      const authoritative: AdminOrder = {
+        ...order,
+        items: pricedItems as any,
+        subtotal: charges.subtotal,
+        discount: charges.couponDiscount,
+        deliveryFee: charges.deliveryFee,
+        handlingFee: charges.handlingFee,
+        convenienceFee: charges.convenienceFee,
+        mrpSavings,
+        tax: 0,
+        total: charges.total,
+      };
       await catalogRun(
         `INSERT INTO store_orders (id, customer_id, customer_phone, customer_email, status, stock_restored, total, data)
          VALUES (?, ?, ?, ?, ?, 0, ?, ?)`,
@@ -433,8 +501,8 @@ export async function placeOrderStock(
           (order as any).customerPhone ?? null,
           (order as any).customerEmail ?? null,
           order.status || "Pending",
-          Math.max(0, Math.round(Number((order as any).total) || 0)),
-          JSON.stringify(stamped),
+          charges.total,
+          JSON.stringify(authoritative),
         ]
       );
     } catch (err: any) {
@@ -444,21 +512,36 @@ export async function placeOrderStock(
     }
   }
 
-  return { success: true, products: results };
+  return {
+    success: true,
+    products: results,
+    charges: {
+      subtotal: charges.subtotal,
+      deliveryFee: charges.deliveryFee,
+      handlingFee: charges.handlingFee,
+      convenienceFee: charges.convenienceFee,
+      couponDiscount: charges.couponDiscount,
+      mrpSavings,
+      total: charges.total,
+      freeDelivery: charges.freeDelivery,
+    },
+  };
 }
 
-/** Stamp pack weights onto order items (same index order as the cart lines). */
-function stampOrderItems(order: AdminOrder, items: PlaceOrderItem[]): AdminOrder {
-  const stampedItems = (order.items || []).map((oi: any, idx: number) => {
-    const src =
-      items[idx] && items[idx].productId === oi.productId
-        ? items[idx]
-        : items.find((x) => x.productId === oi.productId);
-    if (!src) return oi;
-    const packGrams = Math.max(1, Math.round(Number(src.grams) || 0));
-    return { ...oi, packGrams, totalGrams: packGrams * Math.max(1, Number(oi.quantity) || 1) };
-  });
-  return { ...order, items: stampedItems };
+/** Match a cart line to its product variant — by exact grams, then label. */
+function pickVariant(weights: any[], grams: number, label?: string): any | null {
+  if (!Array.isArray(weights) || weights.length === 0) return null;
+  const byGrams = weights.find((w) => Math.round(Number(w.grams) || 0) === grams);
+  if (byGrams) return byGrams;
+  if (label) {
+    const byLabel = weights.find((w) => String(w.label) === label);
+    if (byLabel) return byLabel;
+  }
+  // closest grams as a last resort
+  return weights.reduce((best, w) => {
+    const d = Math.abs((Number(w.grams) || 0) - grams);
+    return !best || d < best.d ? { w, d } : best;
+  }, null as any)?.w ?? weights[0];
 }
 
 // ──────────────────────── Orders ────────────────────────

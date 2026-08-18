@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
       name: typeof i.name === "string" ? i.name.slice(0, 120) : undefined,
       grams: Number(i.grams) || 0,
       quantity: Number(i.quantity) || 0,
+      label: typeof i.label === "string" ? i.label.slice(0, 40) : undefined,
     }))
     .filter((i) => i.grams > 0 && i.quantity > 0);
 

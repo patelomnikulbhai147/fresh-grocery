@@ -148,6 +148,12 @@ export interface AdminOrder {
   subtotal: number;
   discount: number;
   deliveryFee: number;
+  /** Fixed handling fee at purchase time (₹5). Optional for legacy orders. */
+  handlingFee?: number;
+  /** Fixed convenience fee at purchase time (₹5). Optional for legacy orders. */
+  convenienceFee?: number;
+  /** Savings vs MRP at purchase time. Optional for legacy orders. */
+  mrpSavings?: number;
   tax: number;
   total: number;
   status: OrderStatus;

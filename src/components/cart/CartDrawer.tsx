@@ -6,6 +6,7 @@ import { X, Plus, Minus, Trash2, Tag, ArrowRight, Sparkles, Package, Building } 
 import { useCart } from "@/store/shop";
 import { formatINR, formatWeight } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { computeOrderCharges, freeDeliveryHint } from "@/lib/fees";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCustomerAuth } from "@/store/customerAuth";
@@ -30,7 +31,11 @@ export function CartDrawer() {
   const discount = useCart((s) => s.discount());
   const [tab, setTab] = useState<DeliveryMode | "all">("all");
 
-  const total = subtotal;
+  // Same fee source of truth as checkout — the cart preview shows the fees
+  // that will apply; the server remains authoritative at order time.
+  const charges = computeOrderCharges(subtotal);
+  const total = charges.total;
+  const freeHint = freeDeliveryHint(subtotal);
 
   const visible = tab === "all" ? items : items.filter((i) => i.mode === tab);
   const counts = {
@@ -172,13 +177,34 @@ export function CartDrawer() {
 
             {/* Footer */}
             {items.length > 0 && (
-              <div className="p-5 border-t border-slate-100 bg-white space-y-3">
+              <div className="p-5 border-t border-slate-100 bg-white space-y-2">
                 <div className="flex justify-between text-xs text-slate-600">
-                  <span>Subtotal</span>
+                  <span>Items Total</span>
                   <span className="font-bold text-slate-900">{formatINR(subtotal)}</span>
                 </div>
+                <div className="flex justify-between text-xs text-slate-600">
+                  <span>Delivery Fee</span>
+                  {charges.freeDelivery ? (
+                    <span className="font-bold text-[#067a46]">FREE</span>
+                  ) : (
+                    <span className="font-bold text-slate-900">{formatINR(charges.deliveryFee)}</span>
+                  )}
+                </div>
+                <div className="flex justify-between text-xs text-slate-600">
+                  <span>Handling Fee</span>
+                  <span className="font-bold text-slate-900">{formatINR(charges.handlingFee)}</span>
+                </div>
+                <div className="flex justify-between text-xs text-slate-600">
+                  <span>Convenience Fee</span>
+                  <span className="font-bold text-slate-900">{formatINR(charges.convenienceFee)}</span>
+                </div>
+                {freeHint && (
+                  <div className="text-[11px] font-bold text-[#067a46] bg-emerald-50 rounded-lg px-2.5 py-1.5">
+                    {freeHint}
+                  </div>
+                )}
                 <div className="flex justify-between text-sm font-black text-slate-900 pt-2 border-t border-slate-100">
-                  <span>Total Amount</span>
+                  <span>Total</span>
                   <span className="text-lg">{formatINR(total)}</span>
                 </div>
 

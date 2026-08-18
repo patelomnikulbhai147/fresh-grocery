@@ -20,6 +20,7 @@ import { useAdminStore, type AdminOrder } from "@/store/adminStore";
 import { useCustomerAuth } from "@/store/customerAuth";
 import { useAddressBook } from "@/store/addresses";
 import { cities } from "@/data/catalog";
+import { computeOrderCharges, freeDeliveryHint } from "@/lib/fees";
 
 /** Serviceability from the live city configuration (same source as the pincode checker). */
 const isServiceablePincode = (pin: string): boolean =>
@@ -121,7 +122,12 @@ export function CheckoutForm() {
         )
       : Math.min(matchedCoupon.discountValue, matchedCoupon.maxDiscountCap || matchedCoupon.discountValue)
     : 0;
-  const total = Math.max(0, subtotal - couponAmt);
+
+  // Fee structure — single source of truth (lib/fees). The server re-computes
+  // the SAME way and is authoritative on the payable amount; this is display.
+  const charges = computeOrderCharges(subtotal, couponAmt);
+  const total = charges.total;
+  const freeHint = freeDeliveryHint(subtotal);
 
   const onSubmit = async (data: Form) => {
     if (items.length === 0) return;
@@ -155,7 +161,9 @@ export function CheckoutForm() {
       })),
       subtotal,
       discount: couponAmt,
-      deliveryFee: 0,
+      deliveryFee: charges.deliveryFee,
+      handlingFee: charges.handlingFee,
+      convenienceFee: charges.convenienceFee,
       tax: 0,
       total,
       status: "Pending",
@@ -182,6 +190,7 @@ export function CheckoutForm() {
             name: i.name,
             grams: lineGrams(i.weight, i.grams),
             quantity: i.quantity,
+            label: i.weight,
           })),
           order,
         }),
@@ -196,6 +205,18 @@ export function CheckoutForm() {
       setStockError("Could not verify stock right now. Please try again.");
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
+    }
+
+    // The SERVER is authoritative on the payable amount — overwrite the order's
+    // money fields with the server-computed breakdown before recording it.
+    if (gate.charges) {
+      order.subtotal = gate.charges.subtotal;
+      order.discount = gate.charges.couponDiscount;
+      order.deliveryFee = gate.charges.deliveryFee;
+      order.handlingFee = gate.charges.handlingFee;
+      order.convenienceFee = gate.charges.convenienceFee;
+      order.mrpSavings = gate.charges.mrpSavings;
+      order.total = gate.charges.total;
     }
 
     // Align the local mirror with the server's pre-order stock so the local
@@ -456,17 +477,42 @@ export function CheckoutForm() {
 
             <div className="space-y-2 pt-2 border-t border-slate-100 text-xs">
               <div className="flex justify-between text-slate-600">
-                <span>Subtotal</span>
+                <span>Items Total</span>
                 <span className="font-bold text-slate-900">{formatINR(subtotal)}</span>
               </div>
               {couponAmt > 0 && (
                 <div className="flex justify-between text-[#067a46] font-bold">
-                  <span>Discount</span>
+                  <span>Coupon Discount</span>
                   <span>- {formatINR(couponAmt)}</span>
                 </div>
               )}
+              <div className="flex justify-between text-slate-600">
+                <span>Delivery Fee</span>
+                {charges.freeDelivery ? (
+                  <span className="font-bold text-[#067a46]">FREE</span>
+                ) : (
+                  <span className="font-bold text-slate-900">{formatINR(charges.deliveryFee)}</span>
+                )}
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Handling Fee</span>
+                <span className="font-bold text-slate-900">{formatINR(charges.handlingFee)}</span>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Convenience Fee</span>
+                <span className="font-bold text-slate-900">{formatINR(charges.convenienceFee)}</span>
+              </div>
+              {freeHint ? (
+                <div className="text-[11px] font-bold text-[#067a46] bg-emerald-50 rounded-lg px-2.5 py-1.5">
+                  {freeHint}
+                </div>
+              ) : (
+                <div className="text-[11px] font-bold text-[#067a46] bg-emerald-50 rounded-lg px-2.5 py-1.5">
+                  🎉 FREE delivery unlocked
+                </div>
+              )}
               <div className="flex justify-between text-base font-black text-slate-900 pt-3 border-t border-slate-100">
-                <span>Total Amount</span>
+                <span>Total</span>
                 <span>{formatINR(total)}</span>
               </div>
             </div>
