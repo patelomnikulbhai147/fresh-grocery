@@ -1277,6 +1277,19 @@ export const useAdminStore = create<AdminStoreState>()(
     {
       name: "flashkart-admin-store-v1",
       version: 2,
+      // Products and orders are SERVER-authoritative — pulled fresh from the
+      // database on every admin load (useAdminProductSync). Persisting them to
+      // localStorage is redundant AND dangerous: admin-uploaded photos are
+      // stored as base64 inside each product, and 18+ products easily exceed
+      // the ~5 MB localStorage quota, which used to throw QuotaExceededError
+      // and break "Save Changes". So we persist everything EXCEPT products and
+      // orders; the in-memory seed shows instantly, then the server data loads.
+      partialize: (s) => {
+        // Omit products & orders from what's written to localStorage. Cast to
+        // the state type so zustand's persist generics stay intact.
+        const { products, orders, ...rest } = s;
+        return rest as unknown as AdminStoreState;
+      },
       // v0 → v1: normalize per-variant pack counts (shared pool split, total preserved).
       // v1 → v2: WEIGHT-BASED inventory — pack counts were counts of packs, so the
       // physical stock is Σ (pack count × pack weight in grams). One shared gram pool
