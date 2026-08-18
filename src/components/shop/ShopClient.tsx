@@ -37,6 +37,16 @@ export function ShopClient({ products, categories, initial }: Props) {
   const adminCategories = useAdminStore((s) => s.categories);
   const displayCategories = adminCategories && adminCategories.length > 0 ? adminCategories : categories;
 
+  // Real per-category counts from the live customer-visible products (the same
+  // list shown in the grid), so the sidebar numbers match what's actually there.
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const p of products) {
+      counts[p.category] = (counts[p.category] ?? 0) + 1;
+    }
+    return counts;
+  }, [products]);
+
   const filtered = useMemo(() => {
     let list = products;
     if (cat !== "all") list = list.filter((p) => p.category === cat);
@@ -185,7 +195,7 @@ export function ShopClient({ products, categories, initial }: Props) {
                   >
                     <span className="truncate">{c.name}</span>
                     <span className={cat === c.slug ? "text-emerald-100 font-bold" : "text-slate-400"}>
-                      {c.count}
+                      {categoryCounts[c.slug] ?? 0}
                     </span>
                   </button>
                 ))}
