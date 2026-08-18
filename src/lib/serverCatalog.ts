@@ -179,6 +179,31 @@ export async function getAdminProductsFromDb(): Promise<AdminProduct[]> {
 }
 
 /**
+ * Admin-uploaded photos are stored as data URIs inside the product JSON.
+ * Embedding them into pages/API responses made pages weigh megabytes, so all
+ * CUSTOMER-facing reads replace them with small, immutable image URLs served
+ * by /api/product-image/{id}. The admin panel keeps the raw data URIs (it
+ * needs them for editing, and its push must store them back unchanged).
+ */
+function imageUrl(id: string, idx: number, ver: string): string {
+  return `/api/product-image/${encodeURIComponent(id)}?i=${idx}&v=${ver}`;
+}
+
+function customerizeImages<T extends AdminProduct>(p: T, updatedAt: any): T {
+  const ver = String(new Date(updatedAt ?? 0).getTime() || 0);
+  const isData = (s: any) => typeof s === "string" && s.startsWith("data:");
+  const gallery = Array.isArray(p.gallery)
+    ? p.gallery.map((g: string, i: number) => (isData(g) ? imageUrl(p.id, i, ver) : g))
+    : p.gallery;
+  return {
+    ...p,
+    image: isData(p.image) ? imageUrl(p.id, -1, ver) : p.image,
+    gallery,
+    ogImage: isData((p as any).ogImage) ? imageUrl(p.id, -1, ver) : (p as any).ogImage,
+  };
+}
+
+/**
  * Customer-eligible products ONLY (backend visibility filter):
  * not deleted, status Active or Out of Stock. A product whose status is
  * "Out of Stock" is forced to 0 grams so no pack size is orderable.
@@ -186,15 +211,37 @@ export async function getAdminProductsFromDb(): Promise<AdminProduct[]> {
 export async function getCustomerProductsFromDb(): Promise<Product[]> {
   await ensureReady();
   const rows = await catalogAll(
-    `SELECT id, slug, name, status, deleted, stock_grams, pos, data
+    `SELECT id, slug, name, status, deleted, stock_grams, pos, data, updated_at
      FROM store_products
      WHERE deleted = 0 AND status IN ('Active', 'Out of Stock')
      ORDER BY pos ASC, name ASC`
   );
   return rows
-    .map(rowToProduct)
+    .map((row) => {
+      const p = rowToProduct(row);
+      return p ? customerizeImages(p, row.updated_at) : null;
+    })
     .filter((p): p is AdminProduct => p !== null)
     .map((p) => (p.status === "Out of Stock" ? { ...p, stockGrams: 0, stock: 0 } : p));
+}
+
+/** One image (main or gallery index) for /api/product-image — raw stored value. */
+export async function getProductImageFromDb(productId: string, idx: number): Promise<string | null> {
+  await ensureReady();
+  const rows = await catalogAll(
+    `SELECT data FROM store_products WHERE id = ? AND deleted = 0`,
+    [productId]
+  );
+  if (!rows[0]) return null;
+  try {
+    const parsed = JSON.parse(rows[0].data);
+    if (idx >= 0 && Array.isArray(parsed.gallery) && parsed.gallery[idx]) {
+      return String(parsed.gallery[idx]);
+    }
+    return parsed.image ? String(parsed.image) : null;
+  } catch {
+    return null;
+  }
 }
 
 /**
