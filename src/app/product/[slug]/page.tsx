@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { cache } from "react";
 import { notFound } from "next/navigation";
-import { getCustomerProductBySlugFromDb, getCustomerProductsSafe } from "@/lib/serverCatalog";
+import { getCustomerProductBySlugFromDb, getCustomerRelatedProductsFromDb } from "@/lib/serverCatalog";
 import { ProductDetail } from "@/components/product/ProductDetail";
 import { ProductSection } from "@/components/home/ProductSection";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -57,10 +57,9 @@ export default async function ProductPage({ params }: Params) {
   }
   if (!product) notFound();
 
-  const all = await getCustomerProductsSafe();
-  const related = all.products
-    .filter((p) => p.category === product.category && p.id !== product.id)
-    .slice(0, 4);
+  // Keep this bounded. Loading the full catalog here parses every stored
+  // product image in the Worker, which was the remaining 1102 pressure point.
+  const related = await getCustomerRelatedProductsFromDb(product.category, product.id).catch(() => []);
 
   const schema = {
     "@context": "https://schema.org",

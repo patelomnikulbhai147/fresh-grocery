@@ -282,6 +282,43 @@ export async function getCustomerProductBySlugFromDb(slug: string): Promise<Prod
   return (c.status === "Out of Stock" ? { ...c, stockGrams: 0, stock: 0 } : c) as Product;
 }
 
+/**
+ * The small related-products set shown on a product page.  Do this filtering
+ * in the database instead of loading and parsing every product record (each
+ * can contain a large admin-uploaded image) in the Worker just to render four
+ * cards.  `category` remains part of the existing product JSON so this needs
+ * no schema/data migration.
+ */
+export async function getCustomerRelatedProductsFromDb(
+  category: string | undefined,
+  excludeId: string
+): Promise<Product[]> {
+  if (!category) return [];
+  await ensureReady();
+  const categorySql =
+    dbDialect() === "sqlite"
+      ? "json_extract(data, '$.category') = ?"
+      : "JSON_UNQUOTE(JSON_EXTRACT(data, '$.category')) = ?";
+  const rows = await catalogAll(
+    `SELECT id, slug, name, status, deleted, stock_grams, pos, data, updated_at
+     FROM store_products
+     WHERE deleted = 0
+       AND status IN ('Active', 'Out of Stock')
+       AND id <> ?
+       AND ${categorySql}
+     ORDER BY pos ASC, name ASC
+     LIMIT 4`,
+    [excludeId, category]
+  );
+  return rows
+    .map((row) => {
+      const p = rowToProduct(row);
+      return p ? customerizeImages(p, row.updated_at) : null;
+    })
+    .filter((p): p is AdminProduct => p !== null)
+    .map((p) => (p.status === "Out of Stock" ? { ...p, stockGrams: 0, stock: 0 } : p));
+}
+
 export async function getMeta(key: string): Promise<string | null> {
   await ensureReady();
   const rows = await catalogAll<{ v: string }>(`SELECT v FROM store_meta WHERE k = ?`, [key]);
