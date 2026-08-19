@@ -4,13 +4,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Sprout } from "lucide-react";
 
 /**
- * Seasonal Vegetables — promotional banner carousel.
+ * Seasonal Vegetables — a multi-card auto-scrolling carousel.
  *
- * Displays the 5 seasonal promo banners (full artwork, never cropped) with
- * auto-advance, prev/next, dot indicators, swipe on touch, keyboard arrows,
- * and pause-on-interaction. Pure promotional banners — they intentionally do
- * NOT link to product pages (no fake product records are created for seasonal
- * items that may not exist in the live catalog).
+ * Shows 2–3 small promo cards at once (responsive) and auto-advances one card
+ * at a time, looping seamlessly. Prev/next, dots, touch swipe, keyboard arrows,
+ * pause-on-interaction. Pure promotional banners — no fake product records.
  */
 type Slide = { key: string; src: string; alt: string };
 
@@ -22,23 +20,58 @@ const SLIDES: Slide[] = [
   { key: "palak", src: "/images/seasonal/palak.jpg", alt: "Fresh Palak (Spinach / Palak) — Season's Pick" },
 ];
 
-const INTERVAL = 5000;
+const INTERVAL = 3200;
+const COUNT = SLIDES.length;
+
+/** How many cards are visible at once (responsive). */
+function usePerView() {
+  const [pv, setPv] = useState(3);
+  useEffect(() => {
+    const calc = () => {
+      const w = window.innerWidth;
+      setPv(w >= 1024 ? 3 : w >= 640 ? 2 : 1);
+    };
+    calc();
+    window.addEventListener("resize", calc);
+    return () => window.removeEventListener("resize", calc);
+  }, []);
+  return pv;
+}
 
 export function SeasonalBannerCarousel() {
+  const perView = usePerView();
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
-  const count = SLIDES.length;
+  const [animate, setAnimate] = useState(true);
 
-  const go = useCallback((next: number) => setIndex(((next % count) + count) % count), [count]);
-  const prev = useCallback(() => go(index - 1), [go, index]);
-  const next = useCallback(() => go(index + 1), [go, index]);
+  // Duplicate the list so the track always has cards to its right — the loop
+  // resets invisibly once we scroll one full set forward.
+  const cards = [...SLIDES, ...SLIDES];
 
-  // Auto-advance — paused on hover/focus/touch interaction.
+  const next = useCallback(() => setIndex((i) => i + 1), []);
+  const prev = useCallback(() => setIndex((i) => (i <= 0 ? COUNT - 1 : i - 1)), []);
+
+  // Auto-advance — paused on hover/focus/touch.
   useEffect(() => {
     if (paused) return;
-    const id = setInterval(() => setIndex((i) => (i + 1) % count), INTERVAL);
+    const id = setInterval(() => setIndex((i) => i + 1), INTERVAL);
     return () => clearInterval(id);
-  }, [paused, count]);
+  }, [paused]);
+
+  // Seamless loop: after the transition that lands us on the duplicated set,
+  // snap back by one set with animation off, then re-enable it.
+  const onTransitionEnd = () => {
+    if (index >= COUNT) {
+      setAnimate(false);
+      setIndex((i) => i - COUNT);
+    }
+  };
+  useEffect(() => {
+    if (!animate) {
+      const raf = requestAnimationFrame(() => setAnimate(true));
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [animate]);
 
   // Touch swipe
   const touchX = useRef<number | null>(null);
@@ -55,19 +88,22 @@ export function SeasonalBannerCarousel() {
     setPaused(false);
   };
 
+  const activeDot = ((index % COUNT) + COUNT) % COUNT;
+  const cardBasis = 100 / perView;
+
   return (
     <section className="mb-8" aria-roledescription="carousel" aria-label="Seasonal Vegetables">
-      <div className="mx-auto w-full max-w-md sm:max-w-lg md:max-w-xl flex items-center gap-2 mb-3">
+      <div className="flex items-center gap-2 mb-3">
         <span className="w-7 h-7 rounded-lg bg-emerald-50 text-[#067a46] border border-emerald-100 grid place-items-center shrink-0">
           <Sprout className="w-4 h-4" />
         </span>
-        <h2 className="font-display font-extrabold text-base sm:text-lg text-[#2b1a4e]">
+        <h2 className="font-display font-extrabold text-lg sm:text-xl md:text-2xl text-[#2b1a4e]">
           Seasonal Vegetables
         </h2>
       </div>
 
       <div
-        className="relative mx-auto w-full max-w-md sm:max-w-lg md:max-w-xl aspect-[21/10] overflow-hidden rounded-xl ring-1 ring-emerald-900/10 bg-[#eef6e0] shadow-sm select-none"
+        className="relative select-none"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         onFocusCapture={() => setPaused(true)}
@@ -76,32 +112,37 @@ export function SeasonalBannerCarousel() {
         onTouchEnd={onTouchEnd}
         tabIndex={0}
         role="group"
-        aria-label={`Slide ${index + 1} of ${count}`}
+        aria-label={`Seasonal slide ${activeDot + 1} of ${COUNT}`}
         onKeyDown={(e) => {
           if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
           if (e.key === "ArrowRight") { e.preventDefault(); next(); }
         }}
       >
-        {/* Sliding track */}
-        <div
-          className="flex h-full transition-transform duration-500 ease-out"
-          style={{ transform: `translateX(-${index * 100}%)` }}
-        >
-          {SLIDES.map((s, i) => (
-            <div key={s.key} className="w-full h-full shrink-0 grow-0 basis-full" aria-hidden={i !== index}>
-              {/* object-contain preserves the full banner (logo + text + product)
-                  — never cropped or distorted; the soft green matte blends with
-                  the banner's own light background. Eager: only 5 banners, and
-                  they must be ready so sliding never flashes blank. */}
-              <img
-                src={s.src}
-                alt={s.alt}
-                loading="eager"
-                draggable={false}
-                className="w-full h-full object-contain"
-              />
-            </div>
-          ))}
+        <div className="overflow-hidden">
+          {/* Sliding track — moves one card at a time */}
+          <div
+            className="flex ease-out"
+            style={{
+              transform: `translateX(-${index * cardBasis}%)`,
+              transition: animate ? "transform 500ms" : "none",
+            }}
+            onTransitionEnd={onTransitionEnd}
+          >
+            {cards.map((s, i) => (
+              <div key={`${s.key}-${i}`} style={{ flex: `0 0 ${cardBasis}%` }} className="px-1.5">
+                <div className="aspect-[21/10] rounded-xl overflow-hidden ring-1 ring-emerald-900/10 bg-[#eef6e0] shadow-sm">
+                  {/* object-contain preserves the full banner — never cropped. */}
+                  <img
+                    src={s.src}
+                    alt={s.alt}
+                    loading="eager"
+                    draggable={false}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Prev / Next */}
@@ -109,7 +150,7 @@ export function SeasonalBannerCarousel() {
           type="button"
           onClick={prev}
           aria-label="Previous slide"
-          className="absolute left-1.5 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 grid place-items-center rounded-full bg-white/85 hover:bg-white text-slate-800 shadow-md backdrop-blur-sm transition active:scale-95"
+          className="absolute -left-1 sm:left-1 top-1/2 -translate-y-1/2 w-8 h-8 grid place-items-center rounded-full bg-white/90 hover:bg-white text-slate-800 shadow-md backdrop-blur-sm transition active:scale-95 z-10"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
@@ -117,22 +158,22 @@ export function SeasonalBannerCarousel() {
           type="button"
           onClick={next}
           aria-label="Next slide"
-          className="absolute right-1.5 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 grid place-items-center rounded-full bg-white/85 hover:bg-white text-slate-800 shadow-md backdrop-blur-sm transition active:scale-95"
+          className="absolute -right-1 sm:right-1 top-1/2 -translate-y-1/2 w-8 h-8 grid place-items-center rounded-full bg-white/90 hover:bg-white text-slate-800 shadow-md backdrop-blur-sm transition active:scale-95 z-10"
         >
           <ChevronRight className="w-4 h-4" />
         </button>
 
         {/* Dots */}
-        <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+        <div className="mt-3 flex items-center justify-center gap-1.5">
           {SLIDES.map((s, i) => (
             <button
               key={s.key}
               type="button"
-              onClick={() => go(i)}
+              onClick={() => setIndex(i)}
               aria-label={`Go to slide ${i + 1}`}
-              aria-current={i === index}
+              aria-current={i === activeDot}
               className={`h-1.5 rounded-full transition-all ${
-                i === index ? "w-4 bg-[#067a46]" : "w-1.5 bg-white/80 hover:bg-white"
+                i === activeDot ? "w-4 bg-[#067a46]" : "w-1.5 bg-emerald-200 hover:bg-emerald-300"
               }`}
             />
           ))}
