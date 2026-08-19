@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { X, LocateFixed, Check, Search, MapPin, Loader2, AlertTriangle } from "lucide-react";
-import { loadMap, reverseGeocode, searchPlaces, pinIcon, GeocodeError, type GeocodeResult, type PlaceSuggestion } from "@/lib/mapProvider";
+import { X, LocateFixed, Check, Search, MapPin, Loader2, AlertTriangle, Link2 } from "lucide-react";
+import { loadMap, reverseGeocode, searchPlaces, pinIcon, looksLikeMapsLink, parseLatLngText, resolveMapsLink, GeocodeError, type GeocodeResult, type PlaceSuggestion } from "@/lib/mapProvider";
 import { isServiceablePincode } from "@/lib/serviceability";
 
 /** Gandhinagar city centre — the map's starting view only (never saved as a result). */
@@ -34,6 +34,12 @@ export function LocationPickerModal({
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
   const [searching, setSearching] = useState(false);
   const [searchMsg, setSearchMsg] = useState("");
+
+  // Google Maps link paste
+  const [linkOpen, setLinkOpen] = useState(false);
+  const [link, setLink] = useState("");
+  const [linkBusy, setLinkBusy] = useState(false);
+  const [linkMsg, setLinkMsg] = useState("");
 
   // current location + reverse geocode
   const [locating, setLocating] = useState(false);
@@ -90,20 +96,70 @@ export function LocationPickerModal({
     setDetected(geo || { lat, lng });
   };
 
+  /** Resolve a pasted Google Maps link (from either input) and jump the pin there. */
+  const locateFromLink = async (text?: string) => {
+    const t = (text ?? link).trim();
+    if (!t) return;
+    setLinkBusy(true);
+    setLinkMsg("");
+    const res = await resolveMapsLink(t);
+    setLinkBusy(false);
+    if (res) {
+      setLink("");
+      setLinkOpen(false);
+      setQ("");
+      setSuggestions([]);
+      setSearchMsg("");
+      moveTo(res.lat, res.lng, 18);
+      reverseAt(res.lat, res.lng);
+    } else {
+      setLinkMsg("Couldn't read a location from that link. In Google Maps tap Share → Copy link, then paste it here.");
+    }
+  };
+
   // ── Search: debounced AND button-driven; one in-flight request at a time ──
   const runSearch = async (query: string) => {
     const term = query.trim();
     setSearchMsg("");
     if (term.length < 3) { setSuggestions([]); return; }
+    // Pasted coordinates → jump straight there.
+    const coords = parseLatLngText(term);
+    if (coords) {
+      setQ("");
+      setSuggestions([]);
+      moveTo(coords.lat, coords.lng, 18);
+      reverseAt(coords.lat, coords.lng);
+      return;
+    }
+    // Pasted Google Maps link in the search box → resolve it instead of geocoding.
+    if (looksLikeMapsLink(term)) {
+      setSearching(true);
+      try {
+        const res = await resolveMapsLink(term);
+        if (res) {
+          setQ("");
+          setSuggestions([]);
+          moveTo(res.lat, res.lng, 18);
+          reverseAt(res.lat, res.lng);
+        } else {
+          setSuggestions([]);
+          setSearchMsg("Couldn't read a location from that link. In Google Maps tap Share → Copy link, then paste it again.");
+        }
+      } finally {
+        setSearching(false);
+      }
+      return;
+    }
     setSearching(true);
     try {
       const results = await searchPlaces(term);
       setSuggestions(results);
-      setSearchMsg(
-        results.length === 0
-          ? "Couldn't find that place. Try adding your area or city (e.g. \"Kudasan, Gandhinagar\"), search your pincode, or drag the map pin to your exact spot."
-          : ""
-      );
+      if (results.length === 0) {
+        setSearchMsg("Couldn't find that place. Try adding your area or pincode (e.g. \"Kudasan, Gandhinagar\") — or paste a Google Maps link below.");
+        setLinkOpen(true);
+      } else {
+        setSearchMsg("");
+      }
     } catch {
       setSuggestions([]);
       setSearchMsg("Unable to find this location. Please try another search.");
@@ -200,6 +256,38 @@ export function LocationPickerModal({
                 {locating ? <Loader2 className="w-4 h-4 animate-spin" /> : <LocateFixed className="w-4 h-4" />}
                 {locating ? "Detecting your location…" : "Use Current Location"}
               </button>
+
+              {/* Paste a shared Google Maps link — works for any place on Earth */}
+              {!linkOpen ? (
+                <button type="button" onClick={() => setLinkOpen(true)}
+                  className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-bold transition">
+                  <Link2 className="w-3.5 h-3.5" /> Add Google Maps location link
+                </button>
+              ) : (
+                <div className="space-y-1.5">
+                  <div className="flex gap-2">
+                    <div className="relative flex-1 min-w-0">
+                      <Link2 className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        value={link}
+                        onChange={(e) => { setLink(e.target.value); setLinkMsg(""); }}
+                        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); locateFromLink(); } }}
+                        placeholder="Paste Google Maps link (Share → Copy link)"
+                        className="input pl-9 pr-3 w-full text-xs focus:border-[#067a46] focus:ring-1 focus:ring-[#067a46] outline-none"
+                      />
+                    </div>
+                    <button type="button" onClick={() => locateFromLink()} disabled={linkBusy || !link.trim()}
+                      className="shrink-0 px-4 rounded-xl bg-[#067a46] hover:bg-[#046338] disabled:bg-slate-300 text-white text-xs font-bold flex items-center gap-1.5">
+                      {linkBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />}
+                      Locate
+                    </button>
+                  </div>
+                  <div className="text-[10px] text-slate-400 leading-snug">
+                    In the Google Maps app: find your place → Share → Copy link → paste here.
+                  </div>
+                  {linkMsg && <div className="text-[11px] font-semibold text-amber-700">{linkMsg}</div>}
+                </div>
+              )}
 
               {searchMsg && <div className="text-[11px] font-semibold text-amber-700">{searchMsg}</div>}
 

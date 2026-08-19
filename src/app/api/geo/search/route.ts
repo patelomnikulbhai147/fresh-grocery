@@ -108,44 +108,72 @@ async function googleSearch(q: string, key: string): Promise<Hit[]> {
     .filter((h) => h.label && finite(h));
 }
 
+/** Merge providers' hits: drop duplicates by label and by ~11m coordinate cell. */
+function dedupe(hits: Hit[]): Hit[] {
+  const seen = new Set<string>();
+  const out: Hit[] = [];
+  for (const h of hits) {
+    const byLabel = h.label.toLowerCase().replace(/\s+/g, " ").trim();
+    const byCell = `${h.lat.toFixed(4)},${h.lng.toFixed(4)}`;
+    if (seen.has(byLabel) || seen.has(byCell)) continue;
+    seen.add(byLabel);
+    seen.add(byCell);
+    out.push(h);
+  }
+  return out;
+}
+
 export async function GET(req: NextRequest) {
   const q = (req.nextUrl.searchParams.get("q") || "").trim();
   if (q.length < 3) {
     return NextResponse.json({ success: true, results: [] });
   }
 
+  // Raw "lat, lng" pasted into the search box → jump straight there.
+  const coordMatch = q.match(/^(-?\d{1,2}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)$/);
+  if (coordMatch) {
+    const lat = Number(coordMatch[1]);
+    const lng = Number(coordMatch[2]);
+    if (Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
+      return NextResponse.json({
+        success: true,
+        results: [{ label: `Dropped pin (${lat.toFixed(5)}, ${lng.toFixed(5)})`, lat, lng }],
+      });
+    }
+  }
+
+  // Each layer's providers run in parallel and their hits are merged, so the
+  // dropdown shows everything the free geocoders collectively know.
   const googleKey = process.env.GOOGLE_MAPS_API_KEY || "";
-  const strategies: Array<() => Promise<Hit[]>> = [];
-  if (googleKey) strategies.push(() => googleSearch(q, googleKey));
-  strategies.push(
-    () => nominatimSearch(q, true),
-    () => photonSearch(q, true),
-    () => nominatimSearch(q, false),
-    () => photonSearch(q, false)
-  );
+  const layers: Array<Array<() => Promise<Hit[]>>> = [];
+  if (googleKey) layers.push([() => googleSearch(q, googleKey)]);
+  layers.push([() => nominatimSearch(q, true), () => photonSearch(q, true)]);
+  layers.push([() => nominatimSearch(q, false), () => photonSearch(q, false)]);
   // Relaxation: peel leading words (most specific first in Indian addresses) so
   // "yogi parisar sector 6" still lands on "sector 6" when the society is
-  // missing from the map data. Cap at 2 extra lookups to stay within
-  // Nominatim's rate limits.
+  // missing from the map data. Cap extra lookups to stay within Nominatim's
+  // rate limits.
   const tokens = q.split(/[\s,]+/).filter(Boolean);
   for (let i = 1; i < Math.min(tokens.length, 3); i++) {
     const sub = tokens.slice(i).join(" ");
-    if (sub.length >= 3) strategies.push(() => nominatimSearch(sub, true));
+    if (sub.length >= 3) layers.push([() => nominatimSearch(sub, true)]);
   }
 
   let anySucceeded = false;
-  for (const run of strategies) {
-    try {
-      const results = await run();
-      anySucceeded = true;
-      if (results.length > 0) {
-        return NextResponse.json(
-          { success: true, results },
-          { headers: { "Cache-Control": "public, max-age=300" } }
-        );
-      }
-    } catch (err: any) {
-      console.error("[Geo Search] layer failed:", err?.message);
+  for (const layer of layers) {
+    const settled = await Promise.allSettled(layer.map((run) => run()));
+    for (const s of settled) {
+      if (s.status === "fulfilled") anySucceeded = true;
+      else console.error("[Geo Search] layer failed:", (s.reason as any)?.message);
+    }
+    const results = dedupe(
+      settled.flatMap((s) => (s.status === "fulfilled" ? s.value : []))
+    ).slice(0, 8);
+    if (results.length > 0) {
+      return NextResponse.json(
+        { success: true, results },
+        { headers: { "Cache-Control": "public, max-age=300" } }
+      );
     }
   }
 

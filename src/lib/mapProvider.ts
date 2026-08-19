@@ -102,6 +102,42 @@ export interface PlaceSuggestion { label: string; lat: number; lng: number }
  * proxy. Throws GeocodeError on a transport/service failure so the UI can show
  * "unable to search" instead of silently showing "no results".
  */
+/** True when the text looks like a shared Google Maps link. */
+export function looksLikeMapsLink(text: string): boolean {
+  return /(maps\.app\.goo\.gl|goo\.gl\/maps|g\.co\/kgs|(maps\.)?google\.[a-z.]{2,10}\/(maps|\?))/i.test(text.trim());
+}
+
+/** Parse raw "lat, lng" text (e.g. pasted coordinates). */
+export function parseLatLngText(text: string): { lat: number; lng: number } | null {
+  const m = text.trim().match(/^(-?\d{1,2}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)$/);
+  if (!m) return null;
+  const lat = Number(m[1]);
+  const lng = Number(m[2]);
+  return Math.abs(lat) <= 90 && Math.abs(lng) <= 180 && (lat !== 0 || lng !== 0) ? { lat, lng } : null;
+}
+
+export interface ResolvedMapsLink { lat: number; lng: number; label?: string }
+
+/**
+ * Resolve a shared Google Maps link to coordinates via the server proxy
+ * (short links need server-side redirect following — CORS blocks the browser).
+ */
+export async function resolveMapsLink(link: string): Promise<ResolvedMapsLink | null> {
+  const t = link.trim();
+  if (!t) return null;
+  try {
+    const r = await fetch(`/api/geo/resolve-link?url=${encodeURIComponent(t)}`, { headers: { Accept: "application/json" } });
+    const d = await r.json().catch(() => null);
+    if (!r.ok || !d?.success) return null;
+    const lat = Number(d.lat);
+    const lng = Number(d.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    return { lat, lng, label: typeof d.label === "string" ? d.label : undefined };
+  } catch {
+    return null;
+  }
+}
+
 export async function searchPlaces(query: string): Promise<PlaceSuggestion[]> {
   if (query.trim().length < 3) return [];
   let r: Response;
