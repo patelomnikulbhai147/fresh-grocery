@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
-import { MapPin, Home, Briefcase, MoreHorizontal, Loader2, CheckCircle2 } from "lucide-react";
+import { MapPin, Home, Briefcase, MoreHorizontal, Loader2, CheckCircle2, Link2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isServiceablePincode, serviceableAreasLabel } from "@/lib/serviceability";
-import { forwardGeocode, mapsAvailable } from "@/lib/mapProvider";
+import { forwardGeocode, mapsAvailable, resolveMapsLink, reverseGeocode } from "@/lib/mapProvider";
 import { LocationPickerModal, type PickedLocation } from "./LocationPickerModal";
 import type { SavedAddress } from "@/store/addresses";
 
@@ -52,6 +52,9 @@ export function AddressForm({
   const [geoBusy, setGeoBusy] = useState(false);
   const [warn, setWarn] = useState("");
   const [errors, setErrors] = useState<Record<string, boolean>>({});
+  const [mapsLink, setMapsLink] = useState("");
+  const [linkBusy, setLinkBusy] = useState(false);
+  const [linkMsg, setLinkMsg] = useState("");
 
   const set = (k: keyof AddressDraft, v: any) => setF((s) => ({ ...s, [k]: v }));
 
@@ -73,6 +76,24 @@ export function AddressForm({
     } else {
       setWarn("");
     }
+  };
+
+  /** Paste a shared Google Maps link → resolve to coords, autofill via reverse geocode. */
+  const applyMapsLink = async () => {
+    const t = mapsLink.trim();
+    if (!t) return;
+    setLinkBusy(true);
+    setLinkMsg("");
+    const res = await resolveMapsLink(t);
+    if (!res) {
+      setLinkBusy(false);
+      setLinkMsg("Couldn't read a location from that link. In Google Maps tap Share → Copy link, then paste it here.");
+      return;
+    }
+    const geo = (await reverseGeocode(res.lat, res.lng)) || { lat: res.lat, lng: res.lng };
+    setLinkBusy(false);
+    setMapsLink("");
+    onPicked(geo);
   };
 
   const validate = (): boolean => {
@@ -127,6 +148,28 @@ export function AddressForm({
         </span>
         {f.latitude != null && <CheckCircle2 className="w-5 h-5 text-[#067a46]" />}
       </button>
+
+      {/* Or paste a shared Google Maps link — finds any place, even ones map search misses */}
+      <div className="space-y-1.5">
+        <div className="flex gap-2">
+          <div className="relative flex-1 min-w-0">
+            <Link2 className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              value={mapsLink}
+              onChange={(e) => { setMapsLink(e.target.value); setLinkMsg(""); }}
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyMapsLink(); } }}
+              placeholder="Or paste Google Maps link (Share → Copy link)"
+              className="input pl-9 pr-3 w-full text-xs focus:border-[#067a46] focus:ring-1 focus:ring-[#067a46] outline-none"
+            />
+          </div>
+          <button type="button" onClick={applyMapsLink} disabled={linkBusy || !mapsLink.trim()}
+            className="shrink-0 px-4 rounded-xl bg-[#067a46] hover:bg-[#046338] disabled:bg-slate-300 text-white text-xs font-bold flex items-center gap-1.5">
+            {linkBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />}
+            Locate
+          </button>
+        </div>
+        {linkMsg && <div className="text-[11px] font-semibold text-amber-700">{linkMsg}</div>}
+      </div>
 
       {warn && <div className="text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">{warn}</div>}
 
