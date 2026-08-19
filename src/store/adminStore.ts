@@ -781,6 +781,20 @@ export const useAdminStore = create<AdminStoreState>()(
         const target = get().products.find((p) => p.id === id);
         set((s) => ({ products: s.products.filter((p) => p.id !== id) }));
         get().logAction(user, role, `Deleted product: ${target?.name || id}`, "Products");
+        // Explicit, intentional deletion — the ONLY path that soft-deletes a
+        // product on the server. The normal debounced sync never deletes
+        // (removing a product from the local list no longer wipes it from the
+        // database), so a real Delete must tell the server explicitly.
+        if (typeof window !== "undefined" && id) {
+          fetch("/api/admin/products", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ intent: "delete", id }),
+          }).catch(() => {
+            /* network error — product is already removed locally; the admin
+               can retry Delete. We never silently re-create or mass-delete. */
+          });
+        }
       },
 
       duplicateProduct: (id, user, role) => {

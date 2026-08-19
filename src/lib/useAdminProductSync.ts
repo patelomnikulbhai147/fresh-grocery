@@ -53,21 +53,24 @@ export function useAdminProductSync(): AdminSyncState {
       if (!base || pushingRef.current) return;
       const current = useAdminStore.getState().products;
       const upserts: any[] = [];
-      const seen = new Set<string>();
       current.forEach((p, i) => {
-        seen.add(p.id);
         const ser = serialize(p, i);
         if (base.get(p.id) !== ser) upserts.push({ ...p, __pos: i });
       });
-      const deletes = [...base.keys()].filter((id) => !seen.has(id));
-      if (upserts.length === 0 && deletes.length === 0) return;
+      // Upserts ONLY. A product that has disappeared from the client list is
+      // NEVER auto-deleted here — that "missing ⇒ delete" logic caused real
+      // products to be wiped whenever the store was momentarily short (a
+      // localStorage quota truncation, a partial/racy load, a filtered view,
+      // a reset, a reload mid-load). Deletion is now an explicit action only
+      // (the Delete button → store.deleteProduct → intent:"delete" request).
+      if (upserts.length === 0) return;
 
       pushingRef.current = true;
       try {
         const res = await fetch("/api/admin/products", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ upserts, deletes }),
+          body: JSON.stringify({ upserts }),
         });
         if (res.status === 401 || res.status === 403) {
           setState("unauthorized");
@@ -135,7 +138,6 @@ export function useAdminProductSync(): AdminSyncState {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               upserts: local.map((p, i) => ({ ...p, __pos: i })),
-              deletes: [],
             }),
           });
           if (push.status === 401 || push.status === 403) {

@@ -277,13 +277,21 @@ export async function setMeta(key: string, value: string): Promise<void> {
 }
 
 /**
- * Apply an authenticated admin sync: upsert changed products, soft-delete
- * removed ones (row kept — historical orders stay intact), and mark the
- * store as admin-managed from now on.
+ * Apply an authenticated admin sync: upsert changed/new products only, and
+ * mark the store as admin-managed from now on.
+ *
+ * IMPORTANT — this function NEVER deletes. The normal (debounced) admin sync
+ * used to also soft-delete any product that was "missing" from the client's
+ * list, which caused a data-loss bug: a transient client-side list reduction
+ * (localStorage quota truncation, a partial load, a filtered view, a store
+ * reset, a page reload mid-load) was misread as an intentional deletion and
+ * wiped real products from the database. Deletion is now an EXPLICIT-only
+ * action — see {@link deleteProductById}, invoked solely by the admin's
+ * Delete button. Upserts here are purely additive/updating and can never
+ * remove a product.
  */
 export async function syncAdminProducts(
-  upserts: AdminProduct[],
-  deletes: string[]
+  upserts: AdminProduct[]
 ): Promise<void> {
   await ensureReady();
   const stmts: { sql: string; params: any[] }[] = [];
@@ -292,12 +300,21 @@ export async function syncAdminProducts(
     const pos = Number.isFinite(Number((p as any).__pos)) ? Number((p as any).__pos) : 0;
     stmts.push({ sql: upsertSql(), params: upsertParams(p, pos) });
   }
-  for (const id of deletes) {
-    if (typeof id !== "string" || !id) continue;
-    stmts.push({ sql: `UPDATE store_products SET deleted = 1 WHERE id = ?`, params: [id] });
-  }
   stmts.push({ sql: metaUpsertSql(), params: [META_ADMIN_EVER_SYNCED, "1"] });
   await catalogBatch(stmts);
+}
+
+/**
+ * Explicitly soft-delete ONE product by id (keeps the row — `deleted = 1` —
+ * so historical orders stay intact and the product can be recovered). This is
+ * the ONLY path that sets `deleted = 1`, and it is reached only through an
+ * authenticated, confirmed admin Delete action. Returns the number of rows
+ * affected (0 if the id does not exist).
+ */
+export async function deleteProductById(id: string): Promise<void> {
+  if (typeof id !== "string" || !id) return;
+  await ensureReady();
+  await catalogRun(`UPDATE store_products SET deleted = 1 WHERE id = ?`, [id]);
 }
 
 export type PlaceOrderItem = {
