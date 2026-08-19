@@ -131,13 +131,14 @@ export function SeasonalBannerCarousel() {
             {cards.map((s, i) => (
               <div key={`${s.key}-${i}`} style={{ flex: `0 0 ${cardBasis}%` }} className="px-1.5">
                 <div className="aspect-[21/10] rounded-xl overflow-hidden ring-1 ring-emerald-900/10 bg-[#eef6e0] shadow-sm">
-                  {/* object-contain preserves the full banner — never cropped. */}
+                  {/* object-cover fills the card edge-to-edge (corner to corner) —
+                      no cream matte gaps around the banner. */}
                   <img
                     src={s.src}
                     alt={s.alt}
                     loading="eager"
                     draggable={false}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover object-center"
                   />
                 </div>
               </div>
