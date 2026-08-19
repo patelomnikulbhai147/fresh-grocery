@@ -37,6 +37,7 @@ import { useAdminAuth, type AdminRole } from "@/store/adminAuth";
 import { useCustomerAuth } from "@/store/customerAuth";
 import { useAdminStore, productStockInfo } from "@/store/adminStore";
 import { useAdminProductSync } from "@/lib/useAdminProductSync";
+import { establishAdminSession } from "@/lib/adminServerSession";
 import { GlobalSearchModal } from "./GlobalSearchModal";
 import { cn } from "@/lib/utils";
 
@@ -75,6 +76,24 @@ export function AdminLayout({ children, activeModule, onSelectModule }: AdminLay
     setIsProfileMenuOpen(false);
     router.push("/"); // go to main homepage
   };
+
+  // In-place reconnect for the "changes not publishing" state — re-establish the
+  // server session without a full sign-out (used when the in-memory credentials
+  // are gone, e.g. after a page reload).
+  const [reconnectPassword, setReconnectPassword] = useState("");
+  const [reconnecting, setReconnecting] = useState(false);
+  const handleReconnect = async () => {
+    if (!reconnectPassword) return;
+    setReconnecting(true);
+    const ok = await establishAdminSession(user?.email || "admin", reconnectPassword);
+    setReconnecting(false);
+    if (ok) {
+      window.location.reload(); // re-run the sync with the restored session
+    } else {
+      setReconnectPassword("");
+    }
+  };
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -454,18 +473,36 @@ export function AdminLayout({ children, activeModule, onSelectModule }: AdminLay
 
             {/* Product-sync status: edits must reach the live customer site */}
             {productSync === "unauthorized" && (
-              <div className="mb-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-bold rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+              <div className="mb-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-bold rounded-xl px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <span>
-                  Your changes are NOT publishing to the live website — your admin session has
-                  expired. Please sign out and sign in again to reconnect.
+                  Your changes are NOT publishing to the live website — your admin session
+                  needs to reconnect. Enter your password to reconnect (nothing is lost).
                 </span>
-                <button
-                  type="button"
-                  onClick={handleSignOut}
-                  className="shrink-0 px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold"
-                >
-                  Sign out
-                </button>
+                <div className="flex items-center gap-2 shrink-0">
+                  <input
+                    type="password"
+                    value={reconnectPassword}
+                    onChange={(e) => setReconnectPassword(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleReconnect(); }}
+                    placeholder="Admin password"
+                    className="px-2.5 py-1.5 rounded-lg border border-amber-300 dark:border-amber-700 bg-white dark:bg-zinc-900 text-amber-900 dark:text-amber-200 text-xs w-40"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleReconnect}
+                    disabled={reconnecting || !reconnectPassword}
+                    className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold"
+                  >
+                    {reconnecting ? "Reconnecting…" : "Reconnect"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold"
+                  >
+                    Sign out
+                  </button>
+                </div>
               </div>
             )}
             {productSync === "error" && (

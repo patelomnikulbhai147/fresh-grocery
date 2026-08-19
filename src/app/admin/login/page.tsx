@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { ShieldCheck, Lock, Mail, Key, AlertCircle, ArrowRight, CheckCircle2, Eye, EyeOff, Sparkles, RefreshCw } from "lucide-react";
 import { useAdminAuth } from "@/store/adminAuth";
 import { useToasts } from "@/store/shop";
+import { establishAdminSession } from "@/lib/adminServerSession";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -22,16 +23,16 @@ export default function AdminLoginPage() {
   const [forgotEmail, setForgotEmail] = useState("");
 
   // Establish a REAL server session (httpOnly cookie) so the admin panel's
-  // product/order changes actually publish to the live customer website.
+  // product/order changes actually publish to the live customer website. The
+  // credentials are cached in memory so the session can self-heal if the cookie
+  // later expires or fails, instead of silently dropping the admin's edits.
   const establishServerSession = async () => {
-    try {
-      await fetch("/api/admin/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: email, password }),
-      });
-    } catch {
-      // Non-fatal: the panel shows a "not publishing" warning if this failed.
+    const ok = await establishAdminSession(email, password);
+    if (!ok) {
+      pushToast(
+        "Signed in, but publishing to the live site could not be enabled. If your changes don't appear, sign out and in again.",
+        "warning"
+      );
     }
   };
 

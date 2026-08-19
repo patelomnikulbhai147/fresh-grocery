@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAdminStore, type AdminProduct, type AdminOrder } from "@/store/adminStore";
 import { useAdminAuth } from "@/store/adminAuth";
 import { useCustomerAuth } from "@/store/customerAuth";
+import { reconnectAdminSession } from "@/lib/adminServerSession";
 
 export type AdminSyncState = "idle" | "syncing" | "synced" | "unauthorized" | "error";
 
@@ -36,6 +37,11 @@ export function useAdminProductSync(): AdminSyncState {
   const startedRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pushingRef = useRef(false);
+  // Bounded self-heal: a 401/403 means the server session lapsed — try to
+  // silently re-establish it (using the in-memory creds) and retry, instead of
+  // dropping the admin's edit. Capped so a persistent failure falls back to the
+  // "unauthorized" warning rather than looping forever.
+  const reconnectTriesRef = useRef(0);
 
   useEffect(() => {
     // No admin login in this browser at all → don't even call the API
@@ -73,11 +79,18 @@ export function useAdminProductSync(): AdminSyncState {
           body: JSON.stringify({ upserts }),
         });
         if (res.status === 401 || res.status === 403) {
+          if (reconnectTriesRef.current < 3 && (await reconnectAdminSession())) {
+            reconnectTriesRef.current += 1;
+            pushingRef.current = false;
+            schedule(); // retry the diff now that the session is restored
+            return;
+          }
           setState("unauthorized");
           return;
         }
         const data = await res.json().catch(() => null);
         if (!res.ok || !data?.success) throw new Error(data?.message || `HTTP ${res.status}`);
+        reconnectTriesRef.current = 0;
         lastSyncedRef.current = toMap(current);
         setState("synced");
         // Changes made while this push was in flight → follow-up push.
@@ -116,7 +129,11 @@ export function useAdminProductSync(): AdminSyncState {
     (async () => {
       setState("syncing");
       try {
-        const res = await fetch("/api/admin/products", { cache: "no-store" });
+        let res = await fetch("/api/admin/products", { cache: "no-store" });
+        // Session lapsed → try to silently re-establish it, then retry once.
+        if ((res.status === 401 || res.status === 403) && (await reconnectAdminSession())) {
+          res = await fetch("/api/admin/products", { cache: "no-store" });
+        }
         if (res.status === 401 || res.status === 403) {
           setState("unauthorized");
           return;
@@ -133,13 +150,17 @@ export function useAdminProductSync(): AdminSyncState {
         } else {
           // One-time adoption: publish this browser's current catalog.
           const local = useAdminStore.getState().products;
-          const push = await fetch("/api/admin/products", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              upserts: local.map((p, i) => ({ ...p, __pos: i })),
-            }),
-          });
+          const body = JSON.stringify({ upserts: local.map((p, i) => ({ ...p, __pos: i })) });
+          const doPush = () =>
+            fetch("/api/admin/products", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body,
+            });
+          let push = await doPush();
+          if ((push.status === 401 || push.status === 403) && (await reconnectAdminSession())) {
+            push = await doPush();
+          }
           if (push.status === 401 || push.status === 403) {
             setState("unauthorized");
             return;
