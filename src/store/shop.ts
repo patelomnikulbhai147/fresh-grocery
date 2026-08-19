@@ -30,6 +30,8 @@ type CartState = {
   remove: (productId: string, weight: string, mode: DeliveryMode) => void;
   updateQty: (productId: string, weight: string, mode: DeliveryMode, qty: number) => void;
   clear: () => void;
+  /** Replace the whole cart (server hydrate / cross-device merge). */
+  replaceItems: (items: CartItem[]) => void;
   clearMode: (mode: DeliveryMode) => void;
   forMode: (mode: DeliveryMode) => CartItem[];
   subtotal: () => number;
@@ -109,6 +111,7 @@ export const useCart = create<CartState>()(
             .filter((i) => i.quantity > 0),
         })),
       clear: () => set({ items: [] }),
+      replaceItems: (items) => set({ items: Array.isArray(items) ? items : [] }),
       clearMode: (mode) =>
         set((s) => ({ items: s.items.filter((i) => i.mode !== mode) })),
       forMode: (mode) => get().items.filter((i) => i.mode === mode),
@@ -139,6 +142,8 @@ export type Wishlist = {
   ids: string[];
   toggle: (id: string) => void;
   has: (id: string) => boolean;
+  /** Replace all wishlist ids (server hydrate / cross-device merge). */
+  replaceIds: (ids: string[]) => void;
 };
 
 export const useWishlist = create<Wishlist>()(
@@ -152,6 +157,8 @@ export const useWishlist = create<Wishlist>()(
             : { ids: [...s.ids, id] }
         ),
       has: (id) => get().ids.includes(id),
+      replaceIds: (ids) =>
+        set({ ids: Array.isArray(ids) ? [...new Set(ids.filter((x) => typeof x === "string"))] : [] }),
     }),
     { name: "flashkart-wishlist" }
   )

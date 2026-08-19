@@ -185,6 +185,12 @@ export async function POST(req: NextRequest) {
       const role = getUserRole(mobile, customer.email, customer.role);
       const token = createSessionToken(customer.id, mobile, role);
 
+      // The Super Admin's displayed identity is server-authoritative and fixed
+      // to "OM" — never a per-browser cached/stored name (which currently reads
+      // "kaushik" in the DB). Role itself comes from getUserRole (server-side).
+      const displayName =
+        role === "SUPER_ADMIN" ? "OM" : (customer.full_name ?? "Customer");
+
       await logAuditEvent({
         event: "LOGIN_SUCCESS",
         mobile,
@@ -201,7 +207,7 @@ export async function POST(req: NextRequest) {
           id: customer.id,
           mobile: customer.mobile,
           email: customer.email ?? null,
-          name: customer.full_name ?? "Customer",
+          name: displayName,
           role,
           points: role === "SUPER_ADMIN" ? 0 : customer.points,
           walletBalance: role === "SUPER_ADMIN" ? 0 : customer.wallet_balance,

@@ -259,10 +259,27 @@ export async function getCustomerProductsSafe(): Promise<{ ok: boolean; products
   }
 }
 
-/** One customer-eligible product by slug (or id) — null when it must not be shown. */
+/**
+ * One customer-eligible product by slug (or id) — null when it must not be
+ * shown. A single indexed row lookup (uses idx_store_products_slug): loading
+ * the whole catalog just to find one product spiked the Worker's CPU/memory
+ * and tripped Cloudflare "Error 1102" on product pages.
+ */
 export async function getCustomerProductBySlugFromDb(slug: string): Promise<Product | null> {
-  const all = await getCustomerProductsFromDb();
-  return all.find((p) => p.slug === slug || p.id === slug) ?? null;
+  await ensureReady();
+  const rows = await catalogAll(
+    `SELECT id, slug, name, status, deleted, stock_grams, pos, data, updated_at
+     FROM store_products
+     WHERE deleted = 0 AND status IN ('Active', 'Out of Stock') AND (slug = ? OR id = ?)
+     ORDER BY pos ASC LIMIT 1`,
+    [slug, slug]
+  );
+  const row = rows[0];
+  if (!row) return null;
+  const p = rowToProduct(row);
+  if (!p) return null;
+  const c = customerizeImages(p, row.updated_at);
+  return (c.status === "Out of Stock" ? { ...c, stockGrams: 0, stock: 0 } : c) as Product;
 }
 
 export async function getMeta(key: string): Promise<string | null> {

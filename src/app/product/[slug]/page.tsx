@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import { getCustomerProductBySlugFromDb, getCustomerProductsSafe } from "@/lib/serverCatalog";
 import { ProductDetail } from "@/components/product/ProductDetail";
@@ -13,17 +14,13 @@ export const dynamic = "force-dynamic";
 
 type Params = { params: Promise<{ slug: string }> };
 
-async function loadProduct(slug: string) {
-  try {
-    return await getCustomerProductBySlugFromDb(slug);
-  } catch {
-    return null;
-  }
-}
+// Deduped per request via React cache: generateMetadata and the page body
+// share ONE product lookup instead of querying the database twice.
+const loadProduct = cache((slug: string) => getCustomerProductBySlugFromDb(slug));
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const p = await loadProduct(slug);
+  const p = await loadProduct(slug).catch(() => null);
   if (!p) return { title: "Product not found · FlashKart" };
   return {
     title: `${p.name} — ${formatINR(p.weights[0].price)} · FlashKart`,
@@ -41,7 +38,7 @@ export default async function ProductPage({ params }: Params) {
   let product = null;
   let dbOk = true;
   try {
-    product = await getCustomerProductBySlugFromDb(slug);
+    product = await loadProduct(slug);
   } catch {
     dbOk = false;
   }

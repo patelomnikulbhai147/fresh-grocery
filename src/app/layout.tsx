@@ -6,6 +6,7 @@ import { CartDrawer } from "@/components/cart/CartDrawer";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { CityNotifyAuto } from "@/components/city/CityModal";
 import { CustomerLoginModal } from "@/components/auth/CustomerLoginModal";
+import { AccountSync } from "@/components/account/AccountSync";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { RakshaBandhanTheme, RAKSHA_BANDHAN_THEME } from "@/components/theme/RakshaBandhanTheme";
@@ -108,6 +109,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <CartDrawer />
         <CityNotifyAuto />
         <CustomerLoginModal />
+        <AccountSync />
         <Toaster />
       </body>
     </html>

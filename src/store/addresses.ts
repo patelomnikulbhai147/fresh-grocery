@@ -48,6 +48,8 @@ type AddressBookState = {
   update: (id: string, patch: Partial<Omit<SavedAddress, "id" | "userKey">>) => void;
   remove: (id: string) => void;
   setDefault: (userKey: string, id: string) => void;
+  /** Replace ALL of one user's addresses with the given list (server hydrate). */
+  replaceUser: (userKey: string, list: SavedAddress[]) => void;
 };
 
 export const useAddressBook = create<AddressBookState>()(
@@ -105,6 +107,14 @@ export const useAddressBook = create<AddressBookState>()(
           addresses: s.addresses.map((a) =>
             a.userKey === userKey ? { ...a, isDefault: a.id === id } : a
           ),
+        })),
+      replaceUser: (userKey, list) =>
+        set((s) => ({
+          // Drop this user's local rows, keep everyone else's, add the merged set.
+          addresses: [
+            ...s.addresses.filter((a) => a.userKey !== userKey),
+            ...list.map((a) => ({ ...a, userKey })),
+          ],
         })),
     }),
     { name: "flashkart-addresses-v1" }
