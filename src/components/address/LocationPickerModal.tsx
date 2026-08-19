@@ -231,8 +231,10 @@ export function LocationPickerModal({
 
         {!unavailable ? (
           <>
-            {/* Search + Current location controls (§3) */}
-            <div className="p-3 border-b border-slate-100 shrink-0 space-y-2.5 relative">
+            {/* Search + Current location controls (§3). z must beat Leaflet's
+                panes/controls (z-index up to 1000) or the suggestion dropdown
+                renders behind the map. */}
+            <div className="p-3 border-b border-slate-100 shrink-0 space-y-2.5 relative z-[1100]">
               <div className="flex gap-2">
                 <div className="relative flex-1 min-w-0">
                   <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -293,7 +295,7 @@ export function LocationPickerModal({
 
               {/* Suggestion dropdown */}
               {suggestions.length > 0 && (
-                <div className="absolute left-3 right-3 top-full -mt-0.5 bg-white border border-slate-200 rounded-xl shadow-lg z-[120] max-h-56 overflow-y-auto">
+                <div className="absolute left-3 right-3 top-full -mt-0.5 bg-white border border-slate-200 rounded-xl shadow-lg z-[1100] max-h-56 overflow-y-auto">
                   {suggestions.map((s, i) => (
                     <button key={i} type="button" onClick={() => pickSuggestion(s)}
                       className="w-full text-left px-3 py-2.5 text-xs text-slate-700 hover:bg-emerald-50 border-b border-slate-50 last:border-0 flex items-start gap-2">

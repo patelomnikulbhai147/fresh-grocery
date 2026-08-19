@@ -104,7 +104,11 @@ export function ProductDetail({ product: staticProduct }: { product: Product }) 
                           : "border-slate-100 hover:border-slate-300"
                       )}
                     >
-                      <Image src={g} alt="" fill sizes="64px" className="object-cover" />
+                      {/* unoptimized: admin images resolve to /api/product-image?…&v=…
+                          (a local URL WITH a query string). Next 16 rejects that in
+                          next/image unless unoptimized — otherwise the product page
+                          500s. Cloudflare has no image optimizer anyway. */}
+                      <Image src={g} alt="" fill sizes="64px" className="object-cover" unoptimized />
                     </button>
                   ))}
                 </div>
