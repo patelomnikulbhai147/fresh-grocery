@@ -99,7 +99,11 @@ export function LocationPickerModal({
     try {
       const results = await searchPlaces(term);
       setSuggestions(results);
-      setSearchMsg(results.length === 0 ? "Location not found. Try an area, city or pincode." : "");
+      setSearchMsg(
+        results.length === 0
+          ? "Couldn't find that place. Try adding your area or city (e.g. \"Kudasan, Gandhinagar\"), search your pincode, or drag the map pin to your exact spot."
+          : ""
+      );
     } catch {
       setSuggestions([]);
       setSearchMsg("Unable to find this location. Please try another search.");
