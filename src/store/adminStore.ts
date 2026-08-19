@@ -182,6 +182,10 @@ export interface AdminOrder {
   deliveryAddressType?: string;
   /** Delivery speed/type — Instant / Scheduled. Optional for legacy orders. */
   deliveryType?: string;
+  /** Order category — Retail (home) or Business / B2B. Optional for legacy orders. */
+  orderCategory?: "retail" | "business";
+  /** Preferred delivery date for scheduled business orders (YYYY-MM-DD). */
+  preferredDate?: string;
   /** Structured delivery-address SNAPSHOT taken when the order was placed —
    *  never mutated if the customer later edits their saved address (§11). */
   deliveryAddressDetails?: OrderAddressSnapshot;

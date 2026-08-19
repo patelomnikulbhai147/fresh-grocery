@@ -32,6 +32,9 @@ import { AddressForm, type AddressDraft } from "@/components/address/AddressForm
 
 /** Pack weight in grams for a cart line — falls back to parsing the label
  *  ("500 g", "1 kg") for carts persisted before grams were stored. */
+/** Today's date as YYYY-MM-DD — used as the min for the scheduled-date picker. */
+const todayISO = (): string => new Date().toISOString().slice(0, 10);
+
 const lineGrams = (weight: string, grams?: number): number => {
   if (grams && grams > 0) return Math.round(grams);
   const m = /([\d.]+)\s*(kg|g)/i.exec(weight || "");
@@ -42,16 +45,21 @@ const lineGrams = (weight: string, grams?: number): number => {
 
 type AddressType = "Home" | "Office" | "Other";
 type DeliveryType = "Instant" | "Scheduled";
+/** Order category — Retail (home customers) or Business / B2B (hostels, hotels, shops). */
+type OrderCategory = "retail" | "business";
 
 type Form = {
   name: string;
   phone: string;
   email: string;
-  fulfillmentType: "partner_counter" | "hostel_mess" | "hotel_kitchen" | "shop_crate";
+  /** Only two choices: Retail or Business / B2B. Drives delivery-type options. */
+  orderCategory: OrderCategory;
   address: string;
   city: string;
   pincode: string;
   slot: string;
+  /** Preferred date — only used for Business + Scheduled orders. */
+  preferredDate: string;
   /** Where the order goes — Home / Office / Other. Distinct from deliveryType. */
   deliveryAddressType: AddressType;
   /** How fast — Instant (fast) / Scheduled (pick a time slot). */
@@ -92,7 +100,9 @@ export function CheckoutForm() {
     defaultValues: {
       payment: "cod",
       slot: "morning-early",
-      fulfillmentType: "partner_counter",
+      // Default order category: Retail (home customers).
+      orderCategory: "retail",
+      preferredDate: "",
       city: "Gandhinagar",
       // Default delivery state: Home address + Instant delivery (never blank).
       deliveryAddressType: "Home",
@@ -124,6 +134,22 @@ export function CheckoutForm() {
   // Delivery selections (default Home + Instant) — drive the selected-card UI.
   const addressType = watch("deliveryAddressType");
   const deliveryType = watch("deliveryType");
+  // Order category (Retail / Business) governs which delivery types are offered.
+  const orderCategory = watch("orderCategory");
+  // Retail = Instant only. If the customer switches back to Retail while
+  // "Scheduled" is selected, snap the delivery type back to Instant so no
+  // scheduled date/time controls linger.
+  useEffect(() => {
+    if (orderCategory === "retail" && deliveryType !== "Instant") {
+      setValue("deliveryType", "Instant");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderCategory]);
+  // Scheduled controls appear only for Business + Scheduled.
+  const showSchedule = orderCategory === "business" && deliveryType === "Scheduled";
+  // Delivery-type choices: Retail gets Instant only; Business gets both.
+  const availableDeliveryTypes =
+    orderCategory === "business" ? deliveryTypeOptions : deliveryTypeOptions.filter((o) => o.value === "Instant");
 
   const applyAddress = (id: string) => {
     const a = addressBook.addresses.find((x) => x.id === id);
@@ -212,6 +238,9 @@ export function CheckoutForm() {
     }
     setStockError("");
 
+    // Scheduled delivery applies only to Business / B2B orders.
+    const scheduled = data.orderCategory === "business" && data.deliveryType === "Scheduled";
+
     const addr = buildAddressSnapshot(data);
     const id = `FLK-${Math.floor(Math.random() * 900000 + 100000)}`;
     const now = new Date();
@@ -228,6 +257,9 @@ export function CheckoutForm() {
       // Delivery selections — two distinct concepts, never blank (default Home + Instant).
       deliveryAddressType: data.deliveryAddressType || "Home",
       deliveryType: data.deliveryType || "Instant",
+      // Order category (Retail / Business). Business + Scheduled carries a preferred date.
+      orderCategory: data.orderCategory || "retail",
+      preferredDate: scheduled ? data.preferredDate : undefined,
       // Structured address SNAPSHOT + exact coordinates, frozen onto the order (§11).
       deliveryAddressDetails: addr.snapshot,
       deliveryLat: addr.lat,
@@ -251,7 +283,7 @@ export function CheckoutForm() {
       paymentStatus: "Pending",
       paymentMethod:
         data.payment === "cod" ? "Cash on Delivery" : data.payment === "upi" ? "UPI" : "Wallet",
-      deliverySlot: slots.find((s) => s.value === data.slot)?.label || data.slot,
+      deliverySlot: scheduled ? (slots.find((s) => s.value === data.slot)?.label || data.slot) : "Instant delivery",
       invoiceNo: `INV-${id}`,
     };
 
@@ -320,17 +352,23 @@ export function CheckoutForm() {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    // Optionally save this address to the customer's address book
-    if (saveAddress && isAuthenticated && user?.mobile) {
+    // Address book save (§Bug 6):
+    //  • First-time visitor with NO saved address yet → auto-save their first
+    //    address (once), even if the checkbox is unticked, and make it default.
+    //  • Returning customers keep the normal manual "save this address" flow.
+    //  • Never auto-save when an existing saved address was selected (no dupes).
+    const isFirstTimeAddress =
+      isAuthenticated && !!user?.mobile && !selectedAddress && savedAddresses.length === 0;
+    if ((saveAddress || isFirstTimeAddress) && isAuthenticated && user?.mobile && !selectedAddress) {
       addressBook.add({
         userKey: user.mobile,
-        label: "Home",
+        label: data.deliveryAddressType || "Home",
         name: data.name,
         phone: data.phone,
         addressLine: data.address,
         city: data.city,
         pincode: data.pincode.trim(),
-        isDefault: false,
+        isDefault: isFirstTimeAddress,
       });
     }
     setOrderId(id);
@@ -421,12 +459,10 @@ export function CheckoutForm() {
 
             <div className="grid md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">Order Type / Category</label>
-                <select {...register("fulfillmentType")} className="input font-medium text-slate-700 focus:border-[#067a46] focus:ring-1 focus:ring-[#067a46] outline-none">
-                  <option value="partner_counter">Direct Partner Counter Pickup</option>
-                  <option value="hostel_mess">Hostel / PG Mess Supply</option>
-                  <option value="hotel_kitchen">Hotel / Commercial Kitchen Supply</option>
-                  <option value="shop_crate">Retail Shop Crates</option>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">Order Type</label>
+                <select {...register("orderCategory")} className="input font-medium text-slate-700 focus:border-[#067a46] focus:ring-1 focus:ring-[#067a46] outline-none">
+                  <option value="retail">Retail (Home)</option>
+                  <option value="business">Business / B2B</option>
                 </select>
               </div>
               <div>
@@ -515,11 +551,11 @@ export function CheckoutForm() {
               </div>
             </div>
 
-            {/* Delivery Type — how fast (default: Instant) */}
+            {/* Delivery Type — how fast. Retail: Instant only. Business: Instant + Scheduled. */}
             <div>
               <div className="text-xs font-bold text-slate-700 mb-2.5">Delivery Type</div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {deliveryTypeOptions.map((o) => {
+                {availableDeliveryTypes.map((o) => {
                   const active = deliveryType === o.value;
                   const Icon = o.icon;
                   return (
@@ -547,21 +583,37 @@ export function CheckoutForm() {
             </div>
           </section>
 
-          {/* Time Slot */}
-          <section className="card-option12 p-6 md:p-8">
-            <div className="flex items-center gap-2 mb-4">
-              <CalendarClock className="w-5 h-5 text-[#067a46]" />
-              <h2 className="font-display text-xl font-bold text-slate-900">Preferred Supply Time Window</h2>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-3">
-              {slots.map((s) => (
-                <label key={s.value} className="flex items-center gap-3 p-3.5 rounded-2xl border border-slate-200 hover:border-[#067a46] cursor-pointer bg-slate-50 transition">
-                  <input type="radio" value={s.value} {...register("slot")} className="accent-[#067a46]" />
-                  <span className="text-xs font-bold text-slate-800">{s.label}</span>
-                </label>
-              ))}
-            </div>
-          </section>
+          {/* Preferred Date + Time — shown ONLY for Business / B2B + Scheduled.
+              Retail (Instant only) and Business + Instant never see these controls. */}
+          {showSchedule && (
+            <section className="card-option12 p-6 md:p-8">
+              <div className="flex items-center gap-2 mb-4">
+                <CalendarClock className="w-5 h-5 text-[#067a46]" />
+                <h2 className="font-display text-xl font-bold text-slate-900">Preferred Date &amp; Time</h2>
+              </div>
+              <div className="mb-5">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">Preferred Date *</label>
+                <input
+                  type="date"
+                  min={todayISO()}
+                  {...register("preferredDate", { required: showSchedule })}
+                  className="input focus:border-[#067a46] focus:ring-1 focus:ring-[#067a46] outline-none"
+                />
+                {errors.preferredDate && (
+                  <div className="text-[11px] font-bold text-rose-600 mt-1">Please pick a delivery date</div>
+                )}
+              </div>
+              <div className="text-xs font-bold text-slate-700 mb-2.5">Preferred Time Window</div>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {slots.map((s) => (
+                  <label key={s.value} className="flex items-center gap-3 p-3.5 rounded-2xl border border-slate-200 hover:border-[#067a46] cursor-pointer bg-slate-50 transition">
+                    <input type="radio" value={s.value} {...register("slot")} className="accent-[#067a46]" />
+                    <span className="text-xs font-bold text-slate-800">{s.label}</span>
+                  </label>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Payment Method */}
           <section className="card-option12 p-6 md:p-8">

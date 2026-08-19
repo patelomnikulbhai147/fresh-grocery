@@ -38,7 +38,7 @@ export default function WhereWeSupplyPage() {
         {/* Hero Section */}
         <section className="bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 text-white py-16 md:py-20 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
-          <div className="mx-auto max-w-7xl px-5 md:px-8 relative z-10 text-center max-w-3xl">
+          <div className="mx-auto max-w-7xl px-5 md:px-8 relative z-10 text-center">
             <div className="inline-flex items-center gap-2 bg-amber-400/20 text-amber-300 border border-amber-400/30 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
               <Sparkles className="w-3.5 h-3.5" /> Gandhinagar Direct Supply Hub
             </div>

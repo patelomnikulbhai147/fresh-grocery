@@ -34,7 +34,7 @@ export default function AboutPage() {
         {/* Hero */}
         <section className="relative overflow-hidden bg-gradient-to-br from-[#04502d] via-[#067a46] to-[#04502d] text-white py-20 md:py-28">
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#ea580c]/15 rounded-full blur-3xl pointer-events-none" />
-          <div className="relative mx-auto max-w-7xl px-5 md:px-8 max-w-3xl text-center">
+          <div className="relative mx-auto max-w-7xl px-5 md:px-8 text-center">
             <div className="text-xs uppercase font-bold tracking-[0.24em] text-white mb-3 bg-[#ea580c] inline-block px-3.5 py-1 rounded-full shadow-sm">
               Our Mission
             </div>

@@ -103,7 +103,7 @@ export function Hero() {
             <div className="lg:col-span-5 relative flex items-center justify-center w-full min-h-0 sm:min-h-[300px] lg:min-h-[360px]">
               <div className="relative w-full max-w-[420px] lg:max-w-[500px] aspect-[4/3] flex items-center justify-center">
                 <Image
-                  src="/images/hero_produce_basket.png"
+                  src="/images/hero_produce_basket_fixed.png"
                   alt="Fresh vegetables and fruits basket"
                   fill
                   className="object-contain drop-shadow-xl"

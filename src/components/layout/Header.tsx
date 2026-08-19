@@ -29,6 +29,7 @@ const moreLinks = [
   { label: "Bulk Order", href: "/bulk" },
   { label: "About Us", href: "/about" },
   { label: "Contact Us", href: "/contact" },
+  { label: "Policies", href: "/policies" },
 ];
 
 export function Header() {

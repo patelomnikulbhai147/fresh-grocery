@@ -133,7 +133,7 @@ export function PincodeDeliveryCard() {
           {/* Right Map Pin Produce Basket Illustration */}
           <div className="hidden 2xl:flex relative w-24 h-24 shrink-0 items-center justify-center">
             <Image
-              src="/images/hero_produce_basket.png"
+              src="/images/hero_produce_basket_fixed.png"
               alt="Fresh Produce Basket Location"
               fill
               className="object-contain drop-shadow-md hover:scale-105 transition-transform"

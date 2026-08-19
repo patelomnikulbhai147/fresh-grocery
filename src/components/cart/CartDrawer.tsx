@@ -128,7 +128,7 @@ export function CartDrawer() {
                 visible.map((it) => (
                   <div key={`${it.productId}-${it.weight}-${it.mode}`} className="flex gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-100">
                     <div className="w-16 h-16 rounded-xl bg-white overflow-hidden shrink-0 border border-slate-200 relative p-1">
-                      <Image src={it.image} alt={it.name} fill className="object-contain mix-blend-multiply p-1" />
+                      <Image src={it.image} alt={it.name} fill sizes="64px" unoptimized className="object-contain mix-blend-multiply p-1" />
                     </div>
                     <div className="flex-1 min-w-0 flex flex-col justify-between">
                       <div>
