@@ -16,7 +16,6 @@ const SLIDES: Slide[] = [
   { key: "kankoda", src: "/images/seasonal/kankoda.jpg", alt: "Fresh Kankoda (Spiny Gourd / Kankod) — Season's Pick" },
   { key: "karela", src: "/images/seasonal/karela.jpg", alt: "Fresh Karela (Bitter Gourd / Karela) — Season's Pick" },
   { key: "pudina", src: "/images/seasonal/pudina.jpg", alt: "Fresh Pudina (Mint Leaves / Pudino) — Season's Pick" },
-  { key: "kakdi", src: "/images/seasonal/kakdi.jpg", alt: "Fresh Kakdi (Cucumber / Kakdi / Kheera) — Season's Pick" },
   { key: "palak", src: "/images/seasonal/palak.jpg", alt: "Fresh Palak (Spinach / Palak) — Season's Pick" },
 ];
 
