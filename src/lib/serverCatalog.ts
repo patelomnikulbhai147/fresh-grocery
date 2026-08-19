@@ -206,11 +206,28 @@ function customerizeImages<T extends AdminProduct>(p: T, updatedAt: any): T {
 }
 
 /**
- * Customer-eligible products ONLY (backend visibility filter):
- * not deleted, status Active or Out of Stock. A product whose status is
- * "Out of Stock" is forced to 0 grams so no pack size is orderable.
+ * Short-lived in-memory cache of the customer catalog. Every storefront page
+ * (home, shop, category, bulk, subscription, /api/products) loads the full
+ * product list, and each product's JSON carries a large admin-uploaded image
+ * (base64). Re-parsing all of that on every request drove the Worker's CPU to
+ * ~800ms per hit and, under concurrency / cold starts, tripped Cloudflare
+ * "Error 1102: Worker exceeded resource limits". Caching the parsed list for a
+ * few seconds means the heavy parse runs at most once per window per isolate.
+ * The cache is invalidated the instant an admin edit is applied (see
+ * invalidateCustomerCache), so changes still publish within seconds.
  */
+let customerCache: { at: number; products: Product[] } | null = null;
+const CUSTOMER_CACHE_TTL_MS = 10_000;
+
+export function invalidateCustomerCache(): void {
+  customerCache = null;
+}
+
 export async function getCustomerProductsFromDb(): Promise<Product[]> {
+  const cached = customerCache;
+  if (cached && Date.now() - cached.at < CUSTOMER_CACHE_TTL_MS) {
+    return cached.products;
+  }
   await ensureReady();
   const rows = await catalogAll(
     `SELECT id, slug, name, status, deleted, stock_grams, pos, data, updated_at
@@ -218,13 +235,15 @@ export async function getCustomerProductsFromDb(): Promise<Product[]> {
      WHERE deleted = 0 AND status IN ('Active', 'Out of Stock')
      ORDER BY pos ASC, name ASC`
   );
-  return rows
+  const products = rows
     .map((row) => {
       const p = rowToProduct(row);
       return p ? customerizeImages(p, row.updated_at) : null;
     })
     .filter((p): p is AdminProduct => p !== null)
-    .map((p) => (p.status === "Out of Stock" ? { ...p, stockGrams: 0, stock: 0 } : p));
+    .map((p) => (p.status === "Out of Stock" ? { ...p, stockGrams: 0, stock: 0 } : p)) as Product[];
+  customerCache = { at: Date.now(), products };
+  return products;
 }
 
 /** One image (main or gallery index) for /api/product-image — raw stored value. */
@@ -356,6 +375,7 @@ export async function syncAdminProducts(
   }
   stmts.push({ sql: metaUpsertSql(), params: [META_ADMIN_EVER_SYNCED, "1"] });
   await catalogBatch(stmts);
+  invalidateCustomerCache(); // admin edits must publish right away
 }
 
 /**
@@ -369,6 +389,7 @@ export async function deleteProductById(id: string): Promise<void> {
   if (typeof id !== "string" || !id) return;
   await ensureReady();
   await catalogRun(`UPDATE store_products SET deleted = 1 WHERE id = ?`, [id]);
+  invalidateCustomerCache();
 }
 
 export type PlaceOrderItem = {
@@ -425,6 +446,7 @@ async function fixProductStatus(productId: string): Promise<void> {
   parsed.stock = grams;
   parsed.status = next;
   await catalogRun(`UPDATE store_products SET status = ?, data = ? WHERE id = ?`, [next, JSON.stringify(parsed), productId]);
+  invalidateCustomerCache(); // stock/status change must reflect on the storefront
 }
 
 /**
