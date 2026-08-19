@@ -9,7 +9,6 @@
 
 const LEAFLET_JS = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
 const LEAFLET_CSS = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-const NOMINATIM = "https://nominatim.openstreetmap.org";
 
 let leafletPromise: Promise<any | null> | null = null;
 
@@ -74,61 +73,45 @@ export interface GeocodeResult {
   lng: number;
 }
 
-function mapNominatim(a: any): Omit<GeocodeResult, "lat" | "lng"> {
-  a = a || {};
-  return {
-    street: a.road || a.pedestrian || a.footway || undefined,
-    area: a.suburb || a.neighbourhood || a.quarter || a.village || a.hamlet || undefined,
-    city: a.city || a.town || a.municipality || a.county || undefined,
-    state: a.state || undefined,
-    pincode: a.postcode || undefined,
-  };
-}
+/** Thrown so the UI can distinguish "no results" from "request failed". */
+export class GeocodeError extends Error {}
 
-/** Reverse-geocode coordinates → address parts (OpenStreetMap / Nominatim). */
+/** Reverse-geocode coordinates → address parts (via the server proxy). */
 export async function reverseGeocode(lat: number, lng: number): Promise<GeocodeResult | null> {
   try {
-    const r = await fetch(`${NOMINATIM}/reverse?format=jsonv2&addressdetails=1&lat=${lat}&lon=${lng}`, {
-      headers: { Accept: "application/json" },
-    });
+    const r = await fetch(`/api/geo/reverse?lat=${lat}&lng=${lng}`, { headers: { Accept: "application/json" } });
     if (!r.ok) return { lat, lng };
     const d = await r.json();
-    return { ...mapNominatim(d.address), formatted: d.display_name, lat, lng };
+    return d?.result ? { ...d.result, lat, lng } : { lat, lng };
   } catch {
     return { lat, lng };
   }
 }
 
-/** Forward-geocode a text address → coordinates + parts. */
+/** Forward-geocode a text address → coordinates + parts (via the server proxy). */
 export async function forwardGeocode(address: string): Promise<GeocodeResult | null> {
   if (!address.trim()) return null;
-  try {
-    const r = await fetch(`${NOMINATIM}/search?format=jsonv2&addressdetails=1&countrycodes=in&limit=1&q=${encodeURIComponent(address)}`, {
-      headers: { Accept: "application/json" },
-    });
-    if (!r.ok) return null;
-    const arr = await r.json();
-    const best = arr?.[0];
-    if (!best) return null;
-    return { ...mapNominatim(best.address), formatted: best.display_name, lat: Number(best.lat), lng: Number(best.lon) };
-  } catch {
-    return null;
-  }
+  const results = await searchPlaces(address);
+  return results[0] ? { lat: results[0].lat, lng: results[0].lng, formatted: results[0].label } : null;
 }
 
 export interface PlaceSuggestion { label: string; lat: number; lng: number }
 
-/** Search suggestions for the map search box (India-restricted). */
+/**
+ * Search suggestions for the map search box (India-restricted), via the server
+ * proxy. Throws GeocodeError on a transport/service failure so the UI can show
+ * "unable to search" instead of silently showing "no results".
+ */
 export async function searchPlaces(query: string): Promise<PlaceSuggestion[]> {
   if (query.trim().length < 3) return [];
+  let r: Response;
   try {
-    const r = await fetch(`${NOMINATIM}/search?format=jsonv2&countrycodes=in&limit=5&q=${encodeURIComponent(query)}`, {
-      headers: { Accept: "application/json" },
-    });
-    if (!r.ok) return [];
-    const arr = await r.json();
-    return (arr || []).map((x: any) => ({ label: x.display_name, lat: Number(x.lat), lng: Number(x.lon) }));
+    r = await fetch(`/api/geo/search?q=${encodeURIComponent(query.trim())}`, { headers: { Accept: "application/json" } });
   } catch {
-    return [];
+    throw new GeocodeError("network");
   }
+  if (!r.ok) throw new GeocodeError("service");
+  const d = await r.json().catch(() => null);
+  if (!d?.success) throw new GeocodeError("service");
+  return Array.isArray(d.results) ? d.results : [];
 }
