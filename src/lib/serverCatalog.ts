@@ -217,17 +217,14 @@ function customerizeImages<T extends AdminProduct>(p: T, updatedAt: any): T {
  * invalidateCustomerCache), so changes still publish within seconds.
  */
 let customerCache: { at: number; products: Product[] } | null = null;
+let customerCacheInFlight: Promise<Product[]> | null = null;
 const CUSTOMER_CACHE_TTL_MS = 10_000;
 
 export function invalidateCustomerCache(): void {
   customerCache = null;
 }
 
-export async function getCustomerProductsFromDb(): Promise<Product[]> {
-  const cached = customerCache;
-  if (cached && Date.now() - cached.at < CUSTOMER_CACHE_TTL_MS) {
-    return cached.products;
-  }
+async function loadCustomerProducts(): Promise<Product[]> {
   await ensureReady();
   const rows = await catalogAll(
     `SELECT id, slug, name, status, deleted, stock_grams, pos, data, updated_at
@@ -244,6 +241,22 @@ export async function getCustomerProductsFromDb(): Promise<Product[]> {
     .map((p) => (p.status === "Out of Stock" ? { ...p, stockGrams: 0, stock: 0 } : p)) as Product[];
   customerCache = { at: Date.now(), products };
   return products;
+}
+
+export async function getCustomerProductsFromDb(): Promise<Product[]> {
+  const cached = customerCache;
+  if (cached && Date.now() - cached.at < CUSTOMER_CACHE_TTL_MS) {
+    return cached.products;
+  }
+  // Single-flight: under a burst of cache-misses, only ONE request parses the
+  // (base64-heavy) catalog; the rest await the same promise. This keeps the
+  // Worker's memory flat regardless of concurrency — the real fix for the
+  // memory-pressure that tripped Error 1102.
+  if (customerCacheInFlight) return customerCacheInFlight;
+  customerCacheInFlight = loadCustomerProducts().finally(() => {
+    customerCacheInFlight = null;
+  });
+  return customerCacheInFlight;
 }
 
 /** One image (main or gallery index) for /api/product-image — raw stored value. */
