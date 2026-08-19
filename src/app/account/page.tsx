@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import { AccountShell } from "@/components/account/AccountShell";
 import { CustomerAuthGuard } from "@/components/auth/CustomerAuthGuard";
 
+// Interactive, user-specific page — never edge-cache the HTML shell (a
+// statically prerendered shell was being cached for a year, so after a deploy
+// customers kept getting the OLD JavaScript bundle / UI). Always serve fresh.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "My Account · FlashKart",
   robots: { index: false, follow: false },
