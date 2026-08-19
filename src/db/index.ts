@@ -1,4 +1,4 @@
-import mysql from "mysql2/promise";
+import type { Pool, PoolConnection } from "mysql2/promise";
 import { randomUUID } from "crypto";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
@@ -140,16 +140,35 @@ const inMemoryStore: Record<string, any[]> = {
   whatsapp_subscribers: [],
 };
 
-let mysqlPool: mysql.Pool | null = null;
+let mysqlPool: Pool | null = null;
+let mysqlPoolPromise: Promise<Pool | null> | null = null;
 // null = untested, true = reachable, false = down (retried after RETRY_MS)
 let mysqlHealthy: boolean | null = null;
 let lastFailedAt = 0;
 const RETRY_MS = 30_000;
 
-try {
-  mysqlPool = mysql.createPool(poolConfig);
-} catch {
-  mysqlPool = null;
+/**
+ * Lazily import + create the MySQL pool. This is ONLY reached when Cloudflare
+ * D1 is not the active database (bare-Node dev / self-host). The Cloudflare
+ * Worker and `next dev` both run against D1, so `mysql2` is never imported
+ * there — keeping the heavy Node driver out of the Worker isolate. Loading it
+ * eagerly bloated every isolate's memory/startup CPU and contributed to
+ * intermittent "Error 1102: Worker exceeded resource limits" (HTTP 503).
+ */
+async function ensureMysqlPool(): Promise<Pool | null> {
+  if (mysqlPool) return mysqlPool;
+  if (mysqlPoolPromise) return mysqlPoolPromise;
+  mysqlPoolPromise = (async () => {
+    try {
+      const mysql = (await import("mysql2/promise")).default;
+      mysqlPool = mysql.createPool(poolConfig);
+      return mysqlPool;
+    } catch {
+      mysqlPool = null;
+      return null;
+    }
+  })();
+  return mysqlPoolPromise;
 }
 
 /** Connection-level failures switch us to the in-memory fallback; real SQL errors surface. */
@@ -166,25 +185,27 @@ export const pool = {
       return d1Execute<T>(d1, sql, values);
     }
 
-    const shouldTryMysql =
-      mysqlPool && (mysqlHealthy !== false || Date.now() - lastFailedAt > RETRY_MS);
+    const shouldTryMysql = mysqlHealthy !== false || Date.now() - lastFailedAt > RETRY_MS;
     if (shouldTryMysql) {
-      try {
-        const result = (await mysqlPool!.execute(sql, values)) as [T, any];
-        if (mysqlHealthy !== true) {
-          mysqlHealthy = true;
-          console.log(`[DB] MySQL connected (${poolConfig.host}:${poolConfig.port}/${poolConfig.database})`);
-        }
-        return result;
-      } catch (err: any) {
-        if (isConnectionError(err)) {
-          if (mysqlHealthy !== false) {
-            console.warn("[DB] MySQL unreachable — using in-memory fallback:", err.message);
+      const mp = await ensureMysqlPool();
+      if (mp) {
+        try {
+          const result = (await mp.execute(sql, values)) as [T, any];
+          if (mysqlHealthy !== true) {
+            mysqlHealthy = true;
+            console.log(`[DB] MySQL connected (${poolConfig.host}:${poolConfig.port}/${poolConfig.database})`);
           }
-          mysqlHealthy = false;
-          lastFailedAt = Date.now();
-        } else {
-          throw err; // genuine SQL error — never mask it with fallback data
+          return result;
+        } catch (err: any) {
+          if (isConnectionError(err)) {
+            if (mysqlHealthy !== false) {
+              console.warn("[DB] MySQL unreachable — using in-memory fallback:", err.message);
+            }
+            mysqlHealthy = false;
+            lastFailedAt = Date.now();
+          } else {
+            throw err; // genuine SQL error — never mask it with fallback data
+          }
         }
       }
     }
@@ -328,9 +349,10 @@ export async function getConnection() {
  * answered from the dev fallback store (customers would see wrong products);
  * callers get real rows or a real error to surface as an error state.
  */
-export function getMysqlPool(): mysql.Pool {
-  if (!mysqlPool) throw new Error("MySQL pool not initialised");
-  return mysqlPool;
+export async function getMysqlPool(): Promise<Pool> {
+  const mp = await ensureMysqlPool();
+  if (!mp) throw new Error("MySQL pool not initialised");
+  return mp;
 }
 
 // ──────────────────── Catalog/orders database (STRICT — no memory fallback) ────────────────────
@@ -346,7 +368,7 @@ export async function catalogAll<T = any>(sql: string, params: any[] = []): Prom
     const [rows] = await d1Execute<T[]>(d1, sql, params);
     return Array.isArray(rows) ? rows : [];
   }
-  const conn = await getMysqlPool().getConnection();
+  const conn = await (await getMysqlPool()).getConnection();
   try {
     const [rows] = await conn.execute<any>(sql, params);
     return Array.isArray(rows) ? (rows as T[]) : [];
@@ -364,7 +386,7 @@ export async function catalogRun(
     const [res] = await d1Execute<any>(d1, sql, params);
     return { changes: Number(res?.affectedRows ?? 0) };
   }
-  const conn = await getMysqlPool().getConnection();
+  const conn = await (await getMysqlPool()).getConnection();
   try {
     const [res]: any = await conn.execute(sql, params);
     return { changes: Number(res?.affectedRows ?? 0) };
@@ -388,7 +410,7 @@ export async function catalogBatch(stmts: BatchStatement[]): Promise<void> {
     }
     return;
   }
-  const conn = (await getMysqlPool().getConnection()) as mysql.PoolConnection;
+  const conn = (await (await getMysqlPool()).getConnection()) as PoolConnection;
   try {
     await conn.beginTransaction();
     for (const s of stmts) {
