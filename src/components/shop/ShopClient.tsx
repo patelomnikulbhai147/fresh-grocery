@@ -1,9 +1,10 @@
 "use client";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { X, SlidersHorizontal, Search, ChevronDown, Grid3x3, LayoutList, ShoppingBag, Sparkles } from "lucide-react";
+import { X, SlidersHorizontal, Search, ChevronDown, Grid3x3, LayoutList, ShoppingBag } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ProductCard } from "@/components/product/ProductCard";
+import { SeasonalBannerCarousel } from "@/components/home/SeasonalBannerCarousel";
 import { CategoryComingSoon } from "@/components/shop/CategoryComingSoon";
 import { NotifyMeModal } from "@/components/shop/NotifyMeModal";
 import { OrderTomorrowModal } from "@/components/shop/OrderTomorrowModal";
@@ -13,21 +14,6 @@ import { useAdminStore } from "@/store/adminStore";
 import { isCategoryComingSoon, getCategoryStatus } from "@/lib/categoryHelper";
 
 type Sp = { cat?: string; q?: string; deals?: string; filter?: string; sort?: string };
-
-/* Seasonal vegetables surface real, admin-managed products — matched either by a
-   "seasonal" category/subcategory/tag (long-term, admin-controlled) or by the
-   named demo seasonal veggies. Nothing is fabricated: a product only appears if
-   it actually exists in the live catalog. */
-const SEASONAL_KEYWORDS = [
-  "seasonal", "kankoda", "kantola", "spiny gourd", "karela", "bitter gourd",
-  "tameta", "tomato", "tindora", "ivy gourd", "guvar", "cluster bean", "valor", "suran",
-];
-const isSeasonalProduct = (p: Product): boolean => {
-  // Seasonal VEGETABLES only — never sweep in the "Seasonal Fruits" category.
-  if (/fruit/.test(`${p.category} ${p.subcategory}`.toLowerCase())) return false;
-  const hay = `${p.name} ${p.category} ${p.subcategory} ${(p.tags ?? []).join(" ")}`.toLowerCase();
-  return SEASONAL_KEYWORDS.some((k) => hay.includes(k));
-};
 
 type Props = {
   products: Product[];
@@ -104,11 +90,10 @@ export function ShopClient({ products, categories, initial }: Props) {
     return products.filter((p) => !isCategoryComingSoon(p.category, displayCategories)).slice(0, 8);
   }, [isSearchComingSoon, products, displayCategories]);
 
-  // Seasonal vegetables strip — real products only, shown on the default
-  // "All Produce" landing view (not while a category/search/filter is active).
-  const seasonalItems = useMemo(() => products.filter(isSeasonalProduct).slice(0, 12), [products]);
+  // Seasonal promo banners show on the default "All Produce" landing view only
+  // (not while a category / search / filter is active).
   const showSeasonal =
-    cat === "all" && !q.trim() && !sp?.filter && sp?.deals !== "true" && seasonalItems.length > 0;
+    cat === "all" && !q.trim() && !sp?.filter && sp?.deals !== "true";
 
   return (
     <>
@@ -180,30 +165,9 @@ export function ShopClient({ products, categories, initial }: Props) {
         </div>
       </div>
 
-      {/* Seasonal Vegetables — horizontal slider of real seasonal produce.
-          Admin-manageable: any product in a "Seasonal" category/tag appears here. */}
-      {showSeasonal && (
-        <section className="mb-8">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <span className="w-8 h-8 rounded-xl bg-emerald-50 text-[#067a46] border border-emerald-100 grid place-items-center shrink-0">
-                <Sparkles className="w-4 h-4" />
-              </span>
-              <h2 className="font-display text-lg md:text-xl font-extrabold text-[#2b1a4e]">
-                Seasonal Vegetables
-              </h2>
-            </div>
-            <span className="text-[11px] font-bold text-slate-400">Swipe to explore →</span>
-          </div>
-          <div className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 -mx-1 px-1">
-            {seasonalItems.map((p) => (
-              <div key={p.id} className="snap-start shrink-0 w-[150px] xs:w-[168px] sm:w-[200px]">
-                <ProductCard product={p} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      {/* Seasonal Vegetables — promotional banner carousel (Kankoda, Karela,
+          Pudina, Kakdi, Palak). Full-artwork banners, auto-rotating. */}
+      {showSeasonal && <SeasonalBannerCarousel />}
 
       <div className="grid lg:grid-cols-[260px_1fr] gap-8">
         {/* Sidebar filters */}
