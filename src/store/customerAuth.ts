@@ -101,6 +101,14 @@ export const useCustomerAuth = create<CustomerAuthState>()(
       setLoginStep: (step) => set({ loginStep: step }),
       setPendingMobile: (mobile) => set({ pendingMobile: mobile }),
     }),
-    { name: "flashkart-customer-auth" }
+    {
+      name: "flashkart-customer-auth",
+      // Persist ONLY the durable login — never the transient login-flow UI
+      // state. Persisting isLoginModalOpen / loginStep / pendingMobile /
+      // pendingAction restored a half-finished login on the next visit and
+      // re-popped the login modal, so a logged-in customer looked logged out.
+      // Now the login (isAuthenticated + user) survives cleanly until logout.
+      partialize: (s) => ({ isAuthenticated: s.isAuthenticated, user: s.user }),
+    }
   )
 );
