@@ -9,6 +9,18 @@ import { useCart, useToasts } from "@/store/shop";
 import { ProductImage } from "@/components/ui/ProductImage";
 import { useLiveProduct } from "@/lib/useLiveProduct";
 
+/**
+ * Mobile/tablet = a horizontal swipe rail (≈2 cards on phones, ≈3 on tablets,
+ * peek of the next to invite swiping); at lg it becomes the original untouched
+ * 6-across grid. Cards keep equal height (flex/grid stretch + h-full card).
+ * Scrolling stays inside this container, so the page never overflows sideways.
+ */
+const RAIL_CLASS =
+  "flex lg:grid lg:grid-cols-6 gap-3 sm:gap-4 overflow-x-auto lg:overflow-visible " +
+  "snap-x snap-mandatory scroll-smooth pb-2 lg:pb-0 " +
+  "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden";
+const RAIL_ITEM_CLASS = "shrink-0 basis-[46%] sm:basis-[31%] lg:basis-auto lg:shrink snap-start";
+
 /** Compact commerce product card driven entirely by live admin-managed data. */
 export function HomeProductCard({ product: staticProduct, showDiscount = false }: { product: Product; showDiscount?: boolean }) {
   const product = useLiveProduct(staticProduct);
@@ -183,9 +195,11 @@ export function DealsOfTheDay({ products }: { products: Product[] | null }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+          <div className={RAIL_CLASS}>
             {deals.map((p) => (
-              <HomeProductCard key={p.id} product={p} showDiscount />
+              <div key={p.id} className={RAIL_ITEM_CLASS}>
+                <HomeProductCard product={p} showDiscount />
+              </div>
             ))}
           </div>
         </div>
@@ -213,9 +227,11 @@ export function BestSellers({ products }: { products: Product[] | null }) {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+        <div className={RAIL_CLASS}>
           {bestSellers.map((p) => (
-            <HomeProductCard key={p.id} product={p} />
+            <div key={p.id} className={RAIL_ITEM_CLASS}>
+              <HomeProductCard product={p} />
+            </div>
           ))}
         </div>
       </div>
