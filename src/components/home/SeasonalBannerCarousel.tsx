@@ -17,6 +17,7 @@ const SLIDES: Slide[] = [
   { key: "karela", src: "/images/seasonal/karela.jpg", alt: "Fresh Karela (Bitter Gourd / Karela) — Season's Pick" },
   { key: "pudina", src: "/images/seasonal/pudina.jpg", alt: "Fresh Pudina (Mint Leaves / Pudino) — Season's Pick" },
   { key: "palak", src: "/images/seasonal/palak.jpg", alt: "Fresh Palak (Spinach / Palak) — Season's Pick" },
+  { key: "kheera", src: "/images/seasonal/kheera.jpg", alt: "Fresh Kheera (Cucumber / Kakdi / Kheera) — Season's Pick" },
 ];
 
 const INTERVAL = 3200;
