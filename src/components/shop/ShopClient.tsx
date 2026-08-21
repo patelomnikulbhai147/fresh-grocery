@@ -15,6 +15,22 @@ import { isCategoryComingSoon, getCategoryStatus } from "@/lib/categoryHelper";
 
 type Sp = { cat?: string; q?: string; deals?: string; filter?: string; sort?: string };
 
+// Short, genuine descriptions per real category — useful context for shoppers
+// and a little indexable text on each category view. No stats, prices, stock
+// claims, or unsupported locations; keyed by the catalog category slug.
+const CATEGORY_INTRO: Record<string, string> = {
+  vegetables:
+    "Everyday cooking staples, hand-graded each morning and sold by weight — the base of most home, hostel and hotel kitchens.",
+  fruits:
+    "Seasonal fruits brought in at peak ripeness and refreshed through the week, for daily eating and bulk kitchen use.",
+  "leafy-greens":
+    "Tender greens bunched fresh daily and cleaned for quick prep — a staple for messes and everyday cooking.",
+  exotic:
+    "Salad and exotic vegetables for modern kitchens, hotel menus and health-focused buyers.",
+  organic:
+    "Produce grown without synthetic chemicals, for buyers who want a cleaner basket of vegetables and fruits.",
+};
+
 type Props = {
   products: Product[];
   categories: Category[];
@@ -147,6 +163,14 @@ export function ShopClient({ products, categories, initial }: Props) {
             </button>
           </div>
         </div>
+
+        {/* Per-category intro — only on a real, live category view (not on the
+            "All Produce" landing, a search, or a coming-soon category). */}
+        {cat !== "all" && !q.trim() && !isCurrentCatComingSoon && CATEGORY_INTRO[cat] && (
+          <p className="mt-4 text-slate-600 text-sm md:text-[15px] max-w-2xl leading-relaxed">
+            {CATEGORY_INTRO[cat]}
+          </p>
+        )}
 
         {/* Search */}
         <div className="mt-6 flex items-center bg-white border border-slate-200 rounded-full pl-4 pr-2 py-1.5 max-w-xl shadow-sm focus-within:border-[#067a46]">

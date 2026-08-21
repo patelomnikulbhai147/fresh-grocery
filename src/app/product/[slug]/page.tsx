@@ -6,6 +6,20 @@ import { ProductDetail } from "@/components/product/ProductDetail";
 import { ProductSection } from "@/components/home/ProductSection";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { formatINR } from "@/lib/utils";
+import { categories } from "@/data/catalog";
+
+// Build a clean meta-description snippet from the real product copy: collapse
+// whitespace, and when it exceeds the target length cut on a word boundary
+// (never mid-word) and finish with an ellipsis. Invents nothing — it only
+// trims the product's own tagline + description.
+function metaSnippet(text: string, max = 160): string {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max);
+  const lastSpace = cut.lastIndexOf(" ");
+  const base = lastSpace > 40 ? cut.slice(0, lastSpace) : cut;
+  return base.replace(/[\s,;:.\-–—]+$/, "") + "…";
+}
 
 // Every product view is checked live against the production database —
 // a product the Super Admin has deactivated/hidden/deleted returns 404
@@ -30,7 +44,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     // No "· FlashKart" suffix here — the root layout's title template
     // ("%s · FlashKart") appends the brand exactly once.
     title: `${p.name} — ${formatINR(p.weights[0].price)}`,
-    description: p.tagline + " " + p.description.slice(0, 120),
+    // Word-boundary snippet of the real tagline + description (no mid-word cut).
+    description: metaSnippet(`${p.tagline} ${p.description}`),
     alternates: { canonical: `/product/${slug}` },
     openGraph: {
       title: `${p.name} · FlashKart`,
@@ -69,6 +84,12 @@ export default async function ProductPage({ params }: Params) {
   const related = await getCustomerRelatedProductsFromDb(product.category, product.id).catch(() => []);
 
   const productUrl = `${SITE}/product/${product.slug}`;
+  // Resolve this product's real category to its canonical URL for the
+  // breadcrumb. If the category doesn't map to a known one, fall back to /shop
+  // rather than inventing a category URL. The visible breadcrumb in
+  // <ProductDetail> resolves the same way, so both point at the same target.
+  const productCat = categories.find((c) => c.slug === product.category);
+  const categoryUrl = productCat ? `${SITE}/shop?cat=${productCat.slug}` : `${SITE}/shop`;
   const schema = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -95,13 +116,13 @@ export default async function ProductPage({ params }: Params) {
   };
 
   // Mirrors the visible breadcrumb rendered in <ProductDetail>: Home → Fresh
-  // Produce (/shop) → this product.
+  // Produce (this product's category URL) → this product.
   const breadcrumb = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: `${SITE}/` },
-      { "@type": "ListItem", position: 2, name: "Fresh Produce", item: `${SITE}/shop` },
+      { "@type": "ListItem", position: 2, name: "Fresh Produce", item: categoryUrl },
       { "@type": "ListItem", position: 3, name: product.name, item: productUrl },
     ],
   };

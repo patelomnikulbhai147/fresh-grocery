@@ -196,7 +196,7 @@ export function Header() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search for vegetables, fruits, dairy products..."
+                placeholder="Search for vegetables, fruits, fresh produce..."
                 className="w-full bg-transparent outline-none text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 font-medium"
               />
               {query && (
@@ -353,7 +353,7 @@ export function Header() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search vegetables, fruits, dairy..."
+                placeholder="Search vegetables, fruits, fresh produce..."
                 className="w-full bg-transparent outline-none text-xs text-slate-900 placeholder:text-slate-400 font-medium"
               />
             </div>

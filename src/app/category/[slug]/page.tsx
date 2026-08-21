@@ -20,17 +20,21 @@ export async function generateMetadata({
     };
   }
 
+  // cat.name already includes its descriptor (e.g. "Fresh Vegetables"), so no
+  // extra "fresh"/"farm-fresh" prefix — that produced "farm-fresh fresh vegetables".
+  const label = cat.name.toLowerCase();
+  const description = `Order ${label} direct from FlashKart in Gandhinagar, Gujarat.`;
   return {
     // "· FlashKart" is appended once by the root title template.
     title: `${cat.name} — Fresh Produce`,
-    description: `Order farm-fresh ${cat.name.toLowerCase()} direct from FlashKart in Gandhinagar, Gujarat.`,
+    description,
     // Canonical points to /shop?cat=<slug> — the single chosen public category
     // URL (used by nav, footer, and the sitemap). /category/<slug> stays
     // functional but consolidates its ranking signals to /shop?cat=<slug>.
     alternates: { canonical: `/shop?cat=${slug}` },
     openGraph: {
       title: `${cat.name} · FlashKart Fresh Produce`,
-      description: `Order farm-fresh ${cat.name.toLowerCase()} direct from FlashKart in Gandhinagar, Gujarat.`,
+      description,
       images: [cat.image],
     },
   };

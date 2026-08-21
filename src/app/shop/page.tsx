@@ -16,16 +16,20 @@ export async function generateMetadata({
   if (sp.cat && sp.cat !== "all") {
     const cat = categories.find((c) => c.slug.toLowerCase() === sp.cat?.toLowerCase());
     if (cat) {
+      // cat.name already carries its own descriptor (e.g. "Fresh Vegetables"),
+      // so we don't prefix another "fresh" — that produced "fresh fresh vegetables".
+      const label = cat.name.toLowerCase();
+      const description = `Explore ${label} from FlashKart — direct farm quality for hostels, hotels, shops, and direct buyers.`;
       return {
         // "· FlashKart" comes from the root title template, not repeated here.
         title: `${cat.name} — Fresh Produce`,
-        description: `Explore fresh ${cat.name.toLowerCase()} from FlashKart. Direct farm quality for hostels, hotels, shops, and direct buyers.`,
+        description,
         // Self-canonical to the clean category URL — drops q/sort/filter/deals
         // permutations so filtered views consolidate to the category page.
         alternates: { canonical: `/shop?cat=${cat.slug}` },
         openGraph: {
           title: `${cat.name} · FlashKart Fresh Produce`,
-          description: `Explore fresh ${cat.name.toLowerCase()} from FlashKart. Direct farm quality for hostels, hotels, shops, and direct buyers.`,
+          description,
           images: [cat.image],
         },
       };

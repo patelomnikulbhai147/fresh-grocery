@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Our Farmers · The people behind your basket",
   description:
     "Meet the 140+ small farms we partner with across Gujarat. Trace every basket back to the grower.",
+  alternates: { canonical: "/farmers" },
 };
 
 export default function Page() {

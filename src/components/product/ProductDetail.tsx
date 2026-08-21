@@ -15,7 +15,7 @@ import {
   Building,
   ImageOff,
 } from "lucide-react";
-import { variantAvailable, maxPacksAvailable, type Product } from "@/data/catalog";
+import { variantAvailable, maxPacksAvailable, categories, type Product } from "@/data/catalog";
 import { formatINR, formatWeight, percentOff, cn } from "@/lib/utils";
 import { useCart, useWishlist, useToasts } from "@/store/shop";
 import { useLiveProduct } from "@/lib/useLiveProduct";
@@ -24,6 +24,12 @@ export function ProductDetail({ product: staticProduct }: { product: Product }) 
   // Live admin-managed data (images, price, pack sizes, stock) — updates
   // immediately when changed from the Admin panel; catalog is the fallback.
   const product = useLiveProduct(staticProduct);
+
+  // Breadcrumb "Fresh Produce" links to this product's real category page when
+  // it maps to a known category, else falls back to /shop. Kept in sync with
+  // the BreadcrumbList JSON-LD in the product route so both point to one URL.
+  const produceCat = categories.find((c) => c.slug === product.category);
+  const produceHref = produceCat ? `/shop?cat=${produceCat.slug}` : "/shop";
 
   const [weightIdx, setWeightIdx] = useState(0);
   const [qty, setQty] = useState(1);
@@ -77,7 +83,7 @@ export function ProductDetail({ product: staticProduct }: { product: Product }) 
       <div className="text-xs text-[#067a46] font-bold mb-4">
         <Link href="/" className="hover:text-[#046338]">Home</Link>
         <span className="text-slate-400 mx-1.5">/</span>
-        <Link href="/shop" className="hover:text-[#046338]">Fresh Produce</Link>
+        <Link href={produceHref} className="hover:text-[#046338]">Fresh Produce</Link>
         <span className="text-slate-400 mx-1.5">/</span>
         <span className="text-slate-600 font-semibold">{product.name}</span>
       </div>

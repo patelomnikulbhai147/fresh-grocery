@@ -5,10 +5,15 @@ import { getCustomerProductsSafe } from "@/lib/serverCatalog";
 // Subscription catalogue reads live from the production database.
 export const dynamic = "force-dynamic";
 
+// This page is a B2B produce-supply scheduler ("Scheduled daily produce for
+// hostels & kitchens"), NOT a dairy page — metadata describes the real service.
+// No milk/dairy claims, and no invented prices, quantities, or delivery times.
 export const metadata: Metadata = {
-  title: "Dairy Subscription · Farm-fresh milk every morning",
+  title: "Daily Produce Supply for Hostels & Kitchens",
   description:
-    "Subscribe to farm-fresh A2 milk, paneer, curd and more. Delivered every morning before 7 AM in Ahmedabad and Gandhinagar.",
+    "Schedule daily-morning supply of fresh vegetables, leafy greens and seasonal fruits for hostel messes, PG accommodations and hotel kitchens in Gandhinagar.",
+  alternates: { canonical: "/subscription" },
+  robots: { index: true, follow: true },
 };
 
 export default async function Page() {

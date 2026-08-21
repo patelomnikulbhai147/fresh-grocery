@@ -48,7 +48,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "FlashKart — Fresh. Fast. Reliable.",
+    // Kept coherent with the site/OG title rather than a separate tagline.
+    // NOTE: images is still /logo.svg (SVG) — no suitable 1200×630 raster asset
+    // exists yet; a purpose-built social image is still required (see audit).
+    title: "FlashKart | Fresh Vegetables & Seasonal Fruits",
     description: "Fresh vegetables and seasonal fruits supplied directly to hostels, PGs, hotels and shops.",
     images: ["/logo.svg"],
   },
@@ -59,33 +62,81 @@ export const metadata: Metadata = {
   // canonical; pages that don't are correctly self-canonical by default.
 };
 
-const organizationSchema = {
+const SITE_URL = "https://flashkart.co";
+
+// Shared PostalAddress — real city/region/country only. No street/postcode is
+// invented; only the values already published on the site are used.
+const postalAddress = {
+  "@type": "PostalAddress",
+  addressLocality: "Gandhinagar",
+  addressRegion: "Gujarat",
+  addressCountry: "IN",
+};
+
+// Single coherent @graph so Organization, WebSite and the GroceryStore
+// storefront are linked by @id rather than emitted as three unrelated entities.
+// Every value below is already present on the site — nothing fabricated:
+// no opening hours, price range, geo, ratings, or reviews.
+const structuredData = {
   "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "FlashKart",
-  url: "https://flashkart.co",
-  logo: "https://flashkart.co/logo.svg",
-  description: "Fresh vegetables and seasonal fruits supplied directly for hostels, PGs, hotels and shops.",
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: "Gandhinagar",
-    addressRegion: "Gujarat",
-    addressCountry: "IN",
-  },
-  contactPoint: [
+  "@graph": [
     {
-      "@type": "ContactPoint",
-      telephone: "+91-6352856495",
-      contactType: "sales and partnerships",
-      contactOption: "Kaushik Patel",
-      areaServed: "IN",
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: "FlashKart",
+      url: SITE_URL,
+      logo: `${SITE_URL}/logo.svg`,
+      description:
+        "Fresh vegetables and seasonal fruits supplied directly for hostels, PGs, hotels and shops.",
+      address: postalAddress,
+      contactPoint: [
+        {
+          "@type": "ContactPoint",
+          telephone: "+91-6352856495",
+          contactType: "sales and partnerships",
+          contactOption: "Kaushik Patel",
+          areaServed: "IN",
+        },
+        {
+          "@type": "ContactPoint",
+          telephone: "+91-9773271029",
+          contactType: "operations and franchise",
+          contactOption: "Om Patel",
+          areaServed: "IN",
+        },
+      ],
     },
     {
-      "@type": "ContactPoint",
-      telephone: "+91-9773271029",
-      contactType: "operations and franchise",
-      contactOption: "Om Patel",
-      areaServed: "IN",
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: "FlashKart",
+      publisher: { "@id": `${SITE_URL}/#organization` },
+      // The shop supports a real ?q= product search, so a SearchAction is valid.
+      potentialAction: {
+        "@type": "SearchAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: `${SITE_URL}/shop?q={search_term_string}`,
+        },
+        "query-input": "required name=search_term_string",
+      },
+    },
+    {
+      "@type": "GroceryStore",
+      "@id": `${SITE_URL}/#store`,
+      name: "FlashKart",
+      url: SITE_URL,
+      image: `${SITE_URL}/logo.svg`,
+      telephone: "+91-6352856495",
+      address: postalAddress,
+      // Real, currently-live service hubs only (Gandhinagar main hub, Ahmedabad
+      // network hub). Franchise-upcoming cities are intentionally excluded.
+      areaServed: [
+        { "@type": "City", name: "Gandhinagar" },
+        { "@type": "City", name: "Ahmedabad" },
+      ],
+      parentOrganization: { "@id": `${SITE_URL}/#organization` },
     },
   ],
 };
@@ -104,7 +155,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className={`bg-[#fafaf9] text-purple-950 antialiased font-sans${RAKSHA_BANDHAN_THEME ? " rb-theme" : ""}`}>
         {/* Seasonal decoration only — remove after Raksha Bandhan (one flag) */}
         <RakshaBandhanTheme />
-        <JsonLd data={organizationSchema} />
+        <JsonLd data={structuredData} />
         <Header />
         <main className="flex-1">
           {children}
