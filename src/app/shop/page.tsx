@@ -17,7 +17,8 @@ export async function generateMetadata({
     const cat = categories.find((c) => c.slug.toLowerCase() === sp.cat?.toLowerCase());
     if (cat) {
       return {
-        title: `${cat.name} · FlashKart Fresh Produce`,
+        // "· FlashKart" comes from the root title template, not repeated here.
+        title: `${cat.name} — Fresh Produce`,
         description: `Explore fresh ${cat.name.toLowerCase()} from FlashKart. Direct farm quality for hostels, hotels, shops, and direct buyers.`,
         // Self-canonical to the clean category URL — drops q/sort/filter/deals
         // permutations so filtered views consolidate to the category page.
@@ -32,7 +33,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: "Fresh Vegetables & Seasonal Fruits Catalog · FlashKart",
+    title: "Fresh Vegetables & Seasonal Fruits Catalog",
     description: "Browse FlashKart's produce catalog — daily farm-fresh vegetables and seasonal fruits at better rates in Gandhinagar, Gujarat.",
     // Bare /shop is canonical; parameter permutations collapse here.
     alternates: { canonical: "/shop" },

@@ -32,6 +32,9 @@ function XIcon({ className }: { className?: string }) {
 const instantLinks = [
   { label: "Vegetables", href: "/shop?cat=vegetables" },
   { label: "Fruits", href: "/shop?cat=fruits" },
+  { label: "Leafy Greens", href: "/shop?cat=leafy-greens" },
+  { label: "Exotic & Salad", href: "/shop?cat=exotic" },
+  { label: "Organic Produce", href: "/shop?cat=organic" },
   { label: "All Categories", href: "/shop" },
   { label: "Track Order", href: "/track" },
 ];
@@ -45,6 +48,7 @@ const bulkLinks = [
 
 const serviceLinks = [
   { label: "About Us", href: "/about" },
+  { label: "Our Farmers", href: "/farmers" },
   { label: "Contact Us", href: "/contact" },
   { label: "Business / B2B", href: "/where-we-supply" },
   { label: "Policies", href: "/policies" },

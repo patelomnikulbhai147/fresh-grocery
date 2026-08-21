@@ -419,13 +419,6 @@ export function Header() {
                 >
                   Fruits
                 </Link>
-                <Link
-                  href="/shop?cat=dairy"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-800 hover:bg-emerald-50 hover:text-[#067a46] transition"
-                >
-                  Dairy Products
-                </Link>
 
                 <div className="my-3 border-t border-slate-100 pt-2" />
 

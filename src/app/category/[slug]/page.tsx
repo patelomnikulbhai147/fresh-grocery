@@ -15,18 +15,19 @@ export async function generateMetadata({
   const cat = categories.find((c) => c.slug.toLowerCase() === slug.toLowerCase());
   if (!cat) {
     return {
-      title: "Category Not Found · FlashKart",
+      title: "Category Not Found",
       description: "Browse FlashKart's full produce catalog.",
     };
   }
 
   return {
-    title: `${cat.name} · FlashKart Fresh Produce`,
+    // "· FlashKart" is appended once by the root title template.
+    title: `${cat.name} — Fresh Produce`,
     description: `Order farm-fresh ${cat.name.toLowerCase()} direct from FlashKart in Gandhinagar, Gujarat.`,
-    // Self-referential canonical (was inheriting the homepage canonical). The
-    // /category vs /shop?cat= consolidation is a separate phase; this only stops
-    // the homepage-canonical leak.
-    alternates: { canonical: `/category/${slug}` },
+    // Canonical points to /shop?cat=<slug> — the single chosen public category
+    // URL (used by nav, footer, and the sitemap). /category/<slug> stays
+    // functional but consolidates its ranking signals to /shop?cat=<slug>.
+    alternates: { canonical: `/shop?cat=${slug}` },
     openGraph: {
       title: `${cat.name} · FlashKart Fresh Produce`,
       description: `Order farm-fresh ${cat.name.toLowerCase()} direct from FlashKart in Gandhinagar, Gujarat.`,
