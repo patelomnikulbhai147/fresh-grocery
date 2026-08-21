@@ -292,6 +292,34 @@ export async function getCustomerProductsSafe(): Promise<{ ok: boolean; products
 }
 
 /**
+ * Slug list of customer-visible products for the XML sitemap — same visibility
+ * filter as the storefront catalog, but selects ONLY the slug (no JSON parse,
+ * no base64 image work). Parsing the full catalog just to list URLs is what made
+ * sitemap generation heavy enough to intermittently trip the Worker's limits
+ * (Error 1102) and show as "Couldn't fetch" in Search Console. Read-only.
+ */
+export async function getCustomerProductSlugsFromDb(): Promise<string[]> {
+  await ensureReady();
+  const rows = await catalogAll(
+    `SELECT slug FROM store_products
+     WHERE deleted = 0 AND status IN ('Active', 'Out of Stock') AND slug IS NOT NULL AND slug <> ''
+     ORDER BY pos ASC, name ASC`
+  );
+  return rows.map((r) => String(r.slug)).filter(Boolean);
+}
+
+/** Never-throw variant for the sitemap: DB unavailable → no product URLs (the
+ *  static/category URLs still make a valid sitemap), never demo data. */
+export async function getCustomerProductSlugsSafe(): Promise<string[]> {
+  try {
+    return await getCustomerProductSlugsFromDb();
+  } catch (err: any) {
+    console.error("[serverCatalog] sitemap slug load failed:", err?.message);
+    return [];
+  }
+}
+
+/**
  * One customer-eligible product by slug (or id) — null when it must not be
  * shown. A single indexed row lookup (uses idx_store_products_slug): loading
  * the whole catalog just to find one product spiked the Worker's CPU/memory
