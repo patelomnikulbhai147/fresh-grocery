@@ -19,6 +19,9 @@ export async function generateMetadata({
       return {
         title: `${cat.name} · FlashKart Fresh Produce`,
         description: `Explore fresh ${cat.name.toLowerCase()} from FlashKart. Direct farm quality for hostels, hotels, shops, and direct buyers.`,
+        // Self-canonical to the clean category URL — drops q/sort/filter/deals
+        // permutations so filtered views consolidate to the category page.
+        alternates: { canonical: `/shop?cat=${cat.slug}` },
         openGraph: {
           title: `${cat.name} · FlashKart Fresh Produce`,
           description: `Explore fresh ${cat.name.toLowerCase()} from FlashKart. Direct farm quality for hostels, hotels, shops, and direct buyers.`,
@@ -31,6 +34,8 @@ export async function generateMetadata({
   return {
     title: "Fresh Vegetables & Seasonal Fruits Catalog · FlashKart",
     description: "Browse FlashKart's produce catalog — daily farm-fresh vegetables and seasonal fruits at better rates in Gandhinagar, Gujarat.",
+    // Bare /shop is canonical; parameter permutations collapse here.
+    alternates: { canonical: "/shop" },
   };
 }
 

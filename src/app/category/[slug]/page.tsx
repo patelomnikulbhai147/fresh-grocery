@@ -23,6 +23,10 @@ export async function generateMetadata({
   return {
     title: `${cat.name} · FlashKart Fresh Produce`,
     description: `Order farm-fresh ${cat.name.toLowerCase()} direct from FlashKart in Gandhinagar, Gujarat.`,
+    // Self-referential canonical (was inheriting the homepage canonical). The
+    // /category vs /shop?cat= consolidation is a separate phase; this only stops
+    // the homepage-canonical leak.
+    alternates: { canonical: `/category/${slug}` },
     openGraph: {
       title: `${cat.name} · FlashKart Fresh Produce`,
       description: `Order farm-fresh ${cat.name.toLowerCase()} direct from FlashKart in Gandhinagar, Gujarat.`,

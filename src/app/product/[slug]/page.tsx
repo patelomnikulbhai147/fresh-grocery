@@ -25,6 +25,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return {
     title: `${p.name} — ${formatINR(p.weights[0].price)} · FlashKart`,
     description: p.tagline + " " + p.description.slice(0, 120),
+    alternates: { canonical: `/product/${slug}` },
     openGraph: {
       title: `${p.name} · FlashKart`,
       description: p.tagline,
@@ -77,11 +78,10 @@ export default async function ProductPage({ params }: Params) {
           ? "https://schema.org/InStock"
           : "https://schema.org/OutOfStock",
     },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: product.rating,
-      reviewCount: product.reviews,
-    },
+    // NOTE: no aggregateRating. The catalog's rating (hardcoded 4.8) and
+    // reviewCount (randomised) are demo values with no genuine reviews behind
+    // them; emitting them as AggregateRating structured data violates Google's
+    // review-snippet policy. Re-add only when real review data exists.
   };
 
   return (

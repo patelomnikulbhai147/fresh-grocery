@@ -53,7 +53,10 @@ export const metadata: Metadata = {
     images: ["/logo.svg"],
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: "https://flashkart.co" },
+  // No root-level canonical: a canonical set here is inherited by every child
+  // route, which made all pages (product, shop, category, about, …) declare the
+  // homepage as their canonical. Each page now sets its own self-referential
+  // canonical; pages that don't are correctly self-canonical by default.
 };
 
 const organizationSchema = {
